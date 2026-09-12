@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: #0d1a2f;
+    color: #fff8e7;
+    font-family: 'Nunito', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  }
+
+  button {
+    font-family: inherit;
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-3xl border-2 border-black/20 bg-gradient-to-b from-[#fdf3dd] to-[#f0dcb4] text-[#3b2a14] shadow-chunky;
+  }
+
+  .panel-dark {
+    @apply rounded-3xl border-2 border-black/30 bg-gradient-to-b from-[#25406a] to-[#182c4c] text-[#fff8e7] shadow-chunky;
+  }
+
+  .btn {
+    @apply select-none rounded-2xl border-2 border-black/25 px-4 py-2 font-display text-base font-bold
+      shadow-chunkysm transition-transform active:translate-y-[3px] active:shadow-none disabled:opacity-50
+      disabled:active:translate-y-0;
+  }
+
+  .btn-gold {
+    @apply btn bg-gradient-to-b from-[#ffd95e] to-[#e0a21a] text-[#4a2f05];
+  }
+
+  .btn-green {
+    @apply btn bg-gradient-to-b from-[#7fd88a] to-[#3f9a55] text-[#0f2d17];
+  }
+
+  .btn-blue {
+    @apply btn bg-gradient-to-b from-[#7cc6fe] to-[#2f7fd0] text-[#062441];
+  }
+
+  .btn-red {
+    @apply btn bg-gradient-to-b from-[#ff9a7b] to-[#d94f36] text-[#3b0f05];
+  }
+
+  .btn-ghost {
+    @apply btn border-white/25 bg-white/10 text-white;
+  }
+
+  .chip {
+    @apply flex items-center gap-1 rounded-full border border-black/25 bg-black/30 px-2.5 py-1 text-sm font-bold;
+  }
+
+  .screen-scroll {
+    @apply flex-1 overflow-y-auto overscroll-contain px-3 pb-28 pt-3;
+  }
+}
+
+/* Slot-Walzen */
+.reel-window {
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+}
+
+.reel-strip {
+  will-change: transform;
+}
+
+@keyframes reel-spin {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(var(--reel-distance));
+  }
+}
+
+.reel-spinning {
+  animation: reel-spin var(--reel-duration) linear infinite;
+}
+
+.text-outline {
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.35),
+    0 0 6px rgba(0, 0, 0, 0.25);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

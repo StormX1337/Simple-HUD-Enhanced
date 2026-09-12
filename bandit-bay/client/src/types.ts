@@ -1,0 +1,327 @@
+/** Gemeinsame Typen fuer Server und (per JSON-API) Client. */
+
+export type SymbolId = 'taler' | 'beutel' | 'hammer' | 'pfote' | 'schild' | 'truhe';
+
+export type BuildingKind =
+  | 'hut'
+  | 'dock'
+  | 'mill'
+  | 'tower'
+  | 'statue'
+  | 'market'
+  | 'forge'
+  | 'lighthouse';
+
+export type CardArt =
+  | 'raccoon'
+  | 'ship'
+  | 'map'
+  | 'gem'
+  | 'fish'
+  | 'lantern'
+  | 'mask'
+  | 'crown'
+  | 'leaf'
+  | 'star';
+
+export type Rarity = 1 | 2 | 3 | 4 | 5;
+
+export interface BuildingDef {
+  id: string;
+  name: string;
+  kind: BuildingKind;
+  baseCost: number;
+}
+
+export interface VillageDef {
+  id: number;
+  name: string;
+  subtitle: string;
+  setId: string;
+  costMultiplier: number;
+  palette: { skyTop: string; skyBottom: string; ground: string; accent: string };
+  buildings: BuildingDef[];
+}
+
+export interface CardDef {
+  id: string;
+  name: string;
+  setId: string;
+  rarity: Rarity;
+  art: CardArt;
+  color: string;
+}
+
+export interface CardSetDef {
+  id: string;
+  name: string;
+  villageId: number;
+  reward: { coins: number; spins: number; xp: number; shields?: number };
+}
+
+export interface ChestDef {
+  id: string;
+  name: string;
+  baseCost: number;
+  cards: number;
+  minRarity: Rarity;
+  color: string;
+}
+
+export type QuestType = 'spin' | 'upgrade' | 'attack' | 'raid' | 'coins' | 'cards';
+
+export interface QuestDef {
+  id: string;
+  name: string;
+  description: string;
+  type: QuestType;
+  target: number;
+  reward: { coins: number; spins: number; xp: number };
+}
+
+export interface DailyRewardDef {
+  day: number;
+  coins: number;
+  spins: number;
+  shields: number;
+  cards: number;
+}
+
+/* ---------- Laufzeit-Zustand ---------- */
+
+export interface PublicUser {
+  id: string;
+  name: string;
+  avatar: string;
+  level: number;
+  villageId: number;
+  isBot: boolean;
+  shields: number;
+  coins: number;
+}
+
+export interface PlayerState {
+  id: string;
+  name: string;
+  avatar: string;
+  isBot: boolean;
+  coins: number;
+  spins: number;
+  spinCapacity: number;
+  nextSpinInSeconds: number;
+  shields: number;
+  maxShields: number;
+  level: number;
+  xp: number;
+  xpForNextLevel: number;
+  bet: number;
+  maxBet: number;
+  villageId: number;
+  villageProgress: number;
+  pendingAttacks: number;
+  pendingRaids: number;
+  stats: { attacks: number; raids: number; timesRaided: number; spins: number };
+  buildings: BuildingState[];
+  cards: Record<string, number>;
+  claimedSets: string[];
+}
+
+export interface BuildingState {
+  villageId: number;
+  index: number;
+  level: number;
+  maxLevel: number;
+  cost: number;
+}
+
+export type SpinOutcomeType =
+  | 'coins'
+  | 'spins'
+  | 'shield'
+  | 'attack'
+  | 'raid'
+  | 'card'
+  | 'nothing';
+
+export interface SpinResult {
+  reels: SymbolId[];
+  matches: 3 | 2 | 0;
+  outcome: SpinOutcomeType;
+  amount: number;
+  card?: CardDef;
+  cardIsNew?: boolean;
+  message: string;
+  levelUps: number;
+  state: PlayerState;
+}
+
+export interface AttackResult {
+  blocked: boolean;
+  destroyed: boolean;
+  spotIndex: number;
+  loot: number;
+  targetName: string;
+  targetBuildingName: string;
+  message: string;
+  levelUps: number;
+  state: PlayerState;
+}
+
+export interface RaidSpot {
+  index: number;
+  kind: 'jackpot' | 'loot' | 'empty';
+  amount: number;
+}
+
+export interface RaidResult {
+  spots: RaidSpot[];
+  pickedIndex: number;
+  loot: number;
+  targetName: string;
+  message: string;
+  levelUps: number;
+  state: PlayerState;
+}
+
+export interface QuestState {
+  id: string;
+  name: string;
+  description: string;
+  target: number;
+  progress: number;
+  claimed: boolean;
+  reward: { coins: number; spins: number; xp: number };
+}
+
+export interface DailyState {
+  streak: number;
+  canClaim: boolean;
+  nextDay: number;
+  ladder: DailyRewardDef[];
+}
+
+export type HistoryType =
+  | 'attack'
+  | 'raid'
+  | 'attacked'
+  | 'raided'
+  | 'quest'
+  | 'daily'
+  | 'village'
+  | 'chest'
+  | 'set'
+  | 'upgrade'
+  | 'blocked'
+  | 'spin';
+
+export interface HistoryEntry {
+  id: number;
+  type: HistoryType;
+  otherName: string;
+  amount: number;
+  detail: string;
+  createdAt: number;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  id: string;
+  name: string;
+  avatar: string;
+  level: number;
+  villageId: number;
+  coins: number;
+  isBot: boolean;
+  isMe: boolean;
+}
+
+/* ---------- Client-seitige Ergaenzungen (API-Antworten) ---------- */
+
+export interface SymbolDef {
+  id: SymbolId;
+  name: string;
+  weight: number;
+  color: string;
+}
+
+export interface GameConfig {
+  villages: VillageDef[];
+  symbols: SymbolDef[];
+  cards: CardDef[];
+  cardSets: (CardSetDef & { cardIds: string[] })[];
+  chests: ChestDef[];
+  quests: QuestDef[];
+  dailyLadder: DailyRewardDef[];
+  balance: {
+    maxBuildingLevel: number;
+    maxShields: number;
+    spinRegenSeconds: number;
+    betTiers: number[];
+    betTierLevels: number[];
+  };
+}
+
+export interface TargetInfo {
+  id: string;
+  name: string;
+  avatar: string;
+  level: number;
+  villageId: number;
+  villageName: string;
+  isBot: boolean;
+  shields: number;
+  buildings: { index: number; name: string; kind: BuildingKind; level: number }[];
+  estimatedLoot: number;
+}
+
+export interface SetProgress {
+  id: string;
+  name: string;
+  villageId: number;
+  reward: { coins: number; spins: number; xp: number; shields?: number };
+  total: number;
+  owned: number;
+  complete: boolean;
+  claimed: boolean;
+}
+
+export interface CardDrop {
+  card: CardDef;
+  isNew: boolean;
+  coins: number;
+}
+
+export interface ChestOffer extends ChestDef {
+  cost: number;
+}
+
+export interface UpgradeResponse {
+  cost: number;
+  index: number;
+  newLevel: number;
+  levelUps: number;
+  villageComplete: boolean;
+  newVillageId: number;
+  state: PlayerState;
+}
+
+export interface ClaimResponse {
+  ok: boolean;
+  coins: number;
+  spins: number;
+  xp: number;
+  shields: number;
+  levelUps: number;
+  cards: number;
+  drops?: CardDrop[];
+  quests?: QuestState[];
+  daily?: DailyState;
+  state: PlayerState;
+}
+
+export interface ChestResponse {
+  ok: boolean;
+  cost: number;
+  drops: CardDrop[];
+  state: PlayerState;
+}
