@@ -6,6 +6,7 @@ import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { CardArt } from '../components/art/CardArt';
 import { SymbolIcon } from '../components/art/SymbolIcon';
+import { CardIcon, CoinIcon, ShieldIcon, SpinIcon } from '../components/art/HudIcons';
 import type { CardDrop, ChestOffer, SetProgress } from '../types';
 
 export function CardsScreen(): JSX.Element {
@@ -77,21 +78,21 @@ export function CardsScreen(): JSX.Element {
           {ownedTotal} von {config.cards.length} Karten · {sets.filter((entry) => entry.claimed).length} von{' '}
           {sets.length} Sets eingelöst
         </div>
-        <div className="mt-2 grid grid-cols-4 gap-1.5 text-center text-[11px] font-bold">
-          <div className="rounded-xl bg-black/30 py-1.5">
-            🪙<br />
+        <div className="mt-2 grid grid-cols-4 gap-1.5 text-center text-[11px] font-black">
+          <div className="flex flex-col items-center gap-0.5 rounded-xl border-2 border-black/40 bg-black/30 py-1.5">
+            <CoinIcon size={20} />
             {formatCoins(state.coins)}
           </div>
-          <div className="rounded-xl bg-black/30 py-1.5">
-            🎰<br />
+          <div className="flex flex-col items-center gap-0.5 rounded-xl border-2 border-black/40 bg-black/30 py-1.5">
+            <SpinIcon size={20} />
             {state.spins}/{state.spinCapacity}
           </div>
-          <div className="rounded-xl bg-black/30 py-1.5">
-            🛡️<br />
+          <div className="flex flex-col items-center gap-0.5 rounded-xl border-2 border-black/40 bg-black/30 py-1.5">
+            <ShieldIcon size={20} />
             {state.shields}/{state.maxShields}
           </div>
-          <div className="rounded-xl bg-black/30 py-1.5">
-            🃏<br />
+          <div className="flex flex-col items-center gap-0.5 rounded-xl border-2 border-black/40 bg-black/30 py-1.5">
+            <CardIcon size={20} />
             {Object.values(state.cards).reduce((sum, count) => sum + count, 0)}
           </div>
         </div>
@@ -163,10 +164,12 @@ export function CardsScreen(): JSX.Element {
                     <motion.div
                       key={card.id}
                       whileTap={{ scale: 0.94 }}
-                      className={`relative rounded-xl border-2 p-1 text-center ${
-                        owned ? 'bg-white/70' : 'bg-black/10'
+                      className={`relative rounded-xl border-[3px] p-1 text-center shadow-chunkysm ${
+                        owned
+                          ? 'bg-gradient-to-b from-white to-[#f3e6cd]'
+                          : 'border-black/20 bg-black/10'
                       }`}
-                      style={{ borderColor: owned ? card.color : 'rgba(0,0,0,0.15)' }}
+                      style={owned ? { borderColor: card.color } : undefined}
                     >
                       <div className={owned ? '' : 'opacity-25 grayscale'}>
                         <CardArt art={card.art} color={card.color} size={48} className="mx-auto" />
@@ -185,9 +188,18 @@ export function CardsScreen(): JSX.Element {
                 })}
               </div>
               {!set.claimed && (
-                <div className="mt-2 text-center text-[11px] opacity-70">
-                  Belohnung: 🪙 {formatCoins(set.reward.coins)} · 🎰 {set.reward.spins}
-                  {set.reward.shields ? ` · 🛡️ ${set.reward.shields}` : ''}
+                <div className="mt-2 flex items-center justify-center gap-2 text-[11px] font-bold opacity-80">
+                  <span className="flex items-center gap-1">
+                    <CoinIcon size={14} /> {formatCoins(set.reward.coins)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <SpinIcon size={14} /> {set.reward.spins}
+                  </span>
+                  {!!set.reward.shields && (
+                    <span className="flex items-center gap-1">
+                      <ShieldIcon size={14} /> {set.reward.shields}
+                    </span>
+                  )}
                 </div>
               )}
             </div>

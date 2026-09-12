@@ -6,6 +6,7 @@ import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { useShortScreen } from '../lib/useMediaQuery';
 import { SymbolIcon } from './art/SymbolIcon';
+import { SpinIcon } from './art/HudIcons';
 import type { CardDef, SpinResult, SymbolId } from '../types';
 
 const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
@@ -19,8 +20,8 @@ interface Props {
 export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | null {
   const { state, config, applyState, pushToast, refresh } = useGame();
   const short = useShortScreen();
-  const reelHeight = short ? 68 : 86;
-  const symbolSize = short ? 50 : 62;
+  const reelHeight = short ? 74 : 94;
+  const symbolSize = short ? 56 : 72;
   const [reels, setReels] = useState<SymbolId[]>(['taler', 'truhe', 'schild']);
   const [spinning, setSpinning] = useState<boolean[]>([false, false, false]);
   const [result, setResult] = useState<SpinResult | null>(null);
@@ -125,7 +126,6 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
     }
   }, [state, applyState, pushToast, onAttack, onRaid, onCard, refresh]);
 
-  // Automatisches Drehen
   useEffect(() => {
     if (!auto || !state) return undefined;
     if (state.spins < state.bet) {
@@ -156,153 +156,206 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
   };
 
   const anySpinning = spinning.some(Boolean);
+  const bigWin = !!result && result.matches === 3;
+  const spinPercent = Math.min(100, (state.spins / state.spinCapacity) * 100);
 
   return (
-    <section className="relative z-20 shrink-0 border-t-4 border-black/40 bg-gradient-to-b from-[#8b5a2b] to-[#5d3a18] px-3 pb-2 pt-2 shadow-[0_-6px_18px_rgba(0,0,0,0.35)]">
-      {/* Gewinnanzeige */}
+    <section className="relative z-20 shrink-0 px-2 pb-1">
+      {/* Gewinnbanner */}
       <AnimatePresence>
         {result && result.outcome !== 'nothing' && (
           <motion.div
             key={`${result.outcome}-${result.amount}-${result.message}`}
-            initial={{ opacity: 0, y: 10, scale: 0.85 }}
-            animate={{ opacity: 1, y: -6, scale: 1 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="pointer-events-none absolute -top-9 left-1/2 z-30 -translate-x-1/2 rounded-2xl border-2 border-black/30 bg-gradient-to-b from-[#ffd95e] to-[#e0a21a] px-4 py-1.5 font-display text-sm font-black text-[#4a2f05] shadow-chunkysm"
+            initial={{ opacity: 0, y: 14, scale: 0.8 }}
+            animate={{ opacity: 1, y: -10, scale: 1 }}
+            exit={{ opacity: 0, y: -26, scale: 0.9 }}
+            className="pointer-events-none absolute -top-4 left-1/2 z-30 -translate-x-1/2 rounded-full border-[3px] border-[#7a4a05] bg-gradient-to-b from-[#ffe9a0] via-[#f8c73c] to-[#e0a21a] px-5 py-1.5 font-display text-base font-black text-[#4a2f05] shadow-[0_4px_0_rgba(0,0,0,0.35),0_0_22px_rgba(248,199,60,0.7)]"
           >
-            {result.outcome === 'coins' && `+${formatCoins(result.amount)} Taler`}
-            {result.outcome === 'spins' && `+${result.amount} Drehungen`}
-            {result.outcome === 'shield' && 'Schild erhalten!'}
-            {result.outcome === 'attack' && 'Angriff bereit!'}
-            {result.outcome === 'raid' && 'Raubzug bereit!'}
-            {result.outcome === 'card' && (result.cardIsNew ? 'Neue Karte!' : 'Karte doppelt')}
+            {result.outcome === 'coins' && `+${formatCoins(result.amount)} TALER`}
+            {result.outcome === 'spins' && `+${result.amount} DREHUNGEN`}
+            {result.outcome === 'shield' && 'SCHILD ERHALTEN!'}
+            {result.outcome === 'attack' && 'ANGRIFF BEREIT!'}
+            {result.outcome === 'raid' && 'RAUBZUG BEREIT!'}
+            {result.outcome === 'card' && (result.cardIsNew ? 'NEUE KARTE!' : 'KARTE DOPPELT')}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Walzen */}
-      <div className="flex items-stretch gap-2 rounded-3xl border-4 border-[#3c2410] bg-gradient-to-b from-[#2a1a0c] to-[#402713] p-2 shadow-inner">
-        {reels.map((symbol, index) => (
-          <div
-            key={index}
-            style={{ height: reelHeight }}
-            className="reel-window relative flex-1 rounded-2xl border-2 border-[#c08b53]/60 bg-gradient-to-b from-[#fff8e7] to-[#e7d6b4]"
-          >
-            {spinning[index] ? (
+      {/* Gehäuse */}
+      <div className="cabinet relative rounded-[26px] p-2 pt-2.5">
+        <Rivets />
+
+        {/* Walzenkasten */}
+        <div className="relative rounded-[18px] border-[3px] border-[#f8c73c] bg-[#1b0f05] p-1.5 shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)]">
+          <div className="flex items-stretch gap-1.5">
+            {reels.map((symbol, index) => (
               <div
-                className="reel-strip reel-spinning"
-                style={
-                  {
-                    '--reel-duration': `${0.3 + index * 0.05}s`,
-                    '--reel-distance': `-${symbolIds.length * reelHeight}px`,
-                  } as React.CSSProperties
-                }
+                key={index}
+                style={{ height: reelHeight }}
+                className="reel-window relative flex-1 overflow-hidden rounded-xl border-2 border-[#8a5c1c] bg-gradient-to-b from-[#fff6e2] via-[#f6e7c8] to-[#e2cda2]"
               >
-                {[...symbolIds, ...symbolIds].map((id, position) => (
+                {spinning[index] ? (
                   <div
-                    key={`${id}-${position}`}
-                    style={{ height: reelHeight }}
-                    className="flex items-center justify-center"
+                    className="reel-strip reel-spinning"
+                    style={
+                      {
+                        '--reel-duration': `${0.28 + index * 0.05}s`,
+                        '--reel-distance': `-${symbolIds.length * reelHeight}px`,
+                      } as React.CSSProperties
+                    }
                   >
-                    <SymbolIcon id={id} size={symbolSize} />
+                    {[...symbolIds, ...symbolIds].map((id, position) => (
+                      <div
+                        key={`${id}-${position}`}
+                        style={{ height: reelHeight }}
+                        className="flex items-center justify-center"
+                      >
+                        <SymbolIcon id={id} size={symbolSize} />
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <SymbolIcon
+                      id={symbol}
+                      size={symbolSize}
+                      className={bigWin ? 'animate-pop' : ''}
+                    />
+                  </div>
+                )}
+                {/* Glasspiegelung */}
+                <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/55 via-transparent to-black/15" />
               </div>
-            ) : (
-              <div className="flex h-full items-center justify-center">
-                <SymbolIcon
-                  id={symbol}
-                  size={symbolSize}
-                  className={result && result.matches === 3 ? 'animate-pop' : ''}
-                />
-              </div>
-            )}
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Einsatz */}
-      <div className="mt-2 flex items-center gap-2">
-        <button
-          type="button"
-          className="btn-ghost h-9 w-10 px-0 py-0 text-base"
-          disabled={tierIndex <= 0 || anySpinning}
-          onClick={() => void changeBet(-1)}
-          aria-label="Einsatz senken"
-        >
-          −
-        </button>
-        <div className="flex-1 rounded-2xl border-2 border-black/30 bg-black/30 py-1 text-center font-display text-sm font-black text-bay-gold">
-          EINSATZ ×{state.bet}
-          <span className="ml-2 text-[11px] font-bold text-white/60">max ×{state.maxBet}</span>
+          {/* Gewinnlinie */}
+          {bigWin && (
+            <motion.span
+              initial={{ opacity: 0, scaleX: 0.4 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              className="pointer-events-none absolute inset-x-2 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-[#fff6d0] shadow-[0_0_14px_6px_rgba(248,199,60,0.75)]"
+            />
+          )}
         </div>
-        <button
-          type="button"
-          className="btn-ghost h-9 w-10 px-0 py-0 text-base"
-          disabled={tierIndex >= tiers.length - 1 || anySpinning}
-          onClick={() => void changeBet(1)}
-          aria-label="Einsatz erhöhen"
-        >
-          +
-        </button>
+
+        {/* Einsatz */}
+        <div className="mt-2 flex items-center gap-2">
+          <button
+            type="button"
+            className="knob"
+            disabled={tierIndex <= 0 || anySpinning}
+            onClick={() => void changeBet(-1)}
+            aria-label="Einsatz senken"
+          >
+            −
+          </button>
+          <div className="flex h-9 flex-1 items-center justify-center gap-2 rounded-full border-[3px] border-[#f8c73c] bg-[#1b0f05] px-3 font-display text-sm font-black text-[#ffd95e] shadow-[inset_0_2px_8px_rgba(0,0,0,0.8)]">
+            EINSATZ ×{state.bet}
+            <span className="text-[10px] font-bold text-white/45">max ×{state.maxBet}</span>
+          </div>
+          <button
+            type="button"
+            className="knob"
+            disabled={tierIndex >= tiers.length - 1 || anySpinning}
+            onClick={() => void changeBet(1)}
+            aria-label="Einsatz erhöhen"
+          >
+            +
+          </button>
+        </div>
       </div>
 
-      {/* Aktionen aus dem Automaten */}
+      {/* Offene Aktionen */}
       {(state.pendingAttacks > 0 || state.pendingRaids > 0) && (
-        <div className="mt-2 flex gap-2">
+        <div className="mt-1.5 flex gap-2">
           {state.pendingAttacks > 0 && (
-            <button type="button" className="btn-red flex-1 animate-pop text-sm" onClick={onAttack}>
-              ⚒️ Angriff starten ({state.pendingAttacks})
+            <button type="button" className="btn-red flex-1 animate-pop py-1.5 text-sm" onClick={onAttack}>
+              ⚒️ Angriff ({state.pendingAttacks})
             </button>
           )}
           {state.pendingRaids > 0 && (
             <button
               type="button"
-              className="btn-blue flex-1 animate-pop bg-gradient-to-b from-[#c792ea] to-[#8d7ae6] text-sm text-white"
+              className="btn flex-1 animate-pop bg-gradient-to-b from-[#c792ea] to-[#7d51c9] py-1.5 text-sm text-white"
               onClick={onRaid}
             >
-              🐾 Raubzug starten ({state.pendingRaids})
+              🐾 Raubzug ({state.pendingRaids})
             </button>
           )}
         </div>
       )}
 
+      {/* Drehungs-Anzeige */}
+      <div className="relative mx-auto mt-1.5 h-6 w-[78%] overflow-hidden rounded-full border-[3px] border-[#0b1830] bg-[#0f2038] shadow-chunkysm">
+        <div
+          className="h-full bg-gradient-to-r from-[#48a6f0] to-[#7fd8ff] transition-[width] duration-500"
+          style={{ width: `${spinPercent}%` }}
+        />
+        <span className="absolute inset-0 flex items-center justify-center gap-1 font-display text-xs font-black text-white text-outline">
+          <SpinIcon size={15} />
+          {state.spins} / {state.spinCapacity}
+        </span>
+      </div>
+
       {/* Dreh-Button */}
-      <div className="mt-2 flex items-center gap-2">
+      <div className="mt-1.5 flex items-end gap-2">
         <button
           type="button"
           onClick={() => {
             setAuto((current) => !current);
             playSound('click', 0.35);
           }}
-          className={`btn h-14 w-20 px-0 text-xs leading-tight ${
+          className={`flex h-[52px] w-[62px] shrink-0 flex-col items-center justify-center rounded-2xl border-[3px] font-display text-[11px] font-black leading-tight shadow-chunkysm active:translate-y-[3px] ${
             auto
-              ? 'bg-gradient-to-b from-[#7fd88a] to-[#3f9a55] text-[#0f2d17]'
-              : 'border-white/25 bg-white/10 text-white'
+              ? 'border-[#1d4a1f] bg-gradient-to-b from-[#8ee06a] to-[#3f9a3a] text-white'
+              : 'border-[#0b1830] bg-gradient-to-b from-[#33527f] to-[#1a2f4f] text-white/80'
           }`}
         >
           AUTO
-          <br />
-          {auto ? 'an' : 'aus'}
+          <span className="text-[10px] font-bold opacity-80">{auto ? 'an' : 'aus'}</span>
         </button>
-        <button
-          type="button"
-          data-testid="spin-button"
-          onClick={() => void doSpin()}
-          disabled={anySpinning || state.spins < state.bet}
-          className="btn relative h-14 flex-1 overflow-hidden bg-gradient-to-b from-[#ff6b5b] to-[#c8301f] text-xl font-black text-white"
-        >
-          <span className="relative z-10">
-            DREHEN
-            <span className="ml-2 text-xs font-bold opacity-90">−{state.bet} 🎰</span>
-          </span>
+
+        <div className="relative flex-1">
           {!anySpinning && state.spins >= state.bet && (
-            <span className="absolute inset-y-0 -left-1/3 w-1/3 animate-shine bg-white/25 blur-sm" />
+            <span className="pointer-events-none absolute -inset-2 animate-pulse rounded-full bg-[#ff6b5b]/35 blur-xl" />
           )}
-        </button>
-      </div>
-      <div className="mt-1 text-center text-[11px] text-white/60">
-        {state.spins} / {state.spinCapacity} Drehungen · Beute wächst mit Level & Insel
+          <button
+            type="button"
+            data-testid="spin-button"
+            onClick={() => void doSpin()}
+            disabled={anySpinning || state.spins < state.bet}
+            className="spin-button relative h-[52px] w-full overflow-hidden rounded-full font-display text-2xl font-black tracking-wide text-white disabled:opacity-60"
+          >
+            <span className="relative z-10 drop-shadow-[0_2px_0_rgba(0,0,0,0.45)]">
+              DREHEN
+              <span className="ml-2 align-middle text-xs font-bold opacity-90">−{state.bet}</span>
+            </span>
+            {!anySpinning && state.spins >= state.bet && (
+              <span className="absolute inset-y-0 -left-1/3 w-1/3 animate-shine bg-white/30 blur-[2px]" />
+            )}
+          </button>
+        </div>
       </div>
     </section>
+  );
+}
+
+/** Goldene Nieten an den Ecken des Gehäuses. */
+function Rivets(): JSX.Element {
+  return (
+    <>
+      {[
+        'left-1.5 top-1.5',
+        'right-1.5 top-1.5',
+        'bottom-1.5 left-1.5',
+        'bottom-1.5 right-1.5',
+      ].map((position) => (
+        <span
+          key={position}
+          className={`pointer-events-none absolute ${position} h-3 w-3 rounded-full border-2 border-[#7a4a05] bg-gradient-to-b from-[#ffe9a0] to-[#e0a21a]`}
+        />
+      ))}
+    </>
   );
 }

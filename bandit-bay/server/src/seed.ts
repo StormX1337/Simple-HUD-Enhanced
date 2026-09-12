@@ -3,7 +3,7 @@ import { BOT_NAMES, VILLAGES, BALANCE, getVillage } from './content/content.js';
 import { createUser, ensureBuildings, randInt, saveUser } from './game/core.js';
 import { drawCard, grantCard } from './game/collection.js';
 
-/** Legt Mitspieler-Bots an, damit Angriffe und Raubzuege sofort moeglich sind. */
+/** Legt Mitspieler-Bots an, damit Angriffe und Raubzüge sofort möglich sind. */
 export function seedBots(): number {
   const existing = db
     .prepare<[], { count: number }>('SELECT COUNT(*) as count FROM users WHERE is_bot = 1')

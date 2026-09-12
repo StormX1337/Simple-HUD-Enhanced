@@ -6,6 +6,8 @@ import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { TargetList } from './TargetList';
 import { Raccoon } from './art/Raccoon';
+import { DigPile } from './art/Scenery';
+import { CoinIcon } from './art/HudIcons';
 import type { RaidResult, TargetInfo } from '../types';
 
 interface Props {
@@ -131,18 +133,17 @@ export function RaidOverlay({ open, onClose }: Props): JSX.Element | null {
                     className={`relative flex h-32 flex-col items-center justify-center overflow-hidden rounded-3xl border-4 transition-transform active:scale-95 ${
                       picked ? 'border-bay-gold' : 'border-black/30'
                     } ${revealed && !picked ? 'opacity-70' : ''}`}
-                    style={{ background: 'linear-gradient(180deg,#e8c98f,#c9a469)' }}
+                    style={{ background: 'linear-gradient(180deg,#f7e8c6 0%,#e0c38a 100%)' }}
                   >
                     {!revealed && (
                       <>
                         <motion.div
-                          animate={picked ? { rotate: [0, -12, 12, 0] } : {}}
+                          animate={picked ? { rotate: [0, -10, 10, 0], y: [0, -4, 0] } : {}}
                           transition={{ duration: 0.6, repeat: picked ? 1 : 0 }}
-                          className="text-4xl"
                         >
-                          ⛏️
+                          <DigPile size={96} />
                         </motion.div>
-                        <span className="mt-1 font-display text-sm font-bold text-[#5a4020]">
+                        <span className="-mt-1 font-display text-sm font-black text-[#5a4020]">
                           Stelle {index + 1}
                         </span>
                       </>
@@ -153,10 +154,16 @@ export function RaidOverlay({ open, onClose }: Props): JSX.Element | null {
                         animate={{ scale: 1, opacity: 1 }}
                         className="flex flex-col items-center"
                       >
-                        <span className="text-4xl">
-                          {spot.kind === 'jackpot' ? '💰' : spot.kind === 'loot' ? '🪙' : '🕳️'}
-                        </span>
-                        <span className="mt-1 font-display text-sm font-black text-[#4a2f05]">
+                        <div className="relative">
+                          <DigPile size={92} dug />
+                          {spot.amount > 0 && (
+                            <span className="absolute inset-0 flex items-center justify-center gap-0.5">
+                              <CoinIcon size={spot.kind === 'jackpot' ? 30 : 22} />
+                              {spot.kind === 'jackpot' && <CoinIcon size={26} />}
+                            </span>
+                          )}
+                        </div>
+                        <span className="-mt-1 font-display text-sm font-black text-[#4a2f05]">
                           {spot.amount > 0 ? formatCoins(spot.amount) : 'leer'}
                         </span>
                       </motion.div>

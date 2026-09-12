@@ -114,7 +114,7 @@ export function createUser(opts: {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Gebaeude                                                           */
+/*  Gebäude                                                           */
 /* ------------------------------------------------------------------ */
 
 export function ensureBuildings(userId: string, villageId: number): void {
@@ -243,7 +243,7 @@ export function getClaimedSets(userId: string): string[] {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Zustand fuer den Client                                            */
+/*  Zustand für den Client                                            */
 /* ------------------------------------------------------------------ */
 
 export function buildState(user: UserRow): PlayerState {
@@ -323,7 +323,7 @@ export function logEvent(opts: {
   );
 }
 
-/** Naechste Insel freischalten, wenn die aktuelle fertig ausgebaut ist. */
+/** Nächste Insel freischalten, wenn die aktuelle fertig ausgebaut ist. */
 export function advanceVillageIfComplete(user: UserRow): { advanced: boolean; levelUps: number } {
   if (villageProgress(user.id, user.village) < 1) return { advanced: false, levelUps: 0 };
   if (user.village >= MAX_VILLAGE) return { advanced: false, levelUps: 0 };

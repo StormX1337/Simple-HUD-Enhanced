@@ -49,7 +49,7 @@ function auth(req: AuthedRequest, _res: Response, next: NextFunction): void {
   const token = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
   if (!token) return next(new GameError('Nicht angemeldet', 401));
   const user = getUserByToken(token);
-  if (!user) return next(new GameError('Sitzung ungueltig', 401));
+  if (!user) return next(new GameError('Sitzung ungültig', 401));
   applyRegen(user);
   saveUser(user);
   req.user = user;
@@ -216,7 +216,7 @@ api.post('/collection/chest', auth, (req: AuthedRequest, res, next) => {
   try {
     const user = me(req);
     const result = openChest(user, String(req.body?.chestId ?? ''));
-    if (!result.ok) throw new GameError(result.error ?? 'Truhe konnte nicht geoeffnet werden');
+    if (!result.ok) throw new GameError(result.error ?? 'Truhe konnte nicht geöffnet werden');
     res.json({ ...result, state: buildState(user) });
   } catch (error) {
     next(error);
@@ -227,7 +227,7 @@ api.post('/collection/set', auth, (req: AuthedRequest, res, next) => {
   try {
     const user = me(req);
     const result = claimSet(user, String(req.body?.setId ?? ''));
-    if (!result.ok) throw new GameError(result.error ?? 'Set konnte nicht eingeloest werden');
+    if (!result.ok) throw new GameError(result.error ?? 'Set konnte nicht eingelöst werden');
     res.json({ ...result, state: buildState(user) });
   } catch (error) {
     next(error);
@@ -261,7 +261,7 @@ api.post('/daily/claim', auth, (req: AuthedRequest, res, next) => {
   try {
     const user = me(req);
     const result = claimDaily(user);
-    if (!result.ok) throw new GameError(result.error ?? 'Belohnung nicht verfuegbar');
+    if (!result.ok) throw new GameError(result.error ?? 'Belohnung nicht verfügbar');
     const drops = [];
     for (let i = 0; i < result.cards; i++) drops.push(grantRandomCard(user));
     saveUser(user);

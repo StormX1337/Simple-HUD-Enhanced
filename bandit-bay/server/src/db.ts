@@ -154,7 +154,7 @@ export function now(): number {
   return Date.now();
 }
 
-/** Tagesschluessel (UTC) fuer Quests und Tagesbelohnung. */
+/** Tagesschluessel (UTC) für Quests und Tagesbelohnung. */
 export function dayKey(ts: number = now()): string {
   return new Date(ts).toISOString().slice(0, 10);
 }

@@ -13,7 +13,7 @@ export interface UpgradeResult {
   newVillageId: number;
 }
 
-/** Gebaeude ausbauen – Kosten und Grenzen werden serverseitig geprueft. */
+/** Gebäude ausbauen – Kosten und Grenzen werden serverseitig geprueft. */
 export function upgradeBuilding(user: UserRow, villageId: number, index: number): UpgradeResult {
   if (villageId !== user.village) throw new GameError('Diese Insel ist gerade nicht aktiv');
   const row = db
@@ -21,8 +21,8 @@ export function upgradeBuilding(user: UserRow, villageId: number, index: number)
       'SELECT level FROM buildings WHERE user_id = ? AND village = ? AND idx = ?',
     )
     .get(user.id, villageId, index);
-  if (!row) throw new GameError('Gebaeude nicht gefunden', 404);
-  if (row.level >= BALANCE.maxBuildingLevel) throw new GameError('Gebaeude ist bereits fertig');
+  if (!row) throw new GameError('Gebäude nicht gefunden', 404);
+  if (row.level >= BALANCE.maxBuildingLevel) throw new GameError('Gebäude ist bereits fertig');
 
   const cost = upgradeCost(villageId, index, row.level);
   if (user.coins < cost) throw new GameError('Nicht genug Taler');

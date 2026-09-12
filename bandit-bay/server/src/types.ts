@@ -1,4 +1,4 @@
-/** Gemeinsame Typen fuer Server und (per JSON-API) Client. */
+/** Gemeinsame Typen für Server und (per JSON-API) Client. */
 
 export type SymbolId = 'taler' | 'beutel' | 'hammer' | 'pfote' | 'schild' | 'truhe';
 

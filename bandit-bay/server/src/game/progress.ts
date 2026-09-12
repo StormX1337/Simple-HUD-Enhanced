@@ -23,7 +23,7 @@ export function ensureQuests(userId: string, day: string = dayKey()): void {
   tx();
 }
 
-/** Fortschritt fuer alle Quests eines Typs erhoehen. */
+/** Fortschritt für alle Quests eines Typs erhoehen. */
 export function trackQuest(userId: string, type: QuestType, amount = 1): void {
   if (amount <= 0) return;
   const day = dayKey();
@@ -81,7 +81,7 @@ export function claimQuest(user: UserRow, questId: string): ClaimResult {
   if (!row) return { ok: false, error: 'Quest nicht gefunden', coins: 0, spins: 0, xp: 0, shields: 0, levelUps: 0, cards: 0 };
   if (row.claimed) return { ok: false, error: 'Bereits abgeholt', coins: 0, spins: 0, xp: 0, shields: 0, levelUps: 0, cards: 0 };
   if (row.progress < quest.target)
-    return { ok: false, error: 'Quest noch nicht erfuellt', coins: 0, spins: 0, xp: 0, shields: 0, levelUps: 0, cards: 0 };
+    return { ok: false, error: 'Quest noch nicht erfüllt', coins: 0, spins: 0, xp: 0, shields: 0, levelUps: 0, cards: 0 };
 
   db.prepare('UPDATE quests SET claimed = 1 WHERE user_id = ? AND day = ? AND quest_id = ?').run(
     user.id,

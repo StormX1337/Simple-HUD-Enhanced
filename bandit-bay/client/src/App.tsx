@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useGame } from './game/GameContext';
 import { TopBar } from './components/TopBar';
 import { BottomNav, type Screen } from './components/BottomNav';
+import { SideRail } from './components/SideRail';
 import { VillageScene } from './components/VillageScene';
 import { SlotMachine } from './components/SlotMachine';
 import { AttackOverlay } from './components/AttackOverlay';
@@ -47,11 +48,55 @@ export default function App(): JSX.Element {
 
   return (
     <div className="mx-auto flex h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden bg-[#12233f]">
-      <TopBar />
+      <TopBar onOpenBonus={() => setScreen('rewards')} />
 
-      <main className="flex flex-1 flex-col overflow-hidden pb-[74px]">
+      <main className="relative flex flex-1 flex-col overflow-hidden pb-[74px]">
         {screen === 'village' && (
           <>
+            <SideRail
+              side="left"
+              items={[
+                {
+                  id: 'bonus',
+                  icon: '🎁',
+                  label: 'Bonus',
+                  badge: rewardBadge,
+                  highlight: rewardBadge > 0,
+                  onClick: () => setScreen('rewards'),
+                },
+                {
+                  id: 'quests',
+                  icon: '📜',
+                  label: 'Quests',
+                  badge: questBadge,
+                  onClick: () => setScreen('quests'),
+                },
+                { id: 'shop', icon: '🧰', label: 'Truhen', onClick: () => setScreen('cards') },
+              ]}
+            />
+            <SideRail
+              side="right"
+              items={[
+                {
+                  id: 'attack',
+                  icon: '⚒️',
+                  label: 'Angriff',
+                  badge: state.pendingAttacks,
+                  highlight: state.pendingAttacks > 0,
+                  onClick: () =>
+                    state.pendingAttacks > 0 ? setAttackOpen(true) : setScreen('friends'),
+                },
+                {
+                  id: 'raid',
+                  icon: '🐾',
+                  label: 'Raub',
+                  badge: state.pendingRaids,
+                  highlight: state.pendingRaids > 0,
+                  onClick: () => (state.pendingRaids > 0 ? setRaidOpen(true) : setScreen('friends')),
+                },
+                { id: 'rank', icon: '🏆', label: 'Rang', onClick: () => setScreen('friends') },
+              ]}
+            />
             <VillageScene />
             <SlotMachine
               onAttack={() => setAttackOpen(true)}

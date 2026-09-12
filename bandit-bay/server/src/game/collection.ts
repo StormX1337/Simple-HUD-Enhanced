@@ -73,7 +73,7 @@ export function openChest(user: UserRow, chestId: string): ChestResult {
   user.coins -= cost;
   const drops: CardDrop[] = [];
   for (let i = 0; i < chest.cards; i++) {
-    // Mindestens eine Karte erfuellt die Mindestseltenheit der Truhe.
+    // Mindestens eine Karte erfüllt die Mindestseltenheit der Truhe.
     const minRarity: Rarity = i === 0 ? chest.minRarity : 1;
     drops.push(grantRandomCard(user, minRarity));
   }
@@ -102,7 +102,7 @@ export function claimSet(user: UserRow, setId: string): SetClaimResult {
     )
     .get(user.id, setId);
   if (already)
-    return { ok: false, error: 'Set bereits eingeloest', coins: 0, spins: 0, xp: 0, shields: 0, levelUps: 0 };
+    return { ok: false, error: 'Set bereits eingelöst', coins: 0, spins: 0, xp: 0, shields: 0, levelUps: 0 };
 
   const owned = db
     .prepare<[string], { card_id: string; count: number }>(
@@ -113,7 +113,7 @@ export function claimSet(user: UserRow, setId: string): SetClaimResult {
     (card) => (owned.find((o) => o.card_id === card.id)?.count ?? 0) > 0,
   );
   if (!complete)
-    return { ok: false, error: 'Set ist noch nicht vollstaendig', coins: 0, spins: 0, xp: 0, shields: 0, levelUps: 0 };
+    return { ok: false, error: 'Set ist noch nicht vollständig', coins: 0, spins: 0, xp: 0, shields: 0, levelUps: 0 };
 
   db.prepare('INSERT INTO card_sets (user_id, set_id, claimed_at) VALUES (?, ?, ?)').run(
     user.id,

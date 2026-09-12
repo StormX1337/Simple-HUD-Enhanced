@@ -58,7 +58,7 @@ export function maxBetForLevel(level: number): number {
   return max;
 }
 
-/** Grundwert einer Muenz-Auszahlung, abhaengig von Level und Insel. */
+/** Grundwert einer Münz-Auszahlung, abhaengig von Level und Insel. */
 export function coinValue(level: number, villageId: number): number {
   return Math.round(
     BALANCE.coinBase *
@@ -113,11 +113,11 @@ export const SPIN_TABLE: PayoutEntry[] = [
   { symbol: 'truhe', matches: 2, weight: 7 },
 ];
 
-/** Gewicht fuer "kein Treffer" – gleiche Skala wie SPIN_TABLE. */
+/** Gewicht für "kein Treffer" – gleiche Skala wie SPIN_TABLE. */
 export const NO_MATCH_WEIGHT = 20;
 
 /* ------------------------------------------------------------------ */
-/*  Inseln (Doerfer)                                                   */
+/*  Inseln (Dörfer)                                                   */
 /* ------------------------------------------------------------------ */
 
 export const VILLAGES: VillageDef[] = [
@@ -129,11 +129,11 @@ export const VILLAGES: VillageDef[] = [
     costMultiplier: 1,
     palette: { skyTop: '#8fd6ff', skyBottom: '#dff3ff', ground: '#7cc47f', accent: '#3d8b5f' },
     buildings: [
-      { id: 'v1_hut', name: 'Treibholzhuette', kind: 'hut', baseCost: 900 },
+      { id: 'v1_hut', name: 'Treibholzhütte', kind: 'hut', baseCost: 900 },
       { id: 'v1_dock', name: 'Fischersteg', kind: 'dock', baseCost: 1200 },
-      { id: 'v1_mill', name: 'Nussmuehle', kind: 'mill', baseCost: 1600 },
+      { id: 'v1_mill', name: 'Nussmühle', kind: 'mill', baseCost: 1600 },
       { id: 'v1_market', name: 'Muschelmarkt', kind: 'market', baseCost: 2100 },
-      { id: 'v1_statue', name: 'Waschbaer-Statue', kind: 'statue', baseCost: 2800 },
+      { id: 'v1_statue', name: 'Waschbär-Statue', kind: 'statue', baseCost: 2800 },
     ],
   },
   {
@@ -154,14 +154,14 @@ export const VILLAGES: VillageDef[] = [
   {
     id: 3,
     name: 'Dschungeltiefe',
-    subtitle: 'Ranken, Ruinen und Raubzuege',
+    subtitle: 'Ranken, Ruinen und Raubzüge',
     setId: 'set_dschungel',
     costMultiplier: 5.6,
     palette: { skyTop: '#7ae0c3', skyBottom: '#d9fff2', ground: '#4fa86b', accent: '#26694a' },
     buildings: [
       { id: 'v3_hut', name: 'Baumkronenlager', kind: 'hut', baseCost: 1400 },
-      { id: 'v3_mill', name: 'Lianenmuehle', kind: 'mill', baseCost: 1900 },
-      { id: 'v3_statue', name: 'Moosgoetze', kind: 'statue', baseCost: 2500 },
+      { id: 'v3_mill', name: 'Lianenmühle', kind: 'mill', baseCost: 1900 },
+      { id: 'v3_statue', name: 'Moosgötze', kind: 'statue', baseCost: 2500 },
       { id: 'v3_tower', name: 'Rankenturm', kind: 'tower', baseCost: 3300 },
       { id: 'v3_market', name: 'Fruchthandelsposten', kind: 'market', baseCost: 4300 },
     ],
@@ -169,7 +169,7 @@ export const VILLAGES: VillageDef[] = [
   {
     id: 4,
     name: 'Sturmklippe',
-    subtitle: 'Nur die Zaehesten bauen hier',
+    subtitle: 'Nur die Zähesten bauen hier',
     setId: 'set_sturm',
     costMultiplier: 13,
     palette: { skyTop: '#6f7ea8', skyBottom: '#c6d2ec', ground: '#8a93a8', accent: '#3d4867' },
@@ -184,22 +184,22 @@ export const VILLAGES: VillageDef[] = [
   {
     id: 5,
     name: 'Kristallgrotte',
-    subtitle: 'Funkelnde Hoehlen voller Taler',
+    subtitle: 'Funkelnde Höhlen voller Taler',
     setId: 'set_kristall',
     costMultiplier: 30,
     palette: { skyTop: '#9d7bff', skyBottom: '#e8dcff', ground: '#7d6bb5', accent: '#4b3a86' },
     buildings: [
       { id: 'v5_hut', name: 'Geodenheim', kind: 'hut', baseCost: 2300 },
-      { id: 'v5_mill', name: 'Splittermuehle', kind: 'mill', baseCost: 3100 },
+      { id: 'v5_mill', name: 'Splittermühle', kind: 'mill', baseCost: 3100 },
       { id: 'v5_forge', name: 'Prismenschmiede', kind: 'forge', baseCost: 4100 },
-      { id: 'v5_statue', name: 'Kristallwaechter', kind: 'statue', baseCost: 5400 },
+      { id: 'v5_statue', name: 'Kristallwächter', kind: 'statue', baseCost: 5400 },
       { id: 'v5_tower', name: 'Glimmerturm', kind: 'tower', baseCost: 7200 },
     ],
   },
   {
     id: 6,
     name: 'Wolkenhafen',
-    subtitle: 'Die letzte Insel ueber den Wolken',
+    subtitle: 'Die letzte Insel über den Wolken',
     setId: 'set_wolken',
     costMultiplier: 68,
     palette: { skyTop: '#ff9ec4', skyBottom: '#fff0f6', ground: '#cbb7f2', accent: '#8657c9' },
@@ -221,11 +221,11 @@ export function getVillage(id: number): VillageDef {
   return v;
 }
 
-/** Kosten fuer das naechste Level eines Gebaeudes. */
+/** Kosten für das nächste Level eines Gebäudes. */
 export function upgradeCost(villageId: number, buildingIndex: number, currentLevel: number): number {
   const village = getVillage(villageId);
   const building = village.buildings[buildingIndex];
-  if (!building) throw new Error(`Unbekanntes Gebaeude: ${villageId}/${buildingIndex}`);
+  if (!building) throw new Error(`Unbekanntes Gebäude: ${villageId}/${buildingIndex}`);
   const raw = building.baseCost * village.costMultiplier * Math.pow(1.62, currentLevel);
   return Math.max(100, Math.round(raw / 50) * 50);
 }
@@ -289,14 +289,14 @@ export const CARDS: CardDef[] = [
   card('c_rufus', 'Rufus der Bandit', 'set_nebel', 3, 'raccoon', '#8d7ae6'),
   card('c_steg', 'Alter Steg', 'set_nebel', 1, 'ship', '#6fb1d8'),
   card('c_nebelkarte', 'Nebelkarte', 'set_nebel', 2, 'map', '#d9b382'),
-  card('c_muschel', 'Gluecksmuschel', 'set_nebel', 2, 'gem', '#f2a7c3'),
+  card('c_muschel', 'Glücksmuschel', 'set_nebel', 2, 'gem', '#f2a7c3'),
   card('c_silberfisch', 'Silberfisch', 'set_nebel', 4, 'fish', '#9fd3e8'),
   // Set 2 – Sonnenriff
   card('c_perle', 'Riesenperle', 'set_sonne', 3, 'gem', '#ffd6e8'),
   card('c_taucher', 'Taucherlampe', 'set_sonne', 2, 'lantern', '#ffc46b'),
   card('c_korall', 'Korallenkrone', 'set_sonne', 4, 'crown', '#ff8f6b'),
   card('c_segel', 'Sonnensegler', 'set_sonne', 1, 'ship', '#ffe28a'),
-  card('c_riffwacht', 'Riffwaechter', 'set_sonne', 5, 'mask', '#f97e72'),
+  card('c_riffwacht', 'Riffwächter', 'set_sonne', 5, 'mask', '#f97e72'),
   // Set 3 – Dschungeltiefe
   card('c_idol', 'Moos-Idol', 'set_dschungel', 4, 'mask', '#5fae7c'),
   card('c_ranke', 'Goldene Ranke', 'set_dschungel', 2, 'leaf', '#79c66b'),
@@ -314,7 +314,7 @@ export const CARDS: CardDef[] = [
   card('c_prisma', 'Prismafisch', 'set_kristall', 2, 'fish', '#a48bf0'),
   card('c_kristallkrone', 'Kristallkrone', 'set_kristall', 4, 'crown', '#e0c3ff'),
   card('c_glimmer', 'Glimmerblatt', 'set_kristall', 1, 'leaf', '#9d7bff'),
-  card('c_grottenwacht', 'Grottenwaechter', 'set_kristall', 5, 'mask', '#7b52d6'),
+  card('c_grottenwacht', 'Grottenwächter', 'set_kristall', 5, 'mask', '#7b52d6'),
   // Set 6 – Wolkenhafen
   card('c_ballon', 'Wolkenballon', 'set_wolken', 2, 'ship', '#ffb3d1'),
   card('c_stern', 'Morgenstern', 'set_wolken', 3, 'star', '#ffe9a8'),
@@ -336,7 +336,7 @@ export function duplicateValue(rarity: Rarity, level: number): number {
   return Math.round(1200 * rarity * (1 + level * 0.3));
 }
 
-/** Gewichte fuer Kartenzug nach Seltenheit. */
+/** Gewichte für Kartenzug nach Seltenheit. */
 export const RARITY_WEIGHTS: Record<Rarity, number> = { 1: 42, 2: 28, 3: 17, 4: 9, 5: 4 };
 
 export const CHESTS: ChestDef[] = [
@@ -366,7 +366,7 @@ export const QUESTS: QuestDef[] = [
   {
     id: 'q_upgrade',
     name: 'Baumeister',
-    description: 'Verbessere 3 Gebaeude',
+    description: 'Verbessere 3 Gebäude',
     type: 'upgrade',
     target: 3,
     reward: { coins: 25_000, spins: 12, xp: 180 },
@@ -374,15 +374,15 @@ export const QUESTS: QuestDef[] = [
   {
     id: 'q_attack',
     name: 'Krawallmacher',
-    description: 'Fuehre 3 Angriffe aus',
+    description: 'Führe 3 Angriffe aus',
     type: 'attack',
     target: 3,
     reward: { coins: 20_000, spins: 8, xp: 150 },
   },
   {
     id: 'q_raid',
-    name: 'Schatzgraeber',
-    description: 'Fuehre 2 Raubzuege aus',
+    name: 'Schatzgräber',
+    description: 'Führe 2 Raubzüge aus',
     type: 'raid',
     target: 2,
     reward: { coins: 30_000, spins: 8, xp: 160 },
@@ -413,7 +413,7 @@ export const DAILY_LADDER: DailyRewardDef[] = [
 
 export const BOT_NAMES: { name: string; avatar: string }[] = [
   { name: 'Miko Maske', avatar: '🦝' },
-  { name: 'Kapitaen Klaus', avatar: '🐧' },
+  { name: 'Kapitän Klaus', avatar: '🐧' },
   { name: 'Perla', avatar: '🦦' },
   { name: 'Sturm-Sina', avatar: '🦊' },
   { name: 'Dodo Dietz', avatar: '🦜' },

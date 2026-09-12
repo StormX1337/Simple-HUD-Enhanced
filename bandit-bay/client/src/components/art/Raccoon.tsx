@@ -4,42 +4,101 @@ interface Props {
   cheer?: boolean;
 }
 
-/** Rufus – das Maskottchen von Bandit Bay. */
+const OUTLINE = '#2b3242';
+
+/** Rufus – das Maskottchen von Bandit Bay (Cartoon-Waschbär). */
 export function Raccoon({ size = 96, className = '', cheer = false }: Props): JSX.Element {
   return (
-    <svg viewBox="0 0 120 120" width={size} height={size} className={className} aria-hidden="true">
+    <svg
+      viewBox="0 0 130 130"
+      width={size}
+      height={size}
+      className={className}
+      style={{ filter: 'drop-shadow(0 4px 3px rgba(0,0,0,0.3))' }}
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id="rc-fur" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#d7dfee" />
+          <stop offset="60%" stopColor="#aab6cd" />
+          <stop offset="100%" stopColor="#8593ad" />
+        </linearGradient>
+        <linearGradient id="rc-belly" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#dfe6f2" />
+        </linearGradient>
+      </defs>
+
       {/* Schwanz */}
-      <g transform={cheer ? 'rotate(-12 30 92)' : undefined}>
-        <path d="M30 92c-16 2-24-8-22-20 2-12 14-16 22-12z" fill="#9aa6bd" />
-        <path d="M22 74c-6 3-8 9-6 14 5 3 10 2 14-1z" fill="#4b5872" />
-        <path d="M12 80c-2 4-1 8 2 11 3-1 5-3 6-6z" fill="#9aa6bd" />
+      <g transform={cheer ? 'rotate(-14 34 100)' : 'rotate(-4 34 100)'}>
+        <path
+          d="M34 102c-20 3-30-10-26-24 4-14 18-18 28-13z"
+          fill="url(#rc-fur)"
+          stroke={OUTLINE}
+          strokeWidth="3"
+          strokeLinejoin="round"
+        />
+        <path d="M24 82c-7 3-10 10-7 17 6 3 12 2 16-2z" fill="#5b6880" />
+        <path d="M12 88c-3 5-2 10 2 13 4-1 6-4 7-8z" fill="#8593ad" />
       </g>
-      {/* Koerper */}
-      <ellipse cx="60" cy="86" rx="30" ry="26" fill="#9aa6bd" />
-      <ellipse cx="60" cy="90" rx="20" ry="18" fill="#d7deeb" />
+
+      {/* Körper */}
+      <ellipse cx="65" cy="96" rx="32" ry="27" fill="url(#rc-fur)" stroke={OUTLINE} strokeWidth="3.4" />
+      <ellipse cx="65" cy="100" rx="21" ry="19" fill="url(#rc-belly)" stroke={OUTLINE} strokeWidth="2.4" />
+
       {/* Ohren */}
-      <circle cx="34" cy="40" r="13" fill="#9aa6bd" />
-      <circle cx="34" cy="40" r="7" fill="#d29fb4" />
-      <circle cx="86" cy="40" r="13" fill="#9aa6bd" />
-      <circle cx="86" cy="40" r="7" fill="#d29fb4" />
+      <circle cx="37" cy="42" r="14" fill="url(#rc-fur)" stroke={OUTLINE} strokeWidth="3.2" />
+      <circle cx="37" cy="42" r="7" fill="#e59aad" />
+      <circle cx="93" cy="42" r="14" fill="url(#rc-fur)" stroke={OUTLINE} strokeWidth="3.2" />
+      <circle cx="93" cy="42" r="7" fill="#e59aad" />
+
       {/* Kopf */}
-      <circle cx="60" cy="52" r="32" fill="#b6c0d4" />
-      <path d="M60 22c16 0 29 12 30 27-8-6-19-9-30-9s-22 3-30 9c1-15 14-27 30-27z" fill="#9aa6bd" />
-      {/* Maske */}
-      <path d="M30 52c6-8 15-10 22-6-2 8-8 14-16 15-4 0-6-4-6-9z" fill="#3a4457" />
-      <path d="M90 52c-6-8-15-10-22-6 2 8 8 14 16 15 4 0 6-4 6-9z" fill="#3a4457" />
-      <circle cx="45" cy="52" r="5" fill="#fff8e7" />
-      <circle cx="75" cy="52" r="5" fill="#fff8e7" />
-      <circle cx="46" cy="53" r="2.6" fill="#1c2231" />
-      <circle cx="76" cy="53" r="2.6" fill="#1c2231" />
+      <circle cx="65" cy="56" r="34" fill="url(#rc-fur)" stroke={OUTLINE} strokeWidth="3.4" />
+      <path d="M65 24c17 0 31 12 33 28-9-7-20-10-33-10s-24 3-33 10c2-16 16-28 33-28z" fill="#93a1ba" />
+
+      {/* Banditenmaske */}
+      <path
+        d="M33 56c7-10 18-12 26-7-2 10-9 17-19 18-5 0-8-5-7-11z"
+        fill="#38415a"
+        stroke={OUTLINE}
+        strokeWidth="2.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M97 56c-7-10-18-12-26-7 2 10 9 17 19 18 5 0 8-5 7-11z"
+        fill="#38415a"
+        stroke={OUTLINE}
+        strokeWidth="2.6"
+        strokeLinejoin="round"
+      />
+      <circle cx="50" cy="56" r="7" fill="#ffffff" stroke={OUTLINE} strokeWidth="2" />
+      <circle cx="80" cy="56" r="7" fill="#ffffff" stroke={OUTLINE} strokeWidth="2" />
+      <circle cx="51.5" cy="57" r="3.6" fill="#1c2231" />
+      <circle cx="81.5" cy="57" r="3.6" fill="#1c2231" />
+      <circle cx="53" cy="55" r="1.3" fill="#fff" />
+      <circle cx="83" cy="55" r="1.3" fill="#fff" />
+
       {/* Schnauze */}
-      <ellipse cx="60" cy="66" rx="16" ry="12" fill="#f2f4f9" />
-      <path d="M60 60l6 5-6 5-6-5z" fill="#1c2231" />
-      <path d="M60 70v4" stroke="#1c2231" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M60 74c-3 3-7 2-8-1M60 74c3 3 7 2 8-1" stroke="#1c2231" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      <ellipse cx="65" cy="72" rx="18" ry="13" fill="#f4f7fc" stroke={OUTLINE} strokeWidth="2.6" />
+      <path d="M65 64l7 6-7 6-7-6z" fill="#1c2231" />
+      <path d="M65 76v4" stroke={OUTLINE} strokeWidth="2.6" strokeLinecap="round" />
+      <path
+        d="M65 80c-3 4-8 3-10-1M65 80c3 4 8 3 10-1"
+        stroke={OUTLINE}
+        strokeWidth="2.6"
+        fill="none"
+        strokeLinecap="round"
+      />
+
       {/* Pfoten */}
-      <circle cx="38" cy={cheer ? 66 : 96} r="9" fill="#8e9ab1" />
-      <circle cx="82" cy={cheer ? 66 : 96} r="9" fill="#8e9ab1" />
+      <circle cx="40" cy={cheer ? 70 : 106} r="10" fill="#8593ad" stroke={OUTLINE} strokeWidth="3" />
+      <circle cx="90" cy={cheer ? 70 : 106} r="10" fill="#8593ad" stroke={OUTLINE} strokeWidth="3" />
+      {cheer && (
+        <g>
+          <circle cx="97" cy="62" r="9" fill="#f8c73c" stroke="#7a4a05" strokeWidth="2.6" />
+          <circle cx="97" cy="62" r="4.6" fill="none" stroke="#c8900f" strokeWidth="2" />
+        </g>
+      )}
     </svg>
   );
 }

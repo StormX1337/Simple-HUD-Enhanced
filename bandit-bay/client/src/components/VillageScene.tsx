@@ -7,15 +7,17 @@ import { playSound } from '../lib/sound';
 import { useShortScreen } from '../lib/useMediaQuery';
 import { BuildingArt } from './art/BuildingArt';
 import { Raccoon } from './art/Raccoon';
+import { CoinIcon } from './art/HudIcons';
+import { Boat, Bush, Cloud, FarIsland, Palm, Rock, Sun } from './art/Scenery';
 import type { VillageDef } from '../types';
 
-/** Feste Bauplaetze auf der Insel (Prozentwerte). */
+/** Feste Bauplätze auf der Insel (Prozentwerte). */
 const SPOTS = [
-  { x: 20, y: 45 },
-  { x: 50, y: 33 },
-  { x: 79, y: 46 },
-  { x: 33, y: 70 },
-  { x: 68, y: 70 },
+  { x: 26, y: 56 },
+  { x: 50, y: 43 },
+  { x: 74, y: 56 },
+  { x: 34, y: 78 },
+  { x: 66, y: 78 },
 ];
 
 export function VillageScene(): JSX.Element | null {
@@ -58,60 +60,72 @@ export function VillageScene(): JSX.Element | null {
 
   return (
     <div className="relative flex-1 overflow-hidden">
-      {/* Himmel & Meer */}
+      {/* Himmel */}
       <div
         className="absolute inset-0"
         style={{
-          background: `linear-gradient(180deg, ${village.palette.skyTop} 0%, ${village.palette.skyBottom} 55%, #2f6f9e 55%, #1d4f78 100%)`,
+          background: `linear-gradient(180deg, ${village.palette.skyTop} 0%, ${village.palette.skyBottom} 42%)`,
         }}
       />
-      <div className="pointer-events-none absolute inset-x-0 top-4 flex justify-between px-6 opacity-80">
-        <div className="animate-wave text-3xl">☁️</div>
-        <div className="animate-bob text-2xl">☁️</div>
-      </div>
+      <Sun size={short ? 60 : 80} className="absolute -left-3 -top-3 animate-bob" />
+      <Cloud size={short ? 64 : 84} className="absolute left-[30%] top-12 animate-wave opacity-95" />
+      <Cloud size={short ? 46 : 60} className="absolute right-[22%] top-24 animate-bob opacity-85" />
+      <FarIsland size={short ? 60 : 76} className="absolute left-[14%] top-[36%] opacity-75" />
+      <FarIsland size={short ? 48 : 62} className="absolute right-[16%] top-[38%] opacity-65" />
 
-      {/* Wellen */}
-      <div className="pointer-events-none absolute inset-x-0 top-[50%] flex justify-around text-lg opacity-30">
-        <span className="animate-wave">〰️</span>
-        <span className="animate-bob">〰️</span>
-        <span className="animate-wave">〰️</span>
+      {/* Meer */}
+      <div className="absolute inset-x-0 bottom-0 top-[40%] bg-gradient-to-b from-[#3f9fd0] via-[#2b7fb5] to-[#17578b]" />
+      <div className="pointer-events-none absolute inset-x-0 top-[46%] h-10 opacity-40">
+        <div className="mx-auto h-1.5 w-[70%] animate-wave rounded-full bg-white/70" />
+        <div className="ml-6 mt-2 h-1.5 w-[35%] animate-bob rounded-full bg-white/60" />
+        <div className="ml-auto mr-8 mt-2 h-1.5 w-[28%] animate-wave rounded-full bg-white/50" />
       </div>
+      <Boat size={short ? 34 : 44} className="absolute right-[5%] top-[43%] animate-bob" />
 
       {/* Insel */}
-      <div className="absolute inset-x-0 bottom-0 top-[26%]">
-        <div className="absolute inset-x-0 bottom-[-16%] top-0 rounded-[50%] bg-[#f3dfae]" />
+      <div className="absolute inset-x-0 bottom-0 top-[47%]">
+        <div className="absolute inset-x-[3%] bottom-[-24%] top-0 rounded-[50%] bg-[#f0dca6] shadow-[0_-6px_0_rgba(255,255,255,0.35)_inset]" />
         <div
-          className="absolute inset-x-4 bottom-[-14%] top-[5%] rounded-[50%]"
+          className="absolute inset-x-[8%] bottom-[-22%] top-[7%] rounded-[50%]"
           style={{ background: village.palette.ground }}
         />
         <div
-          className="absolute inset-x-12 bottom-[-10%] top-[12%] rounded-[50%] opacity-45"
+          className="absolute inset-x-[17%] bottom-[-18%] top-[16%] rounded-[50%] opacity-40"
           style={{ background: village.palette.accent }}
         />
       </div>
 
-      {/* Kopfzeile mit Fortschritt */}
-      <div className="absolute inset-x-0 top-0 z-10 px-3 pt-2">
-        <div className="panel-dark flex items-center gap-3 rounded-2xl px-3 py-2">
+      {/* Bepflanzung */}
+      <Palm size={short ? 34 : 46} className="absolute bottom-[13%] left-[15%]" />
+      <Palm size={short ? 30 : 40} className="absolute bottom-[12%] right-[13%]" />
+      <Bush size={short ? 26 : 34} className="absolute bottom-[8%] left-[47%]" />
+      <Rock size={short ? 24 : 30} className="absolute bottom-[24%] right-[3%]" />
+      <Bush size={short ? 22 : 28} className="absolute bottom-[26%] left-[4%]" />
+
+      {/* Inselschild */}
+      <div className="absolute inset-x-0 top-0 z-10 px-2 pt-1.5">
+        <div className="wood-sign flex items-center gap-2 px-3 py-1.5">
           <div className="min-w-0 flex-1">
-            <div className="truncate font-display text-base font-bold leading-tight">
+            <div className="truncate font-display text-sm font-black leading-tight text-[#ffe9a0] text-outline">
               Insel {village.id}: {village.name}
             </div>
-            <div className="truncate text-[11px] text-white/70">{village.subtitle}</div>
+            <div className="truncate text-[10px] font-bold text-[#f5dfb4]/80">{village.subtitle}</div>
           </div>
-          <div className="w-24">
-            <div className="h-3 overflow-hidden rounded-full border border-black/40 bg-black/40">
+          <div className="w-24 shrink-0">
+            <div className="relative h-3.5 overflow-hidden rounded-full border-2 border-[#3b2412] bg-[#2b1a0c]">
               <div
-                className="h-full bg-gradient-to-r from-[#ffd95e] to-[#e0a21a] transition-[width] duration-500"
+                className="h-full bg-gradient-to-r from-[#8ee06a] via-[#f8c73c] to-[#ff9a3c] transition-[width] duration-500"
                 style={{ width: `${progress}%` }}
               />
+              <span className="absolute inset-0 flex items-center justify-center text-[9px] font-black text-white text-outline">
+                {progress}%
+              </span>
             </div>
-            <div className="mt-0.5 text-center text-[10px] font-bold">{progress}%</div>
           </div>
         </div>
       </div>
 
-      {/* Gebaeude */}
+      {/* Gebäude */}
       {state.buildings.map((building, index) => {
         const def = village.buildings[index];
         const spot = SPOTS[index] ?? SPOTS[0];
@@ -133,32 +147,40 @@ export function VillageScene(): JSX.Element | null {
               kind={def.kind}
               level={building.level}
               accent={village.palette.accent}
-              size={short ? 66 : 92}
+              size={short ? 68 : 94}
             />
             <span
-              className={`-mt-2 whitespace-nowrap rounded-full border-2 border-black/30 px-1.5 py-0.5 font-display text-[10px] font-black shadow-chunkysm ${
+              className={`-mt-2 flex items-center gap-1 whitespace-nowrap rounded-full border-2 px-1.5 py-0.5 font-display text-[10px] font-black shadow-chunkysm ${
                 done
-                  ? 'bg-gradient-to-b from-[#ffd95e] to-[#e0a21a] text-[#4a2f05]'
+                  ? 'border-[#7a4a05] bg-gradient-to-b from-[#ffe9a0] to-[#e0a21a] text-[#4a2f05]'
                   : affordable
-                    ? 'bg-gradient-to-b from-[#7fd88a] to-[#3f9a55] text-[#0f2d17]'
-                    : 'bg-black/55 text-white/80'
+                    ? 'border-[#1d4a1f] bg-gradient-to-b from-[#8ee06a] to-[#3f9a3a] text-white'
+                    : 'border-black/50 bg-black/60 text-white/80'
               }`}
             >
-              {done ? 'FERTIG' : `${building.level}/${building.maxLevel} · ${formatCoins(building.cost)}`}
+              {done ? (
+                'FERTIG ★'
+              ) : (
+                <>
+                  <span className="opacity-80">{building.level}/{building.maxLevel}</span>
+                  <CoinIcon size={12} />
+                  {formatCoins(building.cost)}
+                </>
+              )}
             </span>
           </button>
         );
       })}
 
-      <div className="pointer-events-none absolute bottom-1 left-2 z-10">
-        <Raccoon size={short ? 52 : 78} className="animate-bob" />
+      <div className="pointer-events-none absolute bottom-[4%] left-0 z-10">
+        <Raccoon size={short ? 60 : 86} className="animate-bob" />
       </div>
 
       {/* Ausbau-Panel */}
       <AnimatePresence>
         {selectedBuilding && selectedDef && (
           <motion.div
-            className="absolute inset-0 z-20 flex items-end bg-black/45 p-3"
+            className="absolute inset-0 z-20 flex items-end bg-black/50 p-2.5"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -172,23 +194,27 @@ export function VillageScene(): JSX.Element | null {
               onClick={(event) => event.stopPropagation()}
             >
               <div className="flex items-center gap-3">
-                <BuildingArt
-                  kind={selectedDef.kind}
-                  level={selectedBuilding.level}
-                  accent={village.palette.accent}
-                  size={72}
-                />
+                <div className="rounded-2xl border-2 border-black/15 bg-gradient-to-b from-[#dff0ff] to-[#bcd9f0] p-1">
+                  <BuildingArt
+                    kind={selectedDef.kind}
+                    level={selectedBuilding.level}
+                    accent={village.palette.accent}
+                    size={74}
+                  />
+                </div>
                 <div className="min-w-0 flex-1">
-                  <div className="font-display text-lg font-bold leading-tight">{selectedDef.name}</div>
+                  <div className="font-display text-lg font-black leading-tight">{selectedDef.name}</div>
                   <div className="text-xs opacity-70">
                     Stufe {selectedBuilding.level} von {selectedBuilding.maxLevel}
                   </div>
-                  <div className="mt-1 flex gap-1">
+                  <div className="mt-1.5 flex gap-1">
                     {Array.from({ length: selectedBuilding.maxLevel }).map((_, index) => (
                       <span
                         key={index}
-                        className={`h-2.5 flex-1 rounded-full border border-black/20 ${
-                          index < selectedBuilding.level ? 'bg-bay-gold' : 'bg-black/15'
+                        className={`h-3 flex-1 rounded-full border-2 ${
+                          index < selectedBuilding.level
+                            ? 'border-[#7a4a05] bg-gradient-to-b from-[#ffe9a0] to-[#e0a21a]'
+                            : 'border-black/15 bg-black/10'
                         }`}
                       />
                     ))}
@@ -198,24 +224,24 @@ export function VillageScene(): JSX.Element | null {
               <div className="mt-3 flex items-center gap-2">
                 <button
                   type="button"
-                  className="btn-ghost flex-1 border-black/20 bg-black/10 text-sm text-[#3b2a14]"
+                  className="btn border-black/20 bg-black/10 px-4 text-sm text-[#3b2a14]"
                   onClick={() => setSelected(null)}
                 >
-                  Schließen
+                  Zu
                 </button>
                 {selectedBuilding.level >= selectedBuilding.maxLevel ? (
-                  <div className="flex-[2] rounded-2xl border-2 border-black/20 bg-black/10 px-4 py-2 text-center font-display text-sm">
-                    Vollständig ausgebaut
+                  <div className="flex-1 rounded-2xl border-2 border-black/20 bg-black/10 px-4 py-2 text-center font-display text-sm">
+                    Vollständig ausgebaut ★
                   </div>
                 ) : (
                   <button
                     type="button"
                     data-testid="upgrade-button"
                     disabled={busy || state.coins < selectedBuilding.cost}
-                    className="btn-green flex-[2] text-sm"
+                    className="btn-green flex flex-1 items-center justify-center gap-1.5 text-sm"
                     onClick={() => void upgrade(selectedBuilding.index)}
                   >
-                    Ausbauen · 🪙 {formatFull(selectedBuilding.cost)}
+                    Ausbauen <CoinIcon size={18} /> {formatFull(selectedBuilding.cost)}
                   </button>
                 )}
               </div>
@@ -228,7 +254,7 @@ export function VillageScene(): JSX.Element | null {
       <AnimatePresence>
         {celebrate && (
           <motion.div
-            className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 p-5"
+            className="absolute inset-0 z-30 flex items-center justify-center bg-black/65 p-5"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

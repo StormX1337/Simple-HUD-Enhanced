@@ -60,7 +60,7 @@ function buildReels(matches: 3 | 2 | 0, symbol: SymbolId | null): SymbolId[] {
 export function spin(user: UserRow, betInput: number): SpinResult {
   const maxBet = maxBetForLevel(user.level);
   const bet = Math.round(betInput);
-  if (!BALANCE.betTiers.includes(bet as never)) throw new GameError('Ungueltiger Einsatz');
+  if (!BALANCE.betTiers.includes(bet as never)) throw new GameError('Ungültiger Einsatz');
   if (bet > maxBet) throw new GameError(`Einsatz x${bet} ist erst ab Level freigeschaltet`);
 
   applyRegen(user);
@@ -107,9 +107,9 @@ export function spin(user: UserRow, betInput: number): SpinResult {
           outcome = 'shield';
           user.shields += 1;
           amount = 1;
-          message = 'Schild aufgebaut – dein Dorf ist geschuetzt!';
+          message = 'Schild aufgebaut – dein Dorf ist geschützt!';
         } else {
-          gainCoins(base * bet * 5, 'Schilde voll – dafuer klingeln die Taler!');
+          gainCoins(base * bet * 5, 'Schilde voll – dafür klingeln die Taler!');
         }
         break;
       case 'hammer':
@@ -122,7 +122,7 @@ export function spin(user: UserRow, betInput: number): SpinResult {
         outcome = 'raid';
         user.pending_raids += 1;
         amount = 1;
-        message = 'Banditenpfote! Zeit fuer einen Raubzug.';
+        message = 'Banditenpfote! Zeit für einen Raubzug.';
         break;
       case 'truhe': {
         const drop = grantRandomCard(user);
@@ -155,7 +155,7 @@ export function spin(user: UserRow, betInput: number): SpinResult {
         gainCoins(base * bet * 2, 'Zwei Schilde – Trostpreis in Talern.');
         break;
       case 'hammer':
-        gainCoins(base * bet * 2, 'Zwei Haemmer – ein paar Taler fallen ab.');
+        gainCoins(base * bet * 2, 'Zwei Hämmer – ein paar Taler fallen ab.');
         break;
       case 'pfote':
         gainCoins(base * bet * 2, 'Zwei Pfoten – kleine Beute.');
@@ -189,7 +189,7 @@ export function spin(user: UserRow, betInput: number): SpinResult {
 
 /** Einsatz aendern (server-validiert). */
 export function setBet(user: UserRow, bet: number): void {
-  if (!BALANCE.betTiers.includes(bet as never)) throw new GameError('Ungueltiger Einsatz');
+  if (!BALANCE.betTiers.includes(bet as never)) throw new GameError('Ungültiger Einsatz');
   if (bet > maxBetForLevel(user.level)) throw new GameError('Einsatz noch nicht freigeschaltet');
   user.bet = bet;
   saveUser(user);

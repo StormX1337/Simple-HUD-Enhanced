@@ -6,6 +6,7 @@ import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { CardArt } from '../components/art/CardArt';
 import { Raccoon } from '../components/art/Raccoon';
+import { CardIcon, CoinIcon, ShieldIcon, SpinIcon } from '../components/art/HudIcons';
 import type { CardDrop } from '../types';
 
 export function RewardsScreen(): JSX.Element {
@@ -66,18 +67,22 @@ export function RewardsScreen(): JSX.Element {
               }`}
             >
               <div className="font-display text-xs font-black">Tag {step.day}</div>
-              <div className="mt-1 text-[11px] leading-tight">
-                🪙 {formatCoins(step.coins)}
-                <br />🎰 {step.spins}
+              <div className="mt-1 space-y-0.5 text-[11px] font-bold leading-tight">
+                <div className="flex items-center justify-center gap-1">
+                  <CoinIcon size={13} /> {formatCoins(step.coins)}
+                </div>
+                <div className="flex items-center justify-center gap-1">
+                  <SpinIcon size={13} /> {step.spins}
+                </div>
                 {step.shields > 0 && (
-                  <>
-                    <br />🛡️ {step.shields}
-                  </>
+                  <div className="flex items-center justify-center gap-1">
+                    <ShieldIcon size={13} /> {step.shields}
+                  </div>
                 )}
                 {step.cards > 0 && (
-                  <>
-                    <br />🃏 {step.cards}
-                  </>
+                  <div className="flex items-center justify-center gap-1">
+                    <CardIcon size={13} /> {step.cards}
+                  </div>
                 )}
               </div>
               {done && <div className="mt-1 text-[11px] font-black">✓</div>}

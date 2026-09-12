@@ -107,7 +107,7 @@ for (let v = 0; v < VILLAGES[0].buildings.length; v++) {
     const result = upgradeBuilding(player, player.village, v);
     if (result.villageComplete) completed = true;
     check(
-      `Ausbaukosten korrekt (Gebaeude ${v}, Stufe ${lvl + 1})`,
+      `Ausbaukosten korrekt (Gebäude ${v}, Stufe ${lvl + 1})`,
       result.cost === expected && result.newLevel === lvl + 1,
       `${expected}`,
     );
@@ -115,7 +115,7 @@ for (let v = 0; v < VILLAGES[0].buildings.length; v++) {
   }
   if (completed) break;
 }
-check('Insel abgeschlossen -> naechste Insel', completed && player.village === 2, `Insel ${player.village}`);
+check('Insel abgeschlossen -> nächste Insel', completed && player.village === 2, `Insel ${player.village}`);
 
 /* --- Angriff & Raubzug ------------------------------------------------ */
 const targets = getTargets(player);
@@ -148,13 +148,13 @@ const openTarget = targets.find((t) => t.shields === 0 && t.buildings.some((b) =
 if (openTarget) {
   const before = openTarget.buildings.find((b) => b.level > 0)!;
   const result = attack(player, openTarget.id, before.index);
-  check('Ungeschuetztes Gebaeude wird beschaedigt', result.destroyed);
+  check('Ungeschütztes Gebäude wird beschädigt', result.destroyed);
   const after = db
     .prepare<[string, number, number], { level: number }>(
       'SELECT level FROM buildings WHERE user_id = ? AND village = ? AND idx = ?',
     )
     .get(openTarget.id, openTarget.villageId, before.index);
-  check('Gebaeudestufe gesunken', (after?.level ?? 99) === before.level - 1);
+  check('Gebäudestufe gesunken', (after?.level ?? 99) === before.level - 1);
 }
 
 const raidTarget = targets.find((t) => t.id !== shieldTarget.id) ?? targets[0];
@@ -176,20 +176,22 @@ saveUser(player);
 const chest = CHESTS[0];
 const costBefore = chestCost(chest, player.level);
 const chestResult = openChest(player, chest.id);
-check('Truhe geoeffnet', chestResult.ok && chestResult.drops.length === chest.cards);
+check('Truhe geöffnet', chestResult.ok && chestResult.drops.length === chest.cards);
 check('Truhenkosten abgezogen', chestResult.cost === costBefore, `${costBefore}`);
 
 const firstSet = CARD_SETS[0];
-let setFail = false;
-const incomplete = claimSet(player, firstSet.id);
-if (!incomplete.ok) setFail = true;
-check('Unvollstaendiges Set kann nicht eingeloest werden', setFail || incomplete.ok, incomplete.error ?? '');
-
-for (const card of cardsOfSet(firstSet.id)) grantCard(player, card);
-saveUser(player);
-const setResult = claimSet(player, firstSet.id);
-check('Vollstaendiges Set eingeloest', setResult.ok, `${setResult.coins} Taler`);
-check('Set kann nicht doppelt eingeloest werden', !claimSet(player, firstSet.id).ok);
+// Durch die vielen Drehungen kann das Set bereits vollständig sein – beide Fälle prüfen.
+const earlyClaim = claimSet(player, firstSet.id);
+if (earlyClaim.ok) {
+  check('Bereits vollständiges Set eingelöst', true, `${earlyClaim.coins} Taler`);
+} else {
+  check('Unvollständiges Set kann nicht eingelöst werden', !earlyClaim.ok, earlyClaim.error ?? '');
+  for (const card of cardsOfSet(firstSet.id)) grantCard(player, card);
+  saveUser(player);
+  const setResult = claimSet(player, firstSet.id);
+  check('Vollständiges Set eingelöst', setResult.ok, `${setResult.coins} Taler`);
+}
+check('Set kann nicht doppelt eingelöst werden', !claimSet(player, firstSet.id).ok);
 
 /* --- Quests & Tagesbelohnung ------------------------------------------ */
 const quests = questStates(player.id);
@@ -203,7 +205,7 @@ if (claimable) {
   check('Quest nicht doppelt abholbar', !claimQuest(player, claimable.id).ok);
 }
 
-check('Tagesbelohnung verfuegbar', dailyState(player.id).canClaim);
+check('Tagesbelohnung verfügbar', dailyState(player.id).canClaim);
 const daily = claimDaily(player);
 check('Tagesbelohnung abgeholt', daily.ok, `${daily.coins} Taler`);
 check('Tagesbelohnung nur einmal pro Tag', !claimDaily(player).ok);

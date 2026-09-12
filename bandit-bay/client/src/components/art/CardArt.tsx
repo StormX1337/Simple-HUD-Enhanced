@@ -17,7 +17,17 @@ export function CardArt({ art, color, size = 72, className = '' }: Props): JSX.E
           <stop offset="100%" stopColor={color} stopOpacity="0.95" />
         </radialGradient>
       </defs>
-      <rect x="2" y="2" width="60" height="60" rx="10" fill={`url(#bg-${art})`} />
+      <rect
+        x="2"
+        y="2"
+        width="60"
+        height="60"
+        rx="10"
+        fill={`url(#bg-${art})`}
+        stroke="#3b2412"
+        strokeWidth="2.5"
+      />
+      <g stroke="#3b2412" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round">
       {art === 'raccoon' && (
         <g>
           <circle cx="32" cy="34" r="16" fill="#b6c0d4" />
@@ -109,6 +119,7 @@ export function CardArt({ art, color, size = 72, className = '' }: Props): JSX.E
           <circle cx="32" cy="30" r="5" fill={color} />
         </g>
       )}
+      </g>
     </svg>
   );
 }

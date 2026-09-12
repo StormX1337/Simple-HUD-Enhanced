@@ -4,6 +4,7 @@ import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
+import { CoinIcon, SpinIcon, StarIcon } from '../components/art/HudIcons';
 
 export function QuestsScreen(): JSX.Element {
   const { quests, setQuests, applyState, pushToast, refresh, state } = useGame();
@@ -70,9 +71,16 @@ export function QuestsScreen(): JSX.Element {
                   style={{ width: `${percent}%` }}
                 />
               </div>
-              <div className="mt-1 text-[11px] opacity-70">
-                Belohnung: 🪙 {formatCoins(quest.reward.coins)} · 🎰 {quest.reward.spins} · ⭐{' '}
-                {quest.reward.xp} XP
+              <div className="mt-1 flex items-center gap-2 text-[11px] font-bold opacity-80">
+                <span className="flex items-center gap-1">
+                  <CoinIcon size={14} /> {formatCoins(quest.reward.coins)}
+                </span>
+                <span className="flex items-center gap-1">
+                  <SpinIcon size={14} /> {quest.reward.spins}
+                </span>
+                <span className="flex items-center gap-1">
+                  <StarIcon size={13} /> {quest.reward.xp} XP
+                </span>
               </div>
             </motion.div>
           );

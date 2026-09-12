@@ -41,7 +41,7 @@ function targetInfo(target: UserRow, attacker: UserRow): TargetInfo {
     shields: target.shields,
     buildings: rows.map((row) => ({
       index: row.idx,
-      name: village.buildings[row.idx]?.name ?? `Gebaeude ${row.idx + 1}`,
+      name: village.buildings[row.idx]?.name ?? `Gebäude ${row.idx + 1}`,
       kind: village.buildings[row.idx]?.kind ?? 'hut',
       level: row.level,
     })),
@@ -54,7 +54,7 @@ function targetInfo(target: UserRow, attacker: UserRow): TargetInfo {
   };
 }
 
-/** Zufaellige Ziele fuer Angriff/Raubzug. */
+/** Zufaellige Ziele für Angriff/Raubzug. */
 export function getTargets(user: UserRow, count = 4): TargetInfo[] {
   const rows = db
     .prepare<[string, number, number], UserRow>(
@@ -83,14 +83,14 @@ export function getTarget(user: UserRow, targetId: string): TargetInfo {
 /* ------------------------------------------------------------------ */
 
 export function attack(user: UserRow, targetId: string, spotIndex: number): AttackResult {
-  if (user.pending_attacks <= 0) throw new GameError('Du hast keinen Angriff uebrig');
+  if (user.pending_attacks <= 0) throw new GameError('Du hast keinen Angriff übrig');
   const target = getUserById(targetId);
   if (!target || target.id === user.id) throw new GameError('Ziel nicht gefunden', 404);
   refreshBot(target);
 
   const village = getVillage(target.village);
   if (spotIndex < 0 || spotIndex >= village.buildings.length)
-    throw new GameError('Ungueltiges Ziel-Gebaeude');
+    throw new GameError('Ungültiges Ziel-Gebäude');
 
   user.pending_attacks -= 1;
   user.total_attacks += 1;
@@ -128,10 +128,10 @@ export function attack(user: UserRow, targetId: string, spotIndex: number): Atta
         'UPDATE buildings SET level = ? WHERE user_id = ? AND village = ? AND idx = ?',
       ).run(level - 1, target.id, target.village, spotIndex);
       loot = Math.round(base * user.bet * (6 + randInt(0, 4)) + target.coins * BALANCE.attackLootShare * 0.2);
-      message = `Volltreffer! ${buildingName} von ${target.name} ist beschaedigt.`;
+      message = `Volltreffer! ${buildingName} von ${target.name} ist beschädigt.`;
     } else {
       loot = Math.round(base * user.bet * 2);
-      message = `Leeres Grundstueck erwischt – nur ein paar Taler bei ${target.name}.`;
+      message = `Leeres Grundstück erwischt – nur ein paar Taler bei ${target.name}.`;
     }
     logEvent({
       userId: target.id,
@@ -139,7 +139,7 @@ export function attack(user: UserRow, targetId: string, spotIndex: number): Atta
       otherId: user.id,
       otherName: user.name,
       amount: loot,
-      detail: destroyed ? `${buildingName} beschaedigt` : `Fehlschlag auf ${buildingName}`,
+      detail: destroyed ? `${buildingName} beschädigt` : `Fehlschlag auf ${buildingName}`,
     });
   }
 
@@ -185,8 +185,8 @@ function shuffle<T>(items: T[]): T[] {
 }
 
 export function raid(user: UserRow, targetId: string, spotIndex: number): RaidResult {
-  if (user.pending_raids <= 0) throw new GameError('Du hast keinen Raubzug uebrig');
-  if (spotIndex < 0 || spotIndex > 3) throw new GameError('Ungueltige Grabstelle');
+  if (user.pending_raids <= 0) throw new GameError('Du hast keinen Raubzug übrig');
+  if (spotIndex < 0 || spotIndex > 3) throw new GameError('Ungültige Grabstelle');
   const target = getUserById(targetId);
   if (!target || target.id === user.id) throw new GameError('Ziel nicht gefunden', 404);
   refreshBot(target);

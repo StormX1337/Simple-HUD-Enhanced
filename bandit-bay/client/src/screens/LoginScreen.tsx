@@ -5,6 +5,7 @@ import { ApiError } from '../lib/api';
 import { playSound } from '../lib/sound';
 import { Raccoon } from '../components/art/Raccoon';
 import { SymbolIcon } from '../components/art/SymbolIcon';
+import { Boat, Cloud, FarIsland, Palm, Sun } from '../components/art/Scenery';
 
 const AVATARS = ['🦝', '🦊', '🐻', '🐼', '🦉', '🐧', '🦦', '🐿️', '🦜', '🐙'];
 
@@ -32,16 +33,28 @@ export function LoginScreen(): JSX.Element {
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-gradient-to-b from-[#12233f] via-[#1b3358] to-[#2f6f9e] px-5 py-8">
+    <div className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-5 py-8">
+      {/* Kulisse */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#8fd6ff] via-[#d8f0ff] to-[#2f6f9e]" />
+      <Sun size={110} className="absolute -left-6 -top-6 animate-bob" />
+      <Cloud size={120} className="absolute left-[35%] top-6 animate-wave opacity-95" />
+      <Cloud size={90} className="absolute right-0 top-28 animate-bob opacity-90" />
+      <FarIsland size={120} className="absolute left-2 top-[38%] opacity-70" />
+      <Boat size={54} className="absolute right-6 top-[42%] animate-bob" />
+      <div className="absolute inset-x-[-10%] bottom-[-28%] h-[46%] rounded-[50%] bg-[#f0dca6]" />
+      <div className="absolute inset-x-[-4%] bottom-[-30%] h-[42%] rounded-[50%] bg-[#7cc47f]" />
+      <Palm size={70} className="absolute bottom-[2%] left-[6%]" />
+      <Palm size={54} className="absolute bottom-[1%] right-[8%]" />
+
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="w-full max-w-sm"
+        className="relative z-10 w-full max-w-sm"
       >
         <div className="mb-4 text-center">
           <Raccoon size={120} className="mx-auto animate-bob" cheer />
-          <h1 className="font-display text-4xl font-black text-bay-gold text-outline">Bandit Bay</h1>
-          <p className="text-sm text-white/80">
+          <h1 className="logo-title font-display text-5xl font-black">Bandit Bay</h1>
+          <p className="mt-1 text-sm font-bold text-[#14304f]">
             Bau deine Insel, dreh am Automaten und schnapp dir die Taler deiner Nachbarn.
           </p>
         </div>

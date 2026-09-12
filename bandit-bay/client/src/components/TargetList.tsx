@@ -1,5 +1,6 @@
 import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
+import { CoinIcon, ShieldIcon } from './art/HudIcons';
 import type { TargetInfo } from '../types';
 
 interface Props {
@@ -44,14 +45,19 @@ export function TargetList({ targets, mode, onPick, onReload, busy = false }: Pr
                 {target.villageName} · {intact}/{target.buildings.length} Gebäude
               </div>
               <div className="mt-0.5 flex items-center gap-2 text-[11px] font-bold">
-                <span className="text-[#7a5a1c]">
-                  {mode === 'raid'
-                    ? `≈ 🪙 ${formatCoins(target.estimatedLoot)}`
-                    : `🪙 ${formatCoins(target.estimatedLoot)} Beute`}
+                <span className="flex items-center gap-1 text-[#7a5a1c]">
+                  <CoinIcon size={14} />
+                  {mode === 'raid' ? '≈ ' : ''}
+                  {formatCoins(target.estimatedLoot)}
                 </span>
-                <span className={target.shields > 0 ? '' : 'opacity-40'}>
-                  {'🛡️'.repeat(Math.max(1, target.shields)).slice(0, target.shields * 2 || 2)}
-                  {target.shields === 0 && 'ungeschützt'}
+                <span className="flex items-center gap-0.5">
+                  {target.shields > 0 ? (
+                    Array.from({ length: target.shields }).map((_, index) => (
+                      <ShieldIcon key={index} size={14} />
+                    ))
+                  ) : (
+                    <span className="opacity-50">ungeschützt</span>
+                  )}
                 </span>
               </div>
             </div>
