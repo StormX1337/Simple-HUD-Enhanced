@@ -100,6 +100,23 @@ export interface PublicUser {
   coins: number;
 }
 
+export interface ActivePetState {
+  id: string;
+  name: string;
+  art: 'fuchs' | 'baer' | 'papagei';
+  effect: 'raid' | 'attack' | 'coins';
+  bonus: number;
+  secondsLeft: number;
+}
+
+export interface EventState {
+  name: string;
+  multiplier: number;
+  active: boolean;
+  secondsLeft: number;
+  secondsUntilNext: number;
+}
+
 export interface PlayerState {
   id: string;
   name: string;
@@ -121,6 +138,8 @@ export interface PlayerState {
   pendingAttacks: number;
   pendingRaids: number;
   stats: { attacks: number; raids: number; timesRaided: number; spins: number };
+  event: EventState;
+  activePet: ActivePetState | null;
   buildings: BuildingState[];
   cards: Record<string, number>;
   claimedSets: string[];
@@ -212,7 +231,8 @@ export type HistoryType =
   | 'set'
   | 'upgrade'
   | 'blocked'
-  | 'spin';
+  | 'spin'
+  | 'pet';
 
 export interface HistoryEntry {
   id: number;

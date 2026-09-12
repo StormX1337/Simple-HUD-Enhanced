@@ -22,7 +22,7 @@ export function TopBar({ onOpenBonus }: Props): JSX.Element | null {
     <header className="relative z-30 shrink-0 bg-gradient-to-b from-[#0b1830] via-[#14294a] to-[#1b3358] px-2 pb-1.5 pt-[max(0.4rem,env(safe-area-inset-top))] shadow-[0_4px_14px_rgba(0,0,0,0.5)]">
       {/* Währungsleiste */}
       <div className="flex items-center gap-1.5">
-        <div className="hud-pill flex-1">
+        <div className="hud-pill flex-1" data-coin-pill>
           <CoinIcon size={26} className="-ml-1.5 shrink-0 drop-shadow" />
           <span className="flex-1 truncate text-center" title={formatFull(state.coins)}>
             {formatCoins(state.coins)}

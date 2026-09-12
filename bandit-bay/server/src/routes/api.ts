@@ -10,6 +10,8 @@ import {
   SYMBOLS,
   VILLAGES,
   chestCost,
+  eventStatus,
+  PET_DURATION_HOURS,
   cardsOfSet,
   maxBetForLevel,
 } from '../content/content.js';
@@ -25,6 +27,7 @@ import { GameError, setBet, spin } from '../game/slot.js';
 import { upgradeBuilding } from '../game/village.js';
 import { attack, getTargets, raid } from '../game/battle.js';
 import { claimSet, grantRandomCard, openChest } from '../game/collection.js';
+import { feedPet, petStates } from '../game/pets.js';
 import {
   claimDaily,
   claimQuest,
@@ -79,6 +82,8 @@ api.get('/config', (_req, res) => {
     chests: CHESTS,
     quests: QUESTS,
     dailyLadder: DAILY_LADDER,
+    event: eventStatus(),
+    petDurationHours: PET_DURATION_HOURS,
     balance: {
       maxBuildingLevel: BALANCE.maxBuildingLevel,
       maxShields: BALANCE.maxShields,
@@ -266,6 +271,21 @@ api.post('/daily/claim', auth, (req: AuthedRequest, res, next) => {
     for (let i = 0; i < result.cards; i++) drops.push(grantRandomCard(user));
     saveUser(user);
     res.json({ ...result, drops, daily: dailyState(user.id), state: buildState(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+api.get('/pets', auth, (req: AuthedRequest, res) => {
+  const user = me(req);
+  res.json({ pets: petStates(user), state: buildState(user) });
+});
+
+api.post('/pets/feed', auth, (req: AuthedRequest, res, next) => {
+  try {
+    const user = me(req);
+    const result = feedPet(user, String(req.body?.petId ?? ''));
+    res.json({ ...result, pets: petStates(user), state: buildState(user) });
   } catch (error) {
     next(error);
   }

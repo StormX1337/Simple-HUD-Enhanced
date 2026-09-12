@@ -20,6 +20,7 @@ import { upgradeBuilding } from '../game/village.js';
 import { attack, getTargets, raid } from '../game/battle.js';
 import { claimSet, grantCard, openChest } from '../game/collection.js';
 import { claimDaily, claimQuest, dailyState, questStates } from '../game/progress.js';
+import { feedPet, petBonus, petStates } from '../game/pets.js';
 import type { SpinOutcomeType } from '../types.js';
 
 let failures = 0;
@@ -209,6 +210,39 @@ check('Tagesbelohnung verfügbar', dailyState(player.id).canClaim);
 const daily = claimDaily(player);
 check('Tagesbelohnung abgeholt', daily.ok, `${daily.coins} Taler`);
 check('Tagesbelohnung nur einmal pro Tag', !claimDaily(player).ok);
+
+/* --- Begleiter -------------------------------------------------------- */
+const pets = petStates(player);
+check('Begleiter vorhanden', pets.length === 3, `${pets.length}`);
+const fina = pets.find((pet) => pet.id === 'fina');
+check('Fina ist freigeschaltet', !!fina?.unlocked);
+check('Kein Begleiter zu Beginn aktiv', pets.every((pet) => !pet.active));
+
+player.coins = 0;
+saveUser(player);
+let feedFailed = false;
+try {
+  feedPet(player, 'fina');
+} catch {
+  feedFailed = true;
+}
+check('Füttern ohne Taler wird abgelehnt', feedFailed);
+
+player.coins = 5_000_000;
+saveUser(player);
+const coinsBeforeFeed = player.coins;
+const feed = feedPet(player, 'fina');
+check('Fina gefüttert', feed.cost > 0 && player.coins === coinsBeforeFeed - feed.cost, `${feed.cost} Taler`);
+check('Raubzug-Bonus aktiv', petBonus(player.id, 'raid') > 1, `${petBonus(player.id, 'raid')}`);
+check('Angriffs-Bonus inaktiv', petBonus(player.id, 'attack') === 1);
+check('Begleiter im Zustand sichtbar', buildState(player).activePet?.id === 'fina');
+
+const bodoUnlocked = petStates(player).find((pet) => pet.id === 'bodo')?.unlocked;
+if (bodoUnlocked) {
+  feedPet(player, 'bodo');
+  const after = petStates(player).filter((pet) => pet.active);
+  check('Nur ein Begleiter gleichzeitig aktiv', after.length === 1 && after[0].id === 'bodo');
+}
 
 /* --- Ergebnis --------------------------------------------------------- */
 const finalState = buildState(player);

@@ -23,6 +23,7 @@ export default function App(): JSX.Element {
   const [attackOpen, setAttackOpen] = useState(false);
   const [raidOpen, setRaidOpen] = useState(false);
   const [revealed, setRevealed] = useState<{ card: CardDef; isNew: boolean } | null>(null);
+  const [rewardsTab, setRewardsTab] = useState<'daily' | 'pets'>('daily');
 
   if (booting) {
     return (
@@ -48,7 +49,12 @@ export default function App(): JSX.Element {
 
   return (
     <div className="mx-auto flex h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden bg-[#12233f]">
-      <TopBar onOpenBonus={() => setScreen('rewards')} />
+      <TopBar
+        onOpenBonus={() => {
+          setRewardsTab('daily');
+          setScreen('rewards');
+        }}
+      />
 
       <main className="relative flex flex-1 flex-col overflow-hidden pb-[74px]">
         {screen === 'village' && (
@@ -62,7 +68,20 @@ export default function App(): JSX.Element {
                   label: 'Bonus',
                   badge: rewardBadge,
                   highlight: rewardBadge > 0,
-                  onClick: () => setScreen('rewards'),
+                  onClick: () => {
+                    setRewardsTab('daily');
+                    setScreen('rewards');
+                  },
+                },
+                {
+                  id: 'pets',
+                  icon: '🦊',
+                  label: 'Tier',
+                  highlight: !!state.activePet,
+                  onClick: () => {
+                    setRewardsTab('pets');
+                    setScreen('rewards');
+                  },
                 },
                 {
                   id: 'quests',
@@ -110,7 +129,7 @@ export default function App(): JSX.Element {
           <FriendsScreen onAttack={() => setAttackOpen(true)} onRaid={() => setRaidOpen(true)} />
         )}
         {screen === 'quests' && <QuestsScreen />}
-        {screen === 'rewards' && <RewardsScreen />}
+        {screen === 'rewards' && <RewardsScreen tab={rewardsTab} onTab={setRewardsTab} />}
       </main>
 
       <BottomNav

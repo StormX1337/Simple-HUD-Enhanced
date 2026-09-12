@@ -1,6 +1,6 @@
 import { db, type UserRow } from '../db.js';
 import type { AttackResult, RaidResult, RaidSpot } from '../types.js';
-import { BALANCE, coinValue, getVillage } from '../content/content.js';
+import { BALANCE, coinValue, eventMultiplier, getVillage } from '../content/content.js';
 import {
   addXp,
   buildState,
@@ -12,6 +12,7 @@ import {
   saveUser,
 } from './core.js';
 import { trackQuest } from './progress.js';
+import { petBonus } from './pets.js';
 import { GameError } from './slot.js';
 
 export interface TargetInfo {
@@ -95,7 +96,7 @@ export function attack(user: UserRow, targetId: string, spotIndex: number): Atta
   user.pending_attacks -= 1;
   user.total_attacks += 1;
 
-  const base = coinValue(user.level, user.village);
+  const base = coinValue(user.level, user.village) * eventMultiplier() * petBonus(user.id, 'attack');
   const buildingName = village.buildings[spotIndex].name;
   let blocked = false;
   let destroyed = false;
@@ -194,10 +195,11 @@ export function raid(user: UserRow, targetId: string, spotIndex: number): RaidRe
   user.pending_raids -= 1;
   user.total_raids += 1;
 
-  const base = coinValue(user.level, user.village);
+  const raidBonus = petBonus(user.id, 'raid');
+  const base = coinValue(user.level, user.village) * eventMultiplier() * raidBonus;
   const minLoot = Math.round(base * user.bet * 5);
-  const jackpot = Math.max(minLoot * 3, Math.round(target.coins * BALANCE.raidJackpotShare));
-  const normal = Math.max(minLoot, Math.round(target.coins * BALANCE.raidLootShare));
+  const jackpot = Math.max(minLoot * 3, Math.round(target.coins * BALANCE.raidJackpotShare * raidBonus));
+  const normal = Math.max(minLoot, Math.round(target.coins * BALANCE.raidLootShare * raidBonus));
 
   const kinds: RaidSpot['kind'][] = shuffle(['jackpot', 'loot', 'loot', 'empty']);
   const spots: RaidSpot[] = kinds.map((kind, index) => ({

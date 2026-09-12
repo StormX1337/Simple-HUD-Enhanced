@@ -7,6 +7,7 @@ import type {
   GameConfig,
   HistoryEntry,
   LeaderboardEntry,
+  PetState,
   PlayerState,
   QuestState,
   RaidResult,
@@ -85,6 +86,12 @@ export const api = {
   claimQuest: (questId: string) => post<ClaimResponse>('/quests/claim', { questId }),
   daily: () => request<{ daily: DailyState }>('/daily'),
   claimDaily: () => post<ClaimResponse>('/daily/claim'),
+  pets: () => request<{ pets: PetState[]; state: PlayerState }>('/pets'),
+  feedPet: (petId: string) =>
+    post<{ petId: string; cost: number; secondsLeft: number; pets: PetState[]; state: PlayerState }>(
+      '/pets/feed',
+      { petId },
+    ),
   leaderboard: () => request<{ entries: LeaderboardEntry[] }>('/leaderboard'),
   history: () => request<{ entries: HistoryEntry[] }>('/history'),
 };

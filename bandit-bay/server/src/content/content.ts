@@ -117,6 +117,138 @@ export const SPIN_TABLE: PayoutEntry[] = [
 export const NO_MATCH_WEIGHT = 20;
 
 /* ------------------------------------------------------------------ */
+/*  Event: Talerregen                                                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Mehrmals täglich läuft der "Talerregen": alle Taler-Gewinne aus dem
+ * Automaten sowie Beute aus Angriff und Raubzug zählen doppelt.
+ * Die Fenster sind feste UTC-Zeiten, damit Server und Client dasselbe sehen.
+ */
+export const EVENT = {
+  name: 'Talerregen',
+  multiplier: 2,
+  durationMinutes: 60,
+  startHoursUtc: [6, 12, 18, 22],
+} as const;
+
+export interface EventStatus {
+  name: string;
+  multiplier: number;
+  active: boolean;
+  secondsLeft: number;
+  secondsUntilNext: number;
+}
+
+export function eventStatus(now: number = Date.now()): EventStatus {
+  const date = new Date(now);
+  const dayStart = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  const windows: { start: number; end: number }[] = [];
+  for (const offsetDay of [-1, 0, 1]) {
+    for (const hour of EVENT.startHoursUtc) {
+      const start = dayStart + offsetDay * 86_400_000 + hour * 3_600_000;
+      windows.push({ start, end: start + EVENT.durationMinutes * 60_000 });
+    }
+  }
+  windows.sort((a, b) => a.start - b.start);
+
+  const running = windows.find((window) => now >= window.start && now < window.end);
+  if (running) {
+    return {
+      name: EVENT.name,
+      multiplier: EVENT.multiplier,
+      active: true,
+      secondsLeft: Math.ceil((running.end - now) / 1000),
+      secondsUntilNext: 0,
+    };
+  }
+  const next = windows.find((window) => window.start > now);
+  return {
+    name: EVENT.name,
+    multiplier: EVENT.multiplier,
+    active: false,
+    secondsLeft: 0,
+    secondsUntilNext: next ? Math.ceil((next.start - now) / 1000) : 0,
+  };
+}
+
+/** Aktueller Multiplikator auf Taler-Gewinne. */
+export function eventMultiplier(now: number = Date.now()): number {
+  return eventStatus(now).active ? EVENT.multiplier : 1;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Begleiter                                                          */
+/* ------------------------------------------------------------------ */
+
+export type PetEffect = 'raid' | 'attack' | 'coins';
+
+export interface PetDef {
+  id: string;
+  name: string;
+  animal: string;
+  art: 'fuchs' | 'baer' | 'papagei';
+  description: string;
+  effect: PetEffect;
+  /** Bonus als Faktor, z. B. 0.4 = +40 % */
+  bonus: number;
+  unlockVillage: number;
+  baseCost: number;
+  color: string;
+}
+
+/** Ein Begleiter bleibt nach dem Füttern so lange aktiv. */
+export const PET_DURATION_HOURS = 4;
+
+export const PETS: PetDef[] = [
+  {
+    id: 'fina',
+    name: 'Fina',
+    animal: 'Füchsin',
+    art: 'fuchs',
+    description: 'Schnüffelt die besten Verstecke aus: mehr Beute bei Raubzügen.',
+    effect: 'raid',
+    bonus: 0.4,
+    unlockVillage: 1,
+    baseCost: 12_000,
+    color: '#ff9a3c',
+  },
+  {
+    id: 'bodo',
+    name: 'Bodo',
+    animal: 'Bär',
+    art: 'baer',
+    description: 'Haut kräftig zu: mehr Beute bei Angriffen.',
+    effect: 'attack',
+    bonus: 0.5,
+    unlockVillage: 2,
+    baseCost: 60_000,
+    color: '#b5834a',
+  },
+  {
+    id: 'pia',
+    name: 'Pia',
+    animal: 'Papagei',
+    art: 'papagei',
+    description: 'Kreischt bei jedem Treffer: mehr Taler aus dem Automaten.',
+    effect: 'coins',
+    bonus: 0.25,
+    unlockVillage: 3,
+    baseCost: 160_000,
+    color: '#4fc3a1',
+  },
+];
+
+export function petById(id: string): PetDef | undefined {
+  return PETS.find((pet) => pet.id === id);
+}
+
+/** Futterkosten steigen mit dem Spielerlevel. */
+export function petCost(pet: PetDef, level: number): number {
+  return Math.round((pet.baseCost * (1 + (level - 1) * 0.2)) / 100) * 100;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Inseln (Dörfer)                                                   */
 /* ------------------------------------------------------------------ */
 

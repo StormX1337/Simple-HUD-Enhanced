@@ -50,6 +50,13 @@ export interface QuestRow {
   claimed: number;
 }
 
+export interface PetRow {
+  user_id: string;
+  pet_id: string;
+  active_until: number;
+  feeds: number;
+}
+
 export interface EventRow {
   id: number;
   user_id: string;
@@ -132,6 +139,14 @@ export function migrate(): void {
       user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
       streak INTEGER NOT NULL DEFAULT 0,
       last_day TEXT NOT NULL DEFAULT ''
+    );
+
+    CREATE TABLE IF NOT EXISTS pets (
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      pet_id TEXT NOT NULL,
+      active_until INTEGER NOT NULL DEFAULT 0,
+      feeds INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (user_id, pet_id)
     );
 
     CREATE TABLE IF NOT EXISTS events (

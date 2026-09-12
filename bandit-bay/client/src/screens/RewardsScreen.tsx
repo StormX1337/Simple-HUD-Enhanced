@@ -5,11 +5,17 @@ import { ApiError, api } from '../lib/api';
 import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { CardArt } from '../components/art/CardArt';
+import { PetsScreen } from './PetsScreen';
 import { Raccoon } from '../components/art/Raccoon';
 import { CardIcon, CoinIcon, ShieldIcon, SpinIcon } from '../components/art/HudIcons';
 import type { CardDrop } from '../types';
 
-export function RewardsScreen(): JSX.Element {
+interface Props {
+  tab: 'daily' | 'pets';
+  onTab: (tab: 'daily' | 'pets') => void;
+}
+
+export function RewardsScreen({ tab, onTab }: Props): JSX.Element {
   const { daily, setDaily, applyState, pushToast, refresh, state } = useGame();
   const [drops, setDrops] = useState<CardDrop[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -39,6 +45,36 @@ export function RewardsScreen(): JSX.Element {
 
   return (
     <div className="screen-scroll">
+      <div className="mb-3 flex gap-1.5">
+        {(
+          [
+            ['daily', 'Tagesbonus'],
+            ['pets', 'Begleiter'],
+          ] as ['daily' | 'pets', string][]
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            data-testid={`rewards-tab-${id}`}
+            onClick={() => {
+              playSound('click', 0.3);
+              onTab(id);
+            }}
+            className={`flex-1 rounded-2xl border-2 px-2 py-1.5 font-display text-sm font-bold ${
+              tab === id
+                ? 'border-[#7a4a05] bg-gradient-to-b from-[#ffe9a0] to-[#e0a21a] text-[#4a2f05]'
+                : 'border-white/15 bg-white/10 text-white'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'pets' && <PetsScreen />}
+
+      {tab === 'daily' && (
+        <>
       <div className="panel-dark mb-3 flex items-center gap-3 p-3">
         <Raccoon size={64} className="animate-bob" cheer />
         <div>
@@ -115,6 +151,9 @@ export function RewardsScreen(): JSX.Element {
           </div>
         )}
       </div>
+
+        </>
+      )}
 
       {drops && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-5">

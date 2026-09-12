@@ -18,7 +18,7 @@ interface Props {
 export function SideRail({ items, side }: Props): JSX.Element {
   return (
     <div
-      className={`pointer-events-none absolute top-16 z-20 flex flex-col gap-3.5 ${
+      className={`pointer-events-none absolute top-[118px] z-20 flex flex-col gap-3.5 ${
         side === 'left' ? 'left-1' : 'right-1'
       }`}
     >

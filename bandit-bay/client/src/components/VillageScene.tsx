@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { api, ApiError } from '../lib/api';
-import { formatCoins, formatFull } from '../lib/format';
+import { formatCoins, formatDuration, formatFull } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { useShortScreen } from '../lib/useMediaQuery';
 import { BuildingArt } from './art/BuildingArt';
 import { Raccoon } from './art/Raccoon';
+import { PetArt } from './art/PetArt';
 import { CoinIcon } from './art/HudIcons';
 import { Boat, Bush, Cloud, FarIsland, Palm, Rock, Sun } from './art/Scenery';
+import { EventBanner } from './EventBanner';
 import type { VillageDef } from '../types';
 
 /** Feste Bauplätze auf der Insel (Prozentwerte). */
@@ -103,7 +105,7 @@ export function VillageScene(): JSX.Element | null {
       <Bush size={short ? 22 : 28} className="absolute bottom-[26%] left-[4%]" />
 
       {/* Inselschild */}
-      <div className="absolute inset-x-0 top-0 z-10 px-2 pt-1.5">
+      <div className="absolute inset-x-0 top-0 z-10 space-y-1.5 px-2 pt-1.5">
         <div className="wood-sign flex items-center gap-2 px-3 py-1.5">
           <div className="min-w-0 flex-1">
             <div className="truncate font-display text-sm font-black leading-tight text-[#ffe9a0] text-outline">
@@ -123,6 +125,7 @@ export function VillageScene(): JSX.Element | null {
             </div>
           </div>
         </div>
+        <EventBanner />
       </div>
 
       {/* Gebäude */}
@@ -172,8 +175,16 @@ export function VillageScene(): JSX.Element | null {
         );
       })}
 
-      <div className="pointer-events-none absolute bottom-[4%] left-0 z-10">
-        <Raccoon size={short ? 60 : 86} className="animate-bob" />
+      <div className="pointer-events-none absolute bottom-[2%] left-[1%] z-10 flex items-end">
+        {state.activePet && (
+          <div className="relative flex flex-col items-center">
+            <span className="mb-0.5 whitespace-nowrap rounded-full border-2 border-black/40 bg-black/55 px-1.5 text-[9px] font-black text-[#ffd95e]">
+              {state.activePet.name} {formatDuration(state.activePet.secondsLeft)}
+            </span>
+            <PetArt art={state.activePet.art} size={short ? 40 : 52} happy className="animate-bob" />
+          </div>
+        )}
+        <Raccoon size={short ? 58 : 80} className="-ml-3 animate-bob" />
       </div>
 
       {/* Ausbau-Panel */}

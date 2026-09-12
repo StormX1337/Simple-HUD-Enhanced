@@ -112,6 +112,22 @@ export function FarIsland({ size = 90, className = '', style }: Props): JSX.Elem
   );
 }
 
+/** Muschel als Stranddeko. */
+export function Shell({ size = 26, className = '', style }: Props): JSX.Element {
+  return (
+    <svg viewBox="0 0 40 36" width={size} height={size * 0.9} className={className} style={style} aria-hidden="true">
+      <path
+        d="M20 4c9 0 16 7 16 16 0 6-3 12-6 14H10c-3-2-6-8-6-14C4 11 11 4 20 4z"
+        fill="#ffd6e4"
+        stroke="#b9698a"
+        strokeWidth="2.4"
+        strokeLinejoin="round"
+      />
+      <path d="M20 6v28M12 9l-2 24M28 9l2 24" stroke="#e8a6c0" strokeWidth="2.2" />
+    </svg>
+  );
+}
+
 /** Sandhügel für den Raubzug (unangetastet / ausgegraben). */
 export function DigPile({ size = 90, className = '', style, dug = false }: Props & { dug?: boolean }): JSX.Element {
   return (
@@ -133,9 +149,11 @@ export function DigPile({ size = 90, className = '', style, dug = false }: Props
             strokeLinejoin="round"
           />
           <path d="M28 46c4-13 12-20 22-21-8 5-14 12-16 21z" fill="#f2dcb0" />
-          <g transform="rotate(-24 62 30)">
-            <rect x="60" y="6" width="5" height="26" rx="2.5" fill="#8a5c2c" stroke="#3b2412" strokeWidth="2.2" />
-            <path d="M55 30h15l-2 12H57z" fill="#b9c2cc" stroke="#4c545e" strokeWidth="2.4" strokeLinejoin="round" />
+          <g transform="rotate(-20 66 26)">
+            <rect x="63" y="0" width="7" height="30" rx="3.5" fill="#8a5c2c" stroke="#3b2412" strokeWidth="2.6" />
+            <rect x="59" y="-4" width="15" height="7" rx="3.5" fill="#8a5c2c" stroke="#3b2412" strokeWidth="2.4" />
+            <path d="M56 28h21l-3 16H59z" fill="#c2cad4" stroke="#4c545e" strokeWidth="2.6" strokeLinejoin="round" />
+            <path d="M60 31h13" stroke="#e4e9ef" strokeWidth="2.4" />
           </g>
         </g>
       )}

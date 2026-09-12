@@ -77,6 +77,17 @@ serverseitig berechnet und validiert. Der Client sendet nur Absichten („dreh",
 Dazu: Tagesquests, 7-Tage-Belohnungsleiter, Rangliste, Ereignisverlauf, Einsatzstufen
 (×1 bis ×1000, mit Level freigeschaltet) und automatisches Drehen.
 
+**Talerregen** – mehrmals täglich (6, 12, 18 und 22 Uhr UTC, jeweils 60 Minuten) zählen alle
+Taler doppelt. Der Countdown läuft im Banner über der Insel, gerechnet wird serverseitig.
+
+**Begleiter** – drei Tiere helfen dir, sobald du sie fütterst (4 Stunden aktiv, immer nur eines):
+
+| Begleiter | Ab Insel | Wirkung |
+| --- | --- | --- |
+| Fina (Füchsin) | 1 | +40 % Beute bei Raubzügen |
+| Bodo (Bär) | 2 | +50 % Beute bei Angriffen |
+| Pia (Papagei) | 3 | +25 % Taler am Automaten |
+
 ---
 
 ## Balance in Kürze
@@ -91,6 +102,8 @@ Alle Werte stehen an einer Stelle: `server/src/content/content.ts`.
 * **Drehungen**: Start 75, Kapazität 75 + 3 × Level, +1 alle 3 Minuten.
 * **Level**: `xpForNextLevel = 260 × level^1.35`, Level-Up gibt Taler, Drehungen und
   alle 5 Level ein Schild.
+* **Begleiter**: Futter kostet 12.000 / 60.000 / 160.000 Taler (+20 % pro Spielerlevel),
+  Wirkdauer 4 Stunden. Boni werden serverseitig auf Auszahlung und Beute gerechnet.
 
 ---
 
@@ -100,7 +113,7 @@ Alle Werte stehen an einer Stelle: `server/src/content/content.ts`.
 bandit-bay/
 ├─ server/
 │  ├─ src/content/content.ts   Spielinhalte + Balance (Inseln, Karten, Quests, Gewinntabelle)
-│  ├─ src/game/                core (Nutzer/XP/Spins), slot, village, battle, collection, progress
+│  ├─ src/game/                core (Nutzer/XP/Spins), slot, village, battle, collection, progress, pets
 │  ├─ src/routes/api.ts        REST-Endpunkte
 │  ├─ src/db.ts                SQLite-Schema und Migration
 │  ├─ src/seed.ts              Mitspieler-Bots
@@ -108,7 +121,7 @@ bandit-bay/
 ├─ client/
 │  ├─ src/components/art/      eigene SVGs (Symbole, Gebäude, Karten, Maskottchen)
 │  ├─ src/components/          TopBar, VillageScene, SlotMachine, Overlays, Navigation
-│  ├─ src/screens/             Login, Karten, Freunde, Quests, Belohnungen
+│  ├─ src/screens/             Login, Karten, Freunde, Quests, Belohnungen, Begleiter
 │  ├─ src/game/GameContext.tsx zentraler Spielzustand
 │  └─ public/audio/            Soundeffekte (austauschbar)
 └─ tools/generate-audio.py     erzeugt die Platzhalter-Sounds
@@ -132,12 +145,15 @@ bandit-bay/
 | `POST` | `/api/collection/chest`, `/api/collection/set` | Truhe öffnen, Set einlösen |
 | `GET/POST` | `/api/quests`, `/api/quests/claim` | Tagesquests |
 | `GET/POST` | `/api/daily`, `/api/daily/claim` | Tagesbelohnung |
+| `GET` | `/api/pets` | Begleiter mit Status, Kosten und Restlaufzeit |
+| `POST` | `/api/pets/feed` | Begleiter füttern (Taler und Freischaltung werden geprüft) |
 | `GET` | `/api/leaderboard`, `/api/history` | Rangliste, Ereignisse |
 
 Authentifizierung: `Authorization: Bearer <token>`; der Token liegt im `localStorage`.
 
 Gespeichert werden: Nutzer, Taler, Drehungen, Schilde, Level, Erfahrung, Inseln, Gebäude und
-deren Stufen, Karten, Karten-Sets, Quests, Tagesbelohnungen sowie Angriffs- und Raid-Historie.
+deren Stufen, Karten, Karten-Sets, Quests, Tagesbelohnungen, Begleiter sowie Angriffs- und
+Raid-Historie.
 
 ---
 
@@ -147,7 +163,8 @@ deren Stufen, Karten, Karten-Sets, Quests, Tagesbelohnungen sowie Angriffs- und 
   (`spin.wav`, `coin.wav`, `attack.wav`, `raid.wav`, `upgrade.wav`, `reward.wav`, `levelup.wav`, …).
 * **Grafiken**: Die SVG-Komponenten unter `client/src/components/art/` austauschen –
   `SymbolIcon` (Walzensymbole), `BuildingArt` (Gebäude nach Typ und Stufe),
-  `CardArt` (Kartenmotive), `Raccoon` (Maskottchen).
+  `CardArt` (Kartenmotive), `PetArt` (Begleiter), `Scenery` (Palmen, Wolken, Sandhügel …),
+  `HudIcons` (Taler, Drehungen, Schild, Karten) und `Raccoon` (Maskottchen).
 * **Inhalte**: Inseln, Gebäude, Karten, Quests und Belohnungen in
   `server/src/content/content.ts` anpassen – Client und Datenbank folgen automatisch.
 

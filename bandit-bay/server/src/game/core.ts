@@ -1,9 +1,11 @@
 import crypto from 'node:crypto';
 import { db, now, type UserRow, type BuildingRow, type CardRow } from '../db.js';
-import type { BuildingState, PlayerState, PublicUser } from '../types.js';
+import type { ActivePetState, BuildingState, PlayerState, PublicUser } from '../types.js';
 import {
   BALANCE,
+  eventStatus,
   MAX_VILLAGE,
+  PETS,
   PLAYER_AVATARS,
   getVillage,
   maxBetForLevel,
@@ -278,6 +280,8 @@ export function buildState(user: UserRow): PlayerState {
       timesRaided: user.times_raided,
       spins: user.total_spins,
     },
+    event: eventStatus(),
+    activePet: activePetState(user.id),
     buildings: buildingStates(user.id, user.village),
     cards: getCards(user.id),
     claimedSets: getClaimedSets(user.id),
@@ -294,6 +298,27 @@ export function toPublicUser(user: UserRow): PublicUser {
     isBot: !!user.is_bot,
     shields: user.shields,
     coins: user.coins,
+  };
+}
+
+/** Aktiver Begleiter für die Anzeige im Client. */
+function activePetState(userId: string): ActivePetState | null {
+  const ts = now();
+  const row = db
+    .prepare<[string, number], { pet_id: string; active_until: number }>(
+      'SELECT pet_id, active_until FROM pets WHERE user_id = ? AND active_until > ? LIMIT 1',
+    )
+    .get(userId, ts);
+  if (!row) return null;
+  const pet = PETS.find((entry) => entry.id === row.pet_id);
+  if (!pet) return null;
+  return {
+    id: pet.id,
+    name: pet.name,
+    art: pet.art,
+    effect: pet.effect,
+    bonus: pet.bonus,
+    secondsLeft: Math.ceil((row.active_until - ts) / 1000),
   };
 }
 

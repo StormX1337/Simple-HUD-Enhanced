@@ -6,7 +6,8 @@ import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { useShortScreen } from '../lib/useMediaQuery';
 import { SymbolIcon } from './art/SymbolIcon';
-import { SpinIcon } from './art/HudIcons';
+import { CoinIcon, SpinIcon } from './art/HudIcons';
+import { BigWin } from './BigWin';
 import type { CardDef, SpinResult, SymbolId } from '../types';
 
 const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
@@ -26,8 +27,37 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
   const [spinning, setSpinning] = useState<boolean[]>([false, false, false]);
   const [result, setResult] = useState<SpinResult | null>(null);
   const [auto, setAuto] = useState(false);
+  const [bigWin, setBigWin] = useState<number | null>(null);
+  const [flies, setFlies] = useState<{ id: number; x: number; y: number; dx: number; dy: number }[]>([]);
+  const reelBoxRef = useRef<HTMLDivElement>(null);
   const busy = useRef(false);
   const mounted = useRef(true);
+
+  /** Münzen vom Automaten zum Taler-Zähler fliegen lassen. */
+  const launchCoins = useCallback((count: number) => {
+    const pill = document.querySelector('[data-coin-pill]');
+    const box = reelBoxRef.current;
+    if (!pill || !box) return;
+    const from = box.getBoundingClientRect();
+    const to = pill.getBoundingClientRect();
+    const startX = from.left + from.width / 2 - 13;
+    const startY = from.top + from.height / 2 - 13;
+    const dx = to.left + to.width / 2 - 13 - startX;
+    const dy = to.top + to.height / 2 - 13 - startY;
+    const stamp = Date.now();
+    setFlies(
+      Array.from({ length: count }, (_, index) => ({
+        id: stamp + index,
+        x: startX + (index - count / 2) * 14,
+        y: startY,
+        dx,
+        dy,
+      })),
+    );
+    window.setTimeout(() => {
+      if (mounted.current) setFlies([]);
+    }, 1500);
+  }, []);
 
   useEffect(() => {
     mounted.current = true;
@@ -77,6 +107,11 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
       switch (data.outcome) {
         case 'coins':
           playSound(data.matches === 3 ? 'jackpot' : 'coin', 0.6);
+          launchCoins(data.matches === 3 ? 10 : 5);
+          if (data.matches === 3) {
+            setAuto(false);
+            setBigWin(data.amount);
+          }
           break;
         case 'spins':
           playSound('spins', 0.6);
@@ -124,7 +159,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
     } finally {
       busy.current = false;
     }
-  }, [state, applyState, pushToast, onAttack, onRaid, onCard, refresh]);
+  }, [state, applyState, pushToast, onAttack, onRaid, onCard, refresh, launchCoins]);
 
   useEffect(() => {
     if (!auto || !state) return undefined;
@@ -156,7 +191,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
   };
 
   const anySpinning = spinning.some(Boolean);
-  const bigWin = !!result && result.matches === 3;
+  const tripleHit = !!result && result.matches === 3;
   const spinPercent = Math.min(100, (state.spins / state.spinCapacity) * 100);
 
   return (
@@ -187,7 +222,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
 
         {/* Walzenkasten */}
         <div className="relative rounded-[18px] border-[3px] border-[#f8c73c] bg-[#1b0f05] p-1.5 shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)]">
-          <div className="flex items-stretch gap-1.5">
+          <div ref={reelBoxRef} className="flex items-stretch gap-1.5">
             {reels.map((symbol, index) => (
               <div
                 key={index}
@@ -219,7 +254,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
                     <SymbolIcon
                       id={symbol}
                       size={symbolSize}
-                      className={bigWin ? 'animate-pop' : ''}
+                      className={tripleHit ? 'animate-pop' : ''}
                     />
                   </div>
                 )}
@@ -230,7 +265,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
           </div>
 
           {/* Gewinnlinie */}
-          {bigWin && (
+          {tripleHit && (
             <motion.span
               initial={{ opacity: 0, scaleX: 0.4 }}
               animate={{ opacity: 1, scaleX: 1 }}
@@ -297,6 +332,30 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
           {state.spins} / {state.spinCapacity}
         </span>
       </div>
+
+      {/* Münzflug */}
+      <div className="pointer-events-none fixed inset-0 z-[55]">
+        {flies.map((fly, index) => (
+          <motion.div
+            key={fly.id}
+            className="absolute left-0 top-0"
+            initial={{ x: fly.x, y: fly.y, scale: 0.5, opacity: 0 }}
+            animate={{
+              x: [fly.x, fly.x + fly.dx * 0.35, fly.x + fly.dx],
+              y: [fly.y, fly.y + fly.dy * 0.25 - 60, fly.y + fly.dy],
+              scale: [0.5, 1.1, 0.6],
+              opacity: [0, 1, 0],
+            }}
+            transition={{ duration: 0.95, delay: index * 0.05, ease: 'easeInOut' }}
+          >
+            <CoinIcon size={26} />
+          </motion.div>
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {bigWin !== null && <BigWin amount={bigWin} onDone={() => setBigWin(null)} />}
+      </AnimatePresence>
 
       {/* Dreh-Button */}
       <div className="mt-1.5 flex items-end gap-2">

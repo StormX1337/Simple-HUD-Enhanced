@@ -6,6 +6,7 @@ import {
   SPIN_TABLE,
   SYMBOLS,
   coinValue,
+  eventMultiplier,
   maxBetForLevel,
   spinCapacity,
   type PayoutEntry,
@@ -19,6 +20,7 @@ import {
   saveUser,
 } from './core.js';
 import { grantRandomCard } from './collection.js';
+import { petBonus } from './pets.js';
 import { trackQuest } from './progress.js';
 
 export class GameError extends Error {
@@ -72,7 +74,8 @@ export function spin(user: UserRow, betInput: number): SpinResult {
 
   const { matches, symbol } = rollOutcome();
   const reels: SymbolId[] = buildReels(matches, symbol);
-  const base = coinValue(user.level, user.village);
+  const eventBonus = eventMultiplier();
+  const base = coinValue(user.level, user.village) * eventBonus * petBonus(user.id, 'coins');
 
   let outcome: SpinOutcomeType = 'nothing';
   let amount = 0;
