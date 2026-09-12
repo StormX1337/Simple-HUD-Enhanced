@@ -296,6 +296,17 @@ export interface TargetInfo {
   estimatedLoot: number;
 }
 
+export interface AchievementState {
+  id: string;
+  name: string;
+  description: string;
+  target: number;
+  progress: number;
+  done: boolean;
+  claimed: boolean;
+  reward: { coins: number; spins: number; xp: number };
+}
+
 export interface PetState {
   id: string;
   name: string;

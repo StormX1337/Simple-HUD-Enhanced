@@ -29,6 +29,7 @@ import { attack, getTarget, getTargets, raid } from '../game/battle.js';
 import { claimSet, grantRandomCard, openChest } from '../game/collection.js';
 import { feedPet, petStates } from '../game/pets.js';
 import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
+import { achievementStates, claimAchievement } from '../game/achievements.js';
 import {
   claimDaily,
   claimQuest,
@@ -270,6 +271,21 @@ api.post('/quests/claim', auth, (req: AuthedRequest, res, next) => {
     const result = claimQuest(user, String(req.body?.questId ?? ''));
     if (!result.ok) throw new GameError(result.error ?? 'Quest kann nicht abgeholt werden');
     res.json({ ...result, quests: questStates(user.id), state: buildState(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+api.get('/achievements', auth, (req: AuthedRequest, res) => {
+  const user = me(req);
+  res.json({ achievements: achievementStates(user), state: buildState(user) });
+});
+
+api.post('/achievements/claim', auth, (req: AuthedRequest, res, next) => {
+  try {
+    const user = me(req);
+    const result = claimAchievement(user, String(req.body?.id ?? ''));
+    res.json({ ...result, achievements: achievementStates(user), state: buildState(user) });
   } catch (error) {
     next(error);
   }

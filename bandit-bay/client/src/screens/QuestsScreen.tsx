@@ -1,13 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { CoinIcon, SpinIcon, StarIcon } from '../components/art/HudIcons';
+import { AchievementsScreen } from './AchievementsScreen';
 
 export function QuestsScreen(): JSX.Element {
   const { quests, setQuests, applyState, pushToast, refresh, state } = useGame();
+  const [tab, setTab] = useState<'daily' | 'goals'>('daily');
 
   useEffect(() => {
     void refresh();
@@ -29,6 +31,36 @@ export function QuestsScreen(): JSX.Element {
 
   return (
     <div className="screen-scroll">
+      <div className="mb-3 flex gap-1.5">
+        {(
+          [
+            ['daily', 'Tagesquests'],
+            ['goals', 'Meilensteine'],
+          ] as ['daily' | 'goals', string][]
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            data-testid={`quests-tab-${id}`}
+            onClick={() => {
+              playSound('click', 0.3);
+              setTab(id);
+            }}
+            className={`flex-1 rounded-2xl border-2 px-2 py-1.5 font-display text-sm font-bold ${
+              tab === id
+                ? 'border-[#7a4a05] bg-gradient-to-b from-[#ffe9a0] to-[#e0a21a] text-[#4a2f05]'
+                : 'border-white/15 bg-white/10 text-white'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'goals' && <AchievementsScreen />}
+
+      {tab === 'daily' && (
+        <>
       <div className="panel-dark mb-3 p-3">
         <div className="font-display text-lg font-black">Tagesquests</div>
         <div className="text-xs text-white/70">
@@ -87,7 +119,10 @@ export function QuestsScreen(): JSX.Element {
         })}
       </div>
 
-      {state && (
+        </>
+      )}
+
+      {tab === 'daily' && state && (
         <div className="panel mt-4 p-3 text-sm">
           <div className="mb-1 font-display text-base font-bold">Deine Statistik</div>
           <div className="grid grid-cols-2 gap-2 text-[13px]">

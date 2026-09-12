@@ -22,6 +22,7 @@ import { claimSet, grantCard, openChest } from '../game/collection.js';
 import { claimDaily, claimQuest, dailyState, questStates } from '../game/progress.js';
 import { feedPet, petBonus, petStates } from '../game/pets.js';
 import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
+import { achievementStates, claimAchievement } from '../game/achievements.js';
 import type { SpinOutcomeType } from '../types.js';
 
 let failures = 0;
@@ -266,6 +267,37 @@ if (news.length > 0) {
   markNewsSeen(player);
   check('Gesehene Ereignisse verschwinden', unseenNews(player).length === 0);
 }
+
+/* --- Meilensteine ----------------------------------------------------- */
+const achievements = achievementStates(player);
+check('Meilensteine vorhanden', achievements.length > 0, `${achievements.length}`);
+const spinsAch = achievements.find((entry) => entry.id === 'spins_100');
+check('Spin-Meilenstein zählt mit', (spinsAch?.progress ?? 0) > 0, `${spinsAch?.progress}`);
+
+const doneAchievement = achievementStates(player).find((entry) => entry.done && !entry.claimed);
+if (doneAchievement) {
+  const coinsBeforeAchievement = player.coins;
+  const claimed = claimAchievement(player, doneAchievement.id);
+  check(
+    'Meilenstein-Belohnung abgeholt',
+    player.coins === coinsBeforeAchievement + claimed.coins,
+    doneAchievement.name,
+  );
+  let twice = false;
+  try {
+    claimAchievement(player, doneAchievement.id);
+  } catch {
+    twice = true;
+  }
+  check('Meilenstein nicht doppelt abholbar', twice);
+}
+let tooEarly = false;
+try {
+  claimAchievement(player, 'village_6');
+} catch {
+  tooEarly = true;
+}
+check('Nicht erreichter Meilenstein wird abgelehnt', tooEarly);
 
 /* --- Ergebnis --------------------------------------------------------- */
 const finalState = buildState(player);

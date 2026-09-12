@@ -1,4 +1,5 @@
 import type {
+  AchievementState,
   AttackResult,
   ChestOffer,
   ChestResponse,
@@ -93,6 +94,18 @@ export const api = {
   claimQuest: (questId: string) => post<ClaimResponse>('/quests/claim', { questId }),
   daily: () => request<{ daily: DailyState }>('/daily'),
   claimDaily: () => post<ClaimResponse>('/daily/claim'),
+  achievements: () =>
+    request<{ achievements: AchievementState[]; state: PlayerState }>('/achievements'),
+  claimAchievement: (id: string) =>
+    post<{
+      id: string;
+      coins: number;
+      spins: number;
+      xp: number;
+      levelUps: number;
+      achievements: AchievementState[];
+      state: PlayerState;
+    }>('/achievements/claim', { id }),
   pets: () => request<{ pets: PetState[]; state: PlayerState }>('/pets'),
   feedPet: (petId: string) =>
     post<{ petId: string; cost: number; secondsLeft: number; pets: PetState[]; state: PlayerState }>(

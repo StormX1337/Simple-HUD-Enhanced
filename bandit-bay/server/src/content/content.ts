@@ -249,6 +249,131 @@ export function petCost(pet: PetDef, level: number): number {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Meilensteine                                                       */
+/* ------------------------------------------------------------------ */
+
+export type AchievementMetric =
+  | 'spins'
+  | 'attacks'
+  | 'raids'
+  | 'level'
+  | 'village'
+  | 'cards'
+  | 'sets';
+
+export interface AchievementDef {
+  id: string;
+  name: string;
+  description: string;
+  metric: AchievementMetric;
+  target: number;
+  reward: { coins: number; spins: number; xp: number };
+}
+
+export const ACHIEVEMENTS: AchievementDef[] = [
+  {
+    id: 'spins_100',
+    name: 'Drehmeister I',
+    description: '100 Mal am Automaten gedreht',
+    metric: 'spins',
+    target: 100,
+    reward: { coins: 40_000, spins: 20, xp: 300 },
+  },
+  {
+    id: 'spins_500',
+    name: 'Drehmeister II',
+    description: '500 Mal am Automaten gedreht',
+    metric: 'spins',
+    target: 500,
+    reward: { coins: 250_000, spins: 60, xp: 1200 },
+  },
+  {
+    id: 'attacks_25',
+    name: 'Hammerzeit',
+    description: '25 Angriffe ausgeführt',
+    metric: 'attacks',
+    target: 25,
+    reward: { coins: 60_000, spins: 25, xp: 400 },
+  },
+  {
+    id: 'attacks_100',
+    name: 'Schrecken der Bucht',
+    description: '100 Angriffe ausgeführt',
+    metric: 'attacks',
+    target: 100,
+    reward: { coins: 400_000, spins: 70, xp: 1600 },
+  },
+  {
+    id: 'raids_25',
+    name: 'Schatzsucher',
+    description: '25 Raubzüge durchgeführt',
+    metric: 'raids',
+    target: 25,
+    reward: { coins: 80_000, spins: 25, xp: 450 },
+  },
+  {
+    id: 'cards_10',
+    name: 'Sammler',
+    description: '10 verschiedene Karten gefunden',
+    metric: 'cards',
+    target: 10,
+    reward: { coins: 70_000, spins: 30, xp: 500 },
+  },
+  {
+    id: 'cards_30',
+    name: 'Komplettist',
+    description: 'Alle 30 Karten gefunden',
+    metric: 'cards',
+    target: 30,
+    reward: { coins: 2_000_000, spins: 150, xp: 4000 },
+  },
+  {
+    id: 'sets_3',
+    name: 'Setjäger',
+    description: '3 Karten-Sets eingelöst',
+    metric: 'sets',
+    target: 3,
+    reward: { coins: 500_000, spins: 60, xp: 1500 },
+  },
+  {
+    id: 'village_3',
+    name: 'Inselhüpfer',
+    description: 'Insel 3 erreicht',
+    metric: 'village',
+    target: 3,
+    reward: { coins: 300_000, spins: 50, xp: 900 },
+  },
+  {
+    id: 'village_6',
+    name: 'Wolkenherrscher',
+    description: 'Insel 6 erreicht',
+    metric: 'village',
+    target: 6,
+    reward: { coins: 5_000_000, spins: 200, xp: 6000 },
+  },
+  {
+    id: 'level_10',
+    name: 'Aufsteiger',
+    description: 'Level 10 erreicht',
+    metric: 'level',
+    target: 10,
+    reward: { coins: 120_000, spins: 40, xp: 0 },
+  },
+  {
+    id: 'level_25',
+    name: 'Veteran',
+    description: 'Level 25 erreicht',
+    metric: 'level',
+    target: 25,
+    reward: { coins: 1_200_000, spins: 120, xp: 0 },
+  },
+];
+
+export function achievementById(id: string): AchievementDef | undefined {
+  return ACHIEVEMENTS.find((entry) => entry.id === id);
+}
+
+/* ------------------------------------------------------------------ */
 /*  Inseln (Dörfer)                                                   */
 /* ------------------------------------------------------------------ */
 

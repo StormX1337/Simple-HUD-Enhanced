@@ -18,6 +18,12 @@ npm run dev        # Server auf :4000, Client auf :5173
 
 Danach `http://localhost:5173` öffnen, Namen eingeben, spielen.
 
+**Auf dem Handy im gleichen WLAN:** Vite zeigt beim Start eine zweite Adresse an
+(`Network: http://192.168.x.x:5173`) – die im Handy-Browser öffnen. Für die installierte
+Variante (Startbildschirm-Symbol, Vollbild) erst `npm run build` und dann `npm start`;
+das Spiel läuft dann komplett unter `http://<PC-IP>:4000` und lässt sich über
+„Zum Startbildschirm hinzufügen" installieren.
+
 Produktionsbuild (Server liefert den gebauten Client mit aus):
 
 ```bash
@@ -34,6 +40,7 @@ Weitere Skripte:
 | `npm run seed -w server` | Mitspieler-Bots nachlegen |
 | `python3 tools/generate-audio.py` | Platzhalter-Sounds neu erzeugen |
 | `node tools/ui-smoke.mjs` | Durchspiel-Test der Oberfläche (braucht laufenden Dev-Server und Playwright) |
+| `node tools/generate-icons.mjs` | App-Icons neu erzeugen (braucht Playwright) |
 
 ---
 
@@ -75,8 +82,9 @@ serverseitig berechnet und validiert. Der Client sendet nur Absichten („dreh",
 6. **Sammeln** – 30 Karten in 6 Sets, Karten aus Truhen (Taler) oder dem Automaten.
    Ein komplettes Set gibt ein großes Bonuspaket.
 
-Dazu: Tagesquests, 7-Tage-Belohnungsleiter, Rangliste, Ereignisverlauf, Einsatzstufen
-(×1 bis ×1000, mit Level freigeschaltet) und automatisches Drehen.
+Dazu: Tagesquests, **Meilensteine** (dauerhafte Ziele mit Belohnung), 7-Tage-Belohnungsleiter,
+Rangliste, Ereignisverlauf, Einsatzstufen (×1 bis ×1000, mit Level freigeschaltet) und
+automatisches Drehen.
 
 **Talerregen** – mehrmals täglich (6, 12, 18 und 22 Uhr UTC, jeweils 60 Minuten) zählen alle
 Taler doppelt. Der Countdown läuft im Banner über der Insel, gerechnet wird serverseitig.
@@ -153,6 +161,7 @@ bandit-bay/
 | `POST` | `/api/collection/chest`, `/api/collection/set` | Truhe öffnen, Set einlösen |
 | `GET/POST` | `/api/quests`, `/api/quests/claim` | Tagesquests |
 | `GET/POST` | `/api/daily`, `/api/daily/claim` | Tagesbelohnung |
+| `GET/POST` | `/api/achievements`, `/api/achievements/claim` | Meilensteine und ihre Belohnungen |
 | `GET` | `/api/target/:id` | Einzelnes Ziel laden (Rache aus der Ereignisliste) |
 | `POST` | `/api/news/seen` | Ereignisse als gesehen markieren |
 | `GET` | `/api/pets` | Begleiter mit Status, Kosten und Restlaufzeit |
@@ -162,8 +171,12 @@ bandit-bay/
 Authentifizierung: `Authorization: Bearer <token>`; der Token liegt im `localStorage`.
 
 Gespeichert werden: Nutzer, Taler, Drehungen, Schilde, Level, Erfahrung, Inseln, Gebäude und
-deren Stufen, Karten, Karten-Sets, Quests, Tagesbelohnungen, Begleiter sowie Angriffs- und
-Raid-Historie.
+deren Stufen, Karten, Karten-Sets, Quests, Meilensteine, Tagesbelohnungen, Begleiter sowie
+Angriffs- und Raid-Historie.
+
+Das gebaute Spiel ist eine PWA: `client/public/manifest.webmanifest`, ein kleiner Service
+Worker (`client/public/sw.js`, hält nur die App-Hülle im Cache, niemals Spielstände) und
+eigene Icons unter `client/public/icons/`.
 
 ---
 

@@ -153,6 +153,13 @@ export function migrate(): void {
       PRIMARY KEY (user_id, pet_id)
     );
 
+    CREATE TABLE IF NOT EXISTS achievements (
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      ach_id TEXT NOT NULL,
+      claimed_at INTEGER NOT NULL,
+      PRIMARY KEY (user_id, ach_id)
+    );
+
     CREATE TABLE IF NOT EXISTS events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
