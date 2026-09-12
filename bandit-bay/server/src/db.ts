@@ -25,6 +25,8 @@ export interface UserRow {
   total_attacks: number;
   total_raids: number;
   times_raided: number;
+  last_sim: number;
+  last_seen_event: number;
   created_at: number;
   updated_at: number;
 }
@@ -100,6 +102,8 @@ export function migrate(): void {
       total_attacks INTEGER NOT NULL DEFAULT 0,
       total_raids INTEGER NOT NULL DEFAULT 0,
       times_raided INTEGER NOT NULL DEFAULT 0,
+      last_sim INTEGER NOT NULL DEFAULT 0,
+      last_seen_event INTEGER NOT NULL DEFAULT 0,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL
     );
@@ -163,6 +167,20 @@ export function migrate(): void {
     CREATE INDEX IF NOT EXISTS idx_events_user ON events(user_id, id DESC);
     CREATE INDEX IF NOT EXISTS idx_users_token ON users(token);
   `);
+
+  // Nachträglich ergänzte Spalten für bestehende Datenbanken.
+  addColumnIfMissing('users', 'last_sim', 'INTEGER NOT NULL DEFAULT 0');
+  addColumnIfMissing('users', 'last_seen_event', 'INTEGER NOT NULL DEFAULT 0');
+}
+
+function addColumnIfMissing(table: string, column: string, definition: string): void {
+  const columns = db
+    .prepare<[], { name: string }>(`PRAGMA table_info(${table})`)
+    .all()
+    .map((row) => row.name);
+  if (!columns.includes(column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
 }
 
 export function now(): number {

@@ -70,7 +70,14 @@ export const api = {
     post<{ token: string; state: PlayerState }>('/auth/register', { name, avatar }),
   me: () => request<{ state: PlayerState }>('/auth/me'),
   state: () =>
-    request<{ state: PlayerState; quests: QuestState[]; daily: DailyState }>('/state'),
+    request<{
+      state: PlayerState;
+      quests: QuestState[];
+      daily: DailyState;
+      news: HistoryEntry[];
+    }>('/state'),
+  newsSeen: () => post<{ ok: boolean }>('/news/seen'),
+  target: (id: string) => request<{ target: TargetInfo }>(`/target/${id}`),
   spin: (bet: number) => post<SpinResult>('/spin', { bet }),
   setBet: (bet: number) => post<{ state: PlayerState }>('/bet', { bet }),
   upgrade: (index: number) => post<UpgradeResponse>('/village/upgrade', { index }),

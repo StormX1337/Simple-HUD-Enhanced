@@ -27,6 +27,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
   const [spinning, setSpinning] = useState<boolean[]>([false, false, false]);
   const [result, setResult] = useState<SpinResult | null>(null);
   const [auto, setAuto] = useState(false);
+  const [anticipating, setAnticipating] = useState(false);
   const [bigWin, setBigWin] = useState<number | null>(null);
   const [flies, setFlies] = useState<{ id: number; x: number; y: number; dx: number; dy: number }[]>([]);
   const reelBoxRef = useRef<HTMLDivElement>(null);
@@ -97,6 +98,16 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
           return next;
         });
         playSound('reel', 0.45);
+        // Spannungsmoment: die ersten beiden Walzen passen zusammen
+        if (index === 1 && data.reels[0] === data.reels[1]) {
+          setAnticipating(true);
+          for (let beat = 0; beat < 3; beat++) {
+            playSound('reel', 0.22);
+            await wait(185);
+          }
+          if (!mounted.current) return;
+          setAnticipating(false);
+        }
         await wait(index === 2 ? 260 : 380);
       }
       if (!mounted.current) return;
@@ -152,6 +163,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
       }
     } catch (error) {
       setSpinning([false, false, false]);
+      setAnticipating(false);
       setAuto(false);
       playSound('fail', 0.4);
       pushToast(error instanceof ApiError ? error.message : 'Drehung fehlgeschlagen', 'bad');
@@ -227,7 +239,11 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
               <div
                 key={index}
                 style={{ height: reelHeight }}
-                className="reel-window relative flex-1 overflow-hidden rounded-xl border-2 border-[#8a5c1c] bg-gradient-to-b from-[#fff6e2] via-[#f6e7c8] to-[#e2cda2]"
+                className={`reel-window relative flex-1 overflow-hidden rounded-xl border-2 bg-gradient-to-b from-[#fff6e2] via-[#f6e7c8] to-[#e2cda2] ${
+                  anticipating && index === 2
+                    ? 'animate-pulse border-[#f8c73c] shadow-[0_0_18px_6px_rgba(248,199,60,0.75)]'
+                    : 'border-[#8a5c1c]'
+                }`}
               >
                 {spinning[index] ? (
                   <div
@@ -376,6 +392,15 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
         </button>
 
         <div className="relative flex-1">
+          {state.stats.spins === 0 && !anySpinning && (
+            <motion.div
+              animate={{ y: [0, -7, 0] }}
+              transition={{ repeat: Infinity, duration: 1.1 }}
+              className="pointer-events-none absolute -top-8 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border-2 border-black/40 bg-[#0b1830] px-2.5 py-1 font-display text-xs font-black text-[#ffd95e]"
+            >
+              👆 Hier tippen!
+            </motion.div>
+          )}
           {!anySpinning && state.spins >= state.bet && (
             <span className="pointer-events-none absolute -inset-2 animate-pulse rounded-full bg-[#ff6b5b]/35 blur-xl" />
           )}

@@ -204,6 +204,7 @@ export function history(userId: string, limit = 30): HistoryEntry[] {
     id: row.id,
     type: row.type as HistoryEntry['type'],
     otherName: row.other_name,
+    otherId: row.other_id,
     amount: row.amount,
     detail: row.detail,
     createdAt: row.created_at,

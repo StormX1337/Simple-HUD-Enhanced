@@ -17,9 +17,11 @@ import type { AttackResult, TargetInfo } from '../types';
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** Optionales Ziel, z. B. für Rache aus der Ereignisliste. */
+  initialTargetId?: string | null;
 }
 
-export function AttackOverlay({ open, onClose }: Props): JSX.Element | null {
+export function AttackOverlay({ open, onClose, initialTargetId }: Props): JSX.Element | null {
   const { state, config, applyState, pushToast, refresh } = useGame();
   const short = useShortScreen();
   const [targets, setTargets] = useState<TargetInfo[]>([]);
@@ -48,7 +50,13 @@ export function AttackOverlay({ open, onClose }: Props): JSX.Element | null {
     setHitSpot(null);
     setSwinging(false);
     void loadTargets();
-  }, [open, loadTargets]);
+    if (initialTargetId) {
+      void api
+        .target(initialTargetId)
+        .then((data) => setTarget(data.target))
+        .catch(() => undefined);
+    }
+  }, [open, loadTargets, initialTargetId]);
 
   if (!open || !state || !config) return null;
 
@@ -97,7 +105,12 @@ export function AttackOverlay({ open, onClose }: Props): JSX.Element | null {
             {state.pendingAttacks} übrig
           </span>
         </div>
-        <button type="button" className="btn-ghost px-3 py-1 text-sm" onClick={onClose}>
+        <button
+          type="button"
+          data-testid="overlay-close"
+          className="btn-ghost px-3 py-1 text-sm"
+          onClick={onClose}
+        >
           Später
         </button>
       </div>

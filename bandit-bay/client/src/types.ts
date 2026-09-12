@@ -238,6 +238,7 @@ export interface HistoryEntry {
   id: number;
   type: HistoryType;
   otherName: string;
+  otherId?: string;
   amount: number;
   detail: string;
   createdAt: number;

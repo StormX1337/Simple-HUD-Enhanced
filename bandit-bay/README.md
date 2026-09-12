@@ -33,6 +33,7 @@ Weitere Skripte:
 | `npm run typecheck` | TypeScript-Prüfung für Server und Client |
 | `npm run seed -w server` | Mitspieler-Bots nachlegen |
 | `python3 tools/generate-audio.py` | Platzhalter-Sounds neu erzeugen |
+| `node tools/ui-smoke.mjs` | Durchspiel-Test der Oberfläche (braucht laufenden Dev-Server und Playwright) |
 
 ---
 
@@ -80,6 +81,12 @@ Dazu: Tagesquests, 7-Tage-Belohnungsleiter, Rangliste, Ereignisverlauf, Einsatzs
 **Talerregen** – mehrmals täglich (6, 12, 18 und 22 Uhr UTC, jeweils 60 Minuten) zählen alle
 Taler doppelt. Der Countdown läuft im Banner über der Insel, gerechnet wird serverseitig.
 
+**Während du weg warst** – kommst du nach ein paar Stunden zurück, hat die Insel weitergelebt:
+Bots greifen an (Schilde blocken) oder stehlen Taler. Beim Start zeigt eine Übersicht, was
+passiert ist – inklusive Rache-Knopf, wenn du gerade einen Angriff oder Raubzug offen hast.
+Verluste sind gedeckelt (höchstens 20 % der Taler, erst ab Level 3, maximal 12 Stunden werden
+nachgeholt).
+
 **Begleiter** – drei Tiere helfen dir, sobald du sie fütterst (4 Stunden aktiv, immer nur eines):
 
 | Begleiter | Ab Insel | Wirkung |
@@ -113,7 +120,8 @@ Alle Werte stehen an einer Stelle: `server/src/content/content.ts`.
 bandit-bay/
 ├─ server/
 │  ├─ src/content/content.ts   Spielinhalte + Balance (Inseln, Karten, Quests, Gewinntabelle)
-│  ├─ src/game/                core (Nutzer/XP/Spins), slot, village, battle, collection, progress, pets
+│  ├─ src/game/                core (Nutzer/XP/Spins), slot, village, battle, collection,
+│  │                          progress, pets, absence (Bot-Überfälle während der Abwesenheit)
 │  ├─ src/routes/api.ts        REST-Endpunkte
 │  ├─ src/db.ts                SQLite-Schema und Migration
 │  ├─ src/seed.ts              Mitspieler-Bots
@@ -145,6 +153,8 @@ bandit-bay/
 | `POST` | `/api/collection/chest`, `/api/collection/set` | Truhe öffnen, Set einlösen |
 | `GET/POST` | `/api/quests`, `/api/quests/claim` | Tagesquests |
 | `GET/POST` | `/api/daily`, `/api/daily/claim` | Tagesbelohnung |
+| `GET` | `/api/target/:id` | Einzelnes Ziel laden (Rache aus der Ereignisliste) |
+| `POST` | `/api/news/seen` | Ereignisse als gesehen markieren |
 | `GET` | `/api/pets` | Begleiter mit Status, Kosten und Restlaufzeit |
 | `POST` | `/api/pets/feed` | Begleiter füttern (Taler und Freischaltung werden geprüft) |
 | `GET` | `/api/leaderboard`, `/api/history` | Rangliste, Ereignisse |

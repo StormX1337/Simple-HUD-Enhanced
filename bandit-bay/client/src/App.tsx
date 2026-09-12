@@ -8,6 +8,7 @@ import { SlotMachine } from './components/SlotMachine';
 import { AttackOverlay } from './components/AttackOverlay';
 import { RaidOverlay } from './components/RaidOverlay';
 import { CardReveal } from './components/CardReveal';
+import { NewsOverlay } from './components/NewsOverlay';
 import { Toasts } from './components/Toasts';
 import { LoginScreen } from './screens/LoginScreen';
 import { CardsScreen } from './screens/CardsScreen';
@@ -18,12 +19,19 @@ import { Raccoon } from './components/art/Raccoon';
 import type { CardDef } from './types';
 
 export default function App(): JSX.Element {
-  const { state, booting, quests, daily } = useGame();
+  const { state, booting, quests, daily, news, dismissNews } = useGame();
   const [screen, setScreen] = useState<Screen>('village');
-  const [attackOpen, setAttackOpen] = useState(false);
-  const [raidOpen, setRaidOpen] = useState(false);
+  // Angriff und Raubzug teilen sich einen Platz – nie beide gleichzeitig.
+  const [battle, setBattle] = useState<'attack' | 'raid' | null>(null);
   const [revealed, setRevealed] = useState<{ card: CardDef; isNew: boolean } | null>(null);
   const [rewardsTab, setRewardsTab] = useState<'daily' | 'pets'>('daily');
+  const [revengeTarget, setRevengeTarget] = useState<string | null>(null);
+  const openAttack = () => setBattle('attack');
+  const openRaid = () => setBattle('raid');
+  const closeBattle = () => {
+    setBattle(null);
+    setRevengeTarget(null);
+  };
 
   if (booting) {
     return (
@@ -102,8 +110,7 @@ export default function App(): JSX.Element {
                   label: 'Angriff',
                   badge: state.pendingAttacks,
                   highlight: state.pendingAttacks > 0,
-                  onClick: () =>
-                    state.pendingAttacks > 0 ? setAttackOpen(true) : setScreen('friends'),
+                  onClick: () => (state.pendingAttacks > 0 ? openAttack() : setScreen('friends')),
                 },
                 {
                   id: 'raid',
@@ -111,22 +118,22 @@ export default function App(): JSX.Element {
                   label: 'Raub',
                   badge: state.pendingRaids,
                   highlight: state.pendingRaids > 0,
-                  onClick: () => (state.pendingRaids > 0 ? setRaidOpen(true) : setScreen('friends')),
+                  onClick: () => (state.pendingRaids > 0 ? openRaid() : setScreen('friends')),
                 },
                 { id: 'rank', icon: '🏆', label: 'Rang', onClick: () => setScreen('friends') },
               ]}
             />
             <VillageScene />
             <SlotMachine
-              onAttack={() => setAttackOpen(true)}
-              onRaid={() => setRaidOpen(true)}
+              onAttack={openAttack}
+              onRaid={openRaid}
               onCard={(card, isNew) => setRevealed({ card, isNew })}
             />
           </>
         )}
         {screen === 'cards' && <CardsScreen />}
         {screen === 'friends' && (
-          <FriendsScreen onAttack={() => setAttackOpen(true)} onRaid={() => setRaidOpen(true)} />
+          <FriendsScreen onAttack={openAttack} onRaid={openRaid} />
         )}
         {screen === 'quests' && <QuestsScreen />}
         {screen === 'rewards' && <RewardsScreen tab={rewardsTab} onTab={setRewardsTab} />}
@@ -138,8 +145,23 @@ export default function App(): JSX.Element {
         badges={{ quests: questBadge, rewards: rewardBadge }}
       />
 
-      <AttackOverlay open={attackOpen} onClose={() => setAttackOpen(false)} />
-      <RaidOverlay open={raidOpen} onClose={() => setRaidOpen(false)} />
+      <AttackOverlay
+        open={battle === 'attack'}
+        initialTargetId={revengeTarget}
+        onClose={closeBattle}
+      />
+      <RaidOverlay open={battle === 'raid'} initialTargetId={revengeTarget} onClose={closeBattle} />
+      {news.length > 0 && (
+        <NewsOverlay
+          news={news}
+          onClose={dismissNews}
+          onRevenge={(targetId, mode) => {
+            dismissNews();
+            setRevengeTarget(targetId);
+            setBattle(mode);
+          }}
+        />
+      )}
       {revealed && (
         <CardReveal
           card={revealed.card}

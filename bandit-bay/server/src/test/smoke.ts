@@ -21,6 +21,7 @@ import { attack, getTargets, raid } from '../game/battle.js';
 import { claimSet, grantCard, openChest } from '../game/collection.js';
 import { claimDaily, claimQuest, dailyState, questStates } from '../game/progress.js';
 import { feedPet, petBonus, petStates } from '../game/pets.js';
+import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
 import type { SpinOutcomeType } from '../types.js';
 
 let failures = 0;
@@ -242,6 +243,28 @@ if (bodoUnlocked) {
   feedPet(player, 'bodo');
   const after = petStates(player).filter((pet) => pet.active);
   check('Nur ein Begleiter gleichzeitig aktiv', after.length === 1 && after[0].id === 'bodo');
+}
+
+/* --- Abwesenheit ------------------------------------------------------ */
+player.level = Math.max(player.level, 5);
+player.coins = 1_000_000;
+player.shields = 1;
+player.last_sim = Date.now() - 13 * 3_600_000;
+saveUser(player);
+const coinsBeforeAbsence = player.coins;
+const shieldsBefore = player.shields;
+simulateAbsence(player);
+const news = unseenNews(player);
+check(
+  'Abwesenheit erzeugt Ereignisse oder bleibt ruhig',
+  news.length >= 0 && player.coins <= coinsBeforeAbsence && player.shields <= shieldsBefore,
+  `${news.length} Ereignis(se)`,
+);
+check('Verluste bleiben gedeckelt', player.coins >= coinsBeforeAbsence * 0.79);
+check('Simulation läuft nicht doppelt', (simulateAbsence(player), unseenNews(player).length === news.length));
+if (news.length > 0) {
+  markNewsSeen(player);
+  check('Gesehene Ereignisse verschwinden', unseenNews(player).length === 0);
 }
 
 /* --- Ergebnis --------------------------------------------------------- */

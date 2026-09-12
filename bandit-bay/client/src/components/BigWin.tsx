@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { formatCoins } from '../lib/format';
 import { CoinIcon } from './art/HudIcons';
@@ -12,10 +12,14 @@ const CONFETTI = ['#f8c73c', '#ff8a6b', '#8ee06a', '#7cc6fe', '#c792ea', '#ffe9a
 
 /** Kurze Feier-Einblendung bei drei gleichen Taler-Symbolen. */
 export function BigWin({ amount, onDone }: Props): JSX.Element {
+  // Der Timer läuft genau einmal – sonst würde ihn jedes Neurendern der
+  // Elternkomponente (Sekundentakt der Spin-Uhr) wieder zurücksetzen.
+  const doneRef = useRef(onDone);
+  doneRef.current = onDone;
   useEffect(() => {
-    const timer = window.setTimeout(onDone, 2000);
+    const timer = window.setTimeout(() => doneRef.current(), 2200);
     return () => window.clearTimeout(timer);
-  }, [onDone]);
+  }, []);
 
   return (
     <motion.div
@@ -28,7 +32,7 @@ export function BigWin({ amount, onDone }: Props): JSX.Element {
     >
       {/* Strahlenkranz */}
       <motion.div
-        className="absolute h-[520px] w-[520px]"
+        className="pointer-events-none absolute h-[520px] w-[520px]"
         animate={{ rotate: 360 }}
         transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}
         style={{
@@ -43,7 +47,7 @@ export function BigWin({ amount, onDone }: Props): JSX.Element {
       {[...Array(18)].map((_, index) => (
         <motion.span
           key={index}
-          className="absolute h-2.5 w-2.5 rounded-[2px]"
+          className="pointer-events-none absolute h-2.5 w-2.5 rounded-[2px]"
           style={{ background: CONFETTI[index % CONFETTI.length] }}
           initial={{ x: 0, y: 0, opacity: 1, rotate: 0 }}
           animate={{
@@ -60,7 +64,7 @@ export function BigWin({ amount, onDone }: Props): JSX.Element {
         initial={{ scale: 0.5, rotate: -8, opacity: 0 }}
         animate={{ scale: 1, rotate: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 220, damping: 13 }}
-        className="relative flex flex-col items-center"
+        className="pointer-events-none relative flex flex-col items-center"
       >
         <div className="logo-title font-display text-4xl font-black">GROSSER</div>
         <div className="logo-title -mt-2 font-display text-5xl font-black">GEWINN!</div>

@@ -22,9 +22,11 @@ const DIG_SPOTS = [
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** Optionales Ziel, z. B. für Rache aus der Ereignisliste. */
+  initialTargetId?: string | null;
 }
 
-export function RaidOverlay({ open, onClose }: Props): JSX.Element | null {
+export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Element | null {
   const { state, applyState, pushToast, refresh } = useGame();
   const short = useShortScreen();
   const [targets, setTargets] = useState<TargetInfo[]>([]);
@@ -51,7 +53,13 @@ export function RaidOverlay({ open, onClose }: Props): JSX.Element | null {
     setResult(null);
     setDigging(null);
     void loadTargets();
-  }, [open, loadTargets]);
+    if (initialTargetId) {
+      void api
+        .target(initialTargetId)
+        .then((data) => setTarget(data.target))
+        .catch(() => undefined);
+    }
+  }, [open, loadTargets, initialTargetId]);
 
   if (!open || !state) return null;
 
@@ -102,7 +110,12 @@ export function RaidOverlay({ open, onClose }: Props): JSX.Element | null {
             {state.pendingRaids} übrig
           </span>
         </div>
-        <button type="button" className="btn-ghost px-3 py-1 text-sm" onClick={onClose}>
+        <button
+          type="button"
+          data-testid="overlay-close"
+          className="btn-ghost px-3 py-1 text-sm"
+          onClick={onClose}
+        >
           Später
         </button>
       </div>

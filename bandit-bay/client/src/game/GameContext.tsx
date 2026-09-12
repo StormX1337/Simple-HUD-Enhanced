@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { ApiError, api, clearToken, getToken, setToken } from '../lib/api';
 import { preloadSounds, playSound } from '../lib/sound';
-import type { DailyState, GameConfig, PlayerState, QuestState } from '../types';
+import type { DailyState, GameConfig, HistoryEntry, PlayerState, QuestState } from '../types';
 
 export interface Toast {
   id: number;
@@ -23,6 +23,7 @@ interface GameContextValue {
   state: PlayerState | null;
   quests: QuestState[];
   daily: DailyState | null;
+  news: HistoryEntry[];
   booting: boolean;
   toasts: Toast[];
   secondsToNextSpin: number;
@@ -33,6 +34,7 @@ interface GameContextValue {
   applyState: (next: PlayerState) => void;
   setQuests: (quests: QuestState[]) => void;
   setDaily: (daily: DailyState) => void;
+  dismissNews: () => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -42,6 +44,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
   const [state, setState] = useState<PlayerState | null>(null);
   const [quests, setQuests] = useState<QuestState[]>([]);
   const [daily, setDaily] = useState<DailyState | null>(null);
+  const [news, setNews] = useState<HistoryEntry[]>([]);
   const [booting, setBooting] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [secondsToNextSpin, setSecondsToNextSpin] = useState(0);
@@ -67,6 +70,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       applyState(data.state);
       setQuests(data.quests);
       setDaily(data.daily);
+      if (data.news && data.news.length > 0) setNews(data.news);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         clearToken();
@@ -130,11 +134,17 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
     [applyState, refresh],
   );
 
+  const dismissNews = useCallback(() => {
+    setNews([]);
+    void api.newsSeen().catch(() => undefined);
+  }, []);
+
   const logout = useCallback(() => {
     clearToken();
     setState(null);
     setQuests([]);
     setDaily(null);
+    setNews([]);
   }, []);
 
   const value = useMemo<GameContextValue>(
@@ -143,6 +153,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       state,
       quests,
       daily,
+      news,
       booting,
       toasts,
       secondsToNextSpin,
@@ -153,12 +164,14 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       applyState,
       setQuests,
       setDaily,
+      dismissNews,
     }),
     [
       config,
       state,
       quests,
       daily,
+      news,
       booting,
       toasts,
       secondsToNextSpin,
@@ -167,6 +180,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       logout,
       refresh,
       applyState,
+      dismissNews,
     ],
   );
 

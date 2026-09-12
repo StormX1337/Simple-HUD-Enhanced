@@ -25,9 +25,10 @@ import {
 } from '../game/core.js';
 import { GameError, setBet, spin } from '../game/slot.js';
 import { upgradeBuilding } from '../game/village.js';
-import { attack, getTargets, raid } from '../game/battle.js';
+import { attack, getTarget, getTargets, raid } from '../game/battle.js';
 import { claimSet, grantRandomCard, openChest } from '../game/collection.js';
 import { feedPet, petStates } from '../game/pets.js';
+import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
 import {
   claimDaily,
   claimQuest,
@@ -54,6 +55,7 @@ function auth(req: AuthedRequest, _res: Response, next: NextFunction): void {
   const user = getUserByToken(token);
   if (!user) return next(new GameError('Sitzung ungültig', 401));
   applyRegen(user);
+  simulateAbsence(user);
   saveUser(user);
   req.user = user;
   next();
@@ -126,7 +128,22 @@ api.get('/state', auth, (req: AuthedRequest, res) => {
     state: buildState(user),
     quests: questStates(user.id),
     daily: dailyState(user.id),
+    news: unseenNews(user),
   });
+});
+
+api.post('/news/seen', auth, (req: AuthedRequest, res) => {
+  const user = me(req);
+  markNewsSeen(user);
+  res.json({ ok: true });
+});
+
+api.get('/target/:id', auth, (req: AuthedRequest, res, next) => {
+  try {
+    res.json({ target: getTarget(me(req), String(req.params.id)) });
+  } catch (error) {
+    next(error);
+  }
 });
 
 api.post('/spin', auth, (req: AuthedRequest, res, next) => {
