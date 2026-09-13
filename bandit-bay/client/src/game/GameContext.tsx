@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { ApiError, api, clearToken, getToken, setToken } from '../lib/api';
+import { ApiError, api, clearToken, getToken, onConnectionChange, setToken } from '../lib/api';
 import { preloadSounds, playSound, startMusic } from '../lib/sound';
 import type { DailyState, GameConfig, HistoryEntry, PlayerState, QuestState } from '../types';
 
@@ -25,6 +25,7 @@ interface GameContextValue {
   daily: DailyState | null;
   news: HistoryEntry[];
   booting: boolean;
+  online: boolean;
   toasts: Toast[];
   secondsToNextSpin: number;
   pushToast: (text: string, kind?: Toast['kind']) => void;
@@ -46,6 +47,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
   const [daily, setDaily] = useState<DailyState | null>(null);
   const [news, setNews] = useState<HistoryEntry[]>([]);
   const [booting, setBooting] = useState(true);
+  const [online, setOnline] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [secondsToNextSpin, setSecondsToNextSpin] = useState(0);
   const toastId = useRef(1);
@@ -114,6 +116,9 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
     return () => window.clearInterval(timer);
   }, [state, refresh]);
 
+  // Verbindungszustand aus der API übernehmen.
+  useEffect(() => onConnectionChange(setOnline), []);
+
   // Musik darf erst nach der ersten Interaktion starten (Browser-Regel).
   useEffect(() => {
     const start = () => startMusic();
@@ -166,6 +171,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       daily,
       news,
       booting,
+      online,
       toasts,
       secondsToNextSpin,
       pushToast,
@@ -184,6 +190,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       daily,
       news,
       booting,
+      online,
       toasts,
       secondsToNextSpin,
       pushToast,

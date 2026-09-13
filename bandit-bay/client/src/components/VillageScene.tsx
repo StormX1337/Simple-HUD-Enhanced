@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
-import { api, ApiError } from '../lib/api';
+import { api, errorText } from '../lib/api';
 import { formatCoins, formatDuration, formatFull } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { useShortScreen } from '../lib/useMediaQuery';
@@ -65,7 +65,7 @@ export function VillageScene({ onOpenEvents, onOpenVillages }: VillageProps): JS
       await refresh();
     } catch (error) {
       playSound('fail', 0.4);
-      pushToast(error instanceof ApiError ? error.message : 'Ausbau fehlgeschlagen', 'bad');
+      pushToast(errorText(error, 'Ausbau fehlgeschlagen'), 'bad');
     } finally {
       setBusy(false);
     }

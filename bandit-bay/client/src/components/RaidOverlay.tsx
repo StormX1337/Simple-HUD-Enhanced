@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
-import { ApiError, api } from '../lib/api';
+import { api, errorText } from '../lib/api';
 import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { useShortScreen } from '../lib/useMediaQuery';
@@ -97,7 +97,7 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
       if (data.levelUps > 0) playSound('levelup', 0.6);
       void refresh();
     } catch (error) {
-      pushToast(error instanceof ApiError ? error.message : 'Raubzug fehlgeschlagen', 'bad');
+      pushToast(errorText(error, 'Raubzug fehlgeschlagen'), 'bad');
       playSound('fail', 0.4);
       onClose();
     } finally {

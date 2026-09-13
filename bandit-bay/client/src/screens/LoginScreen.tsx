@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
-import { ApiError } from '../lib/api';
+import { errorText } from '../lib/api';
 import { playSound } from '../lib/sound';
 import { Raccoon } from '../components/art/Raccoon';
 import { SymbolIcon } from '../components/art/SymbolIcon';
@@ -25,7 +25,7 @@ export function LoginScreen(): JSX.Element {
       await register(name.trim(), avatar);
       playSound('reward', 0.7);
     } catch (problem) {
-      setError(problem instanceof ApiError ? problem.message : 'Start fehlgeschlagen');
+      setError(errorText(problem, 'Start fehlgeschlagen'));
       playSound('fail', 0.4);
     } finally {
       setBusy(false);

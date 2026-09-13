@@ -24,6 +24,7 @@ const DecoShop = lazy(() =>
   import('./components/DecoShop').then((module) => ({ default: module.DecoShop })),
 );
 import { Toasts } from './components/Toasts';
+import { ConnectionBanner } from './components/ConnectionBanner';
 import { LoginScreen } from './screens/LoginScreen';
 import type { RewardsTab } from './screens/RewardsScreen';
 
@@ -88,6 +89,7 @@ export default function App(): JSX.Element {
     return (
       <>
         <LoginScreen />
+        <ConnectionBanner />
         <Toasts />
       </>
     );
@@ -232,6 +234,7 @@ export default function App(): JSX.Element {
           onClose={() => setRevealed(null)}
         />
       )}
+      <ConnectionBanner />
       <Toasts />
     </div>
   );

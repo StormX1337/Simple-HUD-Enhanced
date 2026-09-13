@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
-import { ApiError, api } from '../lib/api';
+import { api, errorText } from '../lib/api';
 import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { CoinIcon, SpinIcon, StarIcon } from '../components/art/HudIcons';
@@ -25,7 +25,7 @@ export function QuestsScreen(): JSX.Element {
       if (data.levelUps > 0) playSound('levelup', 0.7);
     } catch (error) {
       playSound('fail', 0.4);
-      pushToast(error instanceof ApiError ? error.message : 'Belohnung nicht verfügbar', 'bad');
+      pushToast(errorText(error, 'Belohnung nicht verfügbar'), 'bad');
     }
   };
 

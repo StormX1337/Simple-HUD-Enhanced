@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
-import { ApiError, api } from '../lib/api';
+import { api, errorText } from '../lib/api';
 import { formatCoins, formatDuration } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { CardArt } from '../components/art/CardArt';
@@ -75,7 +75,7 @@ export function WheelScreen(): JSX.Element {
     } catch (error) {
       setSpinning(false);
       playSound('fail', 0.4);
-      pushToast(error instanceof ApiError ? error.message : 'Drehen fehlgeschlagen', 'bad');
+      pushToast(errorText(error, 'Drehen fehlgeschlagen'), 'bad');
       void load();
     }
   };

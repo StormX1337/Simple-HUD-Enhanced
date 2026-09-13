@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
-import { ApiError, api } from '../lib/api';
+import { api, errorText } from '../lib/api';
 import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { DecoArt } from './art/DecoArt';
@@ -48,7 +48,7 @@ export function DecoShop({ open, onClose }: Props): JSX.Element | null {
       pushToast(`${data.decorations.placed.find((entry) => entry.slot === slot)?.name ?? 'Deko'} aufgestellt`, 'good');
     } catch (error) {
       playSound('fail', 0.4);
-      pushToast(error instanceof ApiError ? error.message : 'Kauf fehlgeschlagen', 'bad');
+      pushToast(errorText(error, 'Kauf fehlgeschlagen'), 'bad');
     } finally {
       setBusy(false);
     }

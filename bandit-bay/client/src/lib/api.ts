@@ -49,16 +49,50 @@ export class ApiError extends Error {
   }
 }
 
+/** Server nicht erreichbar (kein HTTP-Fehler, sondern gar keine Antwort). */
+export class OfflineError extends Error {
+  constructor(message = 'Keine Verbindung zum Server') {
+    super(message);
+  }
+}
+
+/** Lesbare Fehlermeldung für Toasts. */
+export function errorText(error: unknown, fallback: string): string {
+  if (error instanceof OfflineError) return 'Keine Verbindung zum Server';
+  if (error instanceof ApiError) return error.message;
+  return fallback;
+}
+
+type ConnectionListener = (online: boolean) => void;
+const connectionListeners = new Set<ConnectionListener>();
+
+/** Meldet, ob der Server gerade antwortet. */
+export function onConnectionChange(listener: ConnectionListener): () => void {
+  connectionListeners.add(listener);
+  return () => connectionListeners.delete(listener);
+}
+
+function reportConnection(online: boolean): void {
+  for (const listener of connectionListeners) listener(online);
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
-  const response = await fetch(`/api${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers ?? {}),
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(`/api${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers ?? {}),
+      },
+    });
+  } catch {
+    reportConnection(false);
+    throw new OfflineError();
+  }
+  reportConnection(true);
   const text = await response.text();
   const data = text ? (JSON.parse(text) as unknown) : {};
   if (!response.ok) {

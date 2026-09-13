@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
-import { ApiError, api } from '../lib/api';
+import { api, errorText } from '../lib/api';
 import { formatCoins, formatDuration } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { PetArt } from '../components/art/PetArt';
@@ -52,7 +52,7 @@ export function PetsScreen(): JSX.Element {
       pushToast(`${data.pets.find((pet) => pet.id === petId)?.name} ist jetzt aktiv!`, 'good');
     } catch (error) {
       playSound('fail', 0.4);
-      pushToast(error instanceof ApiError ? error.message : 'Füttern fehlgeschlagen', 'bad');
+      pushToast(errorText(error, 'Füttern fehlgeschlagen'), 'bad');
     } finally {
       setBusy(false);
     }

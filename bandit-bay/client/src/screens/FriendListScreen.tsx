@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
-import { ApiError, api } from '../lib/api';
+import { api, errorText } from '../lib/api';
 import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { CoinIcon, ShieldIcon } from '../components/art/HudIcons';
@@ -43,7 +43,7 @@ export function FriendListScreen({ onAttack, onRaid }: Props): JSX.Element {
       pushToast(`${data.friend.name} ist jetzt dein Freund`, 'good');
     } catch (error) {
       playSound('fail', 0.4);
-      pushToast(error instanceof ApiError ? error.message : 'Hinzufügen fehlgeschlagen', 'bad');
+      pushToast(errorText(error, 'Hinzufügen fehlgeschlagen'), 'bad');
     } finally {
       setBusy(false);
     }

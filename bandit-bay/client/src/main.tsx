@@ -4,6 +4,7 @@ import App from './App';
 import { DevGallery } from './DevGallery';
 import { LazyMotion, domAnimation } from 'framer-motion';
 import { GameProvider } from './game/GameContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
 
 // Service Worker nur im gebauten Spiel registrieren (Offline-Hülle, Installation).
@@ -15,10 +16,12 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <LazyMotion features={domAnimation} strict>
-      <GameProvider>
-        {window.location.search.includes('gallery') ? <DevGallery /> : <App />}
-      </GameProvider>
-    </LazyMotion>
+    <ErrorBoundary>
+      <LazyMotion features={domAnimation} strict>
+        <GameProvider>
+          {window.location.search.includes('gallery') ? <DevGallery /> : <App />}
+        </GameProvider>
+      </LazyMotion>
+    </ErrorBoundary>
   </React.StrictMode>,
 );

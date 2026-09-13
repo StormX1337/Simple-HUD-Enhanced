@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
-import { ApiError, api } from '../lib/api';
+import { api, errorText } from '../lib/api';
 import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { CardArt } from '../components/art/CardArt';
@@ -48,7 +48,7 @@ export function CardsScreen(): JSX.Element {
       await load();
     } catch (error) {
       playSound('fail', 0.4);
-      pushToast(error instanceof ApiError ? error.message : 'Truhe fehlgeschlagen', 'bad');
+      pushToast(errorText(error, 'Truhe fehlgeschlagen'), 'bad');
     } finally {
       setBusy(false);
     }
@@ -66,7 +66,7 @@ export function CardsScreen(): JSX.Element {
       await refresh();
     } catch (error) {
       playSound('fail', 0.4);
-      pushToast(error instanceof ApiError ? error.message : 'Set konnte nicht eingelöst werden', 'bad');
+      pushToast(errorText(error, 'Set konnte nicht eingelöst werden'), 'bad');
     } finally {
       setBusy(false);
     }
@@ -96,7 +96,7 @@ export function CardsScreen(): JSX.Element {
       await load();
     } catch (error) {
       playSound('fail', 0.4);
-      pushToast(error instanceof ApiError ? error.message : 'Verschenken fehlgeschlagen', 'bad');
+      pushToast(errorText(error, 'Verschenken fehlgeschlagen'), 'bad');
     } finally {
       setBusy(false);
     }

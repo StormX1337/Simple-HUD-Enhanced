@@ -3,7 +3,7 @@ import { useGame } from '../game/GameContext';
 import { formatCoins, formatDuration, formatFull } from '../lib/format';
 import { isMuted, isMusicOn, playSound, toggleMusic, toggleMute } from '../lib/sound';
 import { CoinIcon, ShieldIcon, SpinIcon, StarIcon } from './art/HudIcons';
-import { ApiError, api } from '../lib/api';
+import { api, errorText } from '../lib/api';
 import { Raccoon } from './art/Raccoon';
 
 interface Props {
@@ -30,7 +30,7 @@ export function TopBar({ onOpenBonus }: Props): JSX.Element | null {
       pushToast('Profil gespeichert', 'good');
     } catch (error) {
       playSound('fail', 0.4);
-      pushToast(error instanceof ApiError ? error.message : 'Speichern fehlgeschlagen', 'bad');
+      pushToast(errorText(error, 'Speichern fehlgeschlagen'), 'bad');
     } finally {
       setSaving(false);
     }

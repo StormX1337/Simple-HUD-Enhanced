@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
-import { ApiError, api } from '../lib/api';
+import { api, errorText } from '../lib/api';
 import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { useShortScreen } from '../lib/useMediaQuery';
@@ -170,7 +170,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
       setAnticipating(false);
       setAuto(false);
       playSound('fail', 0.4);
-      pushToast(error instanceof ApiError ? error.message : 'Drehung fehlgeschlagen', 'bad');
+      pushToast(errorText(error, 'Drehung fehlgeschlagen'), 'bad');
       void refresh();
     } finally {
       busy.current = false;

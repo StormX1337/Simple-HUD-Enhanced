@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
-import { ApiError, api } from '../lib/api';
+import { api, errorText } from '../lib/api';
 import { formatCoins, formatDuration } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { CoinIcon, SpinIcon } from '../components/art/HudIcons';
@@ -42,7 +42,7 @@ export function TournamentScreen(): JSX.Element {
       pushToast(`Turnierpreis Rang ${data.rank}: +${formatCoins(data.coins)} Taler`, 'good');
     } catch (error) {
       playSound('fail', 0.4);
-      pushToast(error instanceof ApiError ? error.message : 'Preis nicht verfügbar', 'bad');
+      pushToast(errorText(error, 'Preis nicht verfügbar'), 'bad');
     } finally {
       setBusy(false);
     }
