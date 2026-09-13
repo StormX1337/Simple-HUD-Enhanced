@@ -12,6 +12,7 @@ import { PetArt } from './art/PetArt';
 import { CoinIcon } from './art/HudIcons';
 import { Boat, Bush, Cloud, FarIsland, Palm, Rock, Sun } from './art/Scenery';
 import { EventBanner } from './EventBanner';
+import { Tutorial } from './Tutorial';
 import type { VillageDef } from '../types';
 
 /** Plätze für Dekorationen (Prozentwerte). */
@@ -222,6 +223,9 @@ export function VillageScene({ onOpenEvents, onOpenVillages }: VillageProps): JS
         )}
         <Raccoon size={short ? 58 : 80} className="-ml-3 animate-bob" />
       </div>
+
+      {/* Der Hinweis verschwindet, solange ein Panel offen ist. */}
+      {selected === null && !celebrate && <Tutorial />}
 
       {/* Ausbau-Panel */}
       <AnimatePresence>
