@@ -2,6 +2,7 @@ import type {
   AchievementState,
   AttackResult,
   CardDef,
+  DecoState,
   EventState,
   EventWindowInfo,
   FriendInfo,
@@ -91,6 +92,14 @@ export const api = {
   setBet: (bet: number) => post<{ state: PlayerState }>('/bet', { bet }),
   upgrade: (index: number) => post<UpgradeResponse>('/village/upgrade', { index }),
   targets: () => request<{ targets: TargetInfo[] }>('/targets'),
+  decorations: () => request<{ decorations: DecoState }>('/decorations'),
+  buyDecoration: (slot: number, decoId: string) =>
+    post<{ slot: number; cost: number; decorations: DecoState; state: PlayerState }>(
+      '/decorations/buy',
+      { slot, decoId },
+    ),
+  removeDecoration: (slot: number) =>
+    post<{ decorations: DecoState; state: PlayerState }>('/decorations/remove', { slot }),
   villages: () => request<{ current: number; villages: VillageOverview[] }>('/villages'),
   friends: () => request<{ friends: FriendInfo[] }>('/friends'),
   addFriend: (name: string) =>

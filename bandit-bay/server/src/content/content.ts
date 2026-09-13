@@ -751,6 +751,52 @@ export function upgradeCost(villageId: number, buildingIndex: number, currentLev
 }
 
 /* ------------------------------------------------------------------ */
+/*  Dekorationen                                                       */
+/* ------------------------------------------------------------------ */
+
+export type DecoArt =
+  | 'palme'
+  | 'blumen'
+  | 'fackel'
+  | 'brunnen'
+  | 'zaun'
+  | 'statue'
+  | 'fahne'
+  | 'lagerfeuer';
+
+export interface DecoDef {
+  id: string;
+  name: string;
+  art: DecoArt;
+  baseCost: number;
+  color: string;
+}
+
+/** Drei Deko-Plätze pro Insel. */
+export const DECO_SLOTS = 3;
+
+export const DECORATIONS: DecoDef[] = [
+  { id: 'deco_palme', name: 'Doppelpalme', art: 'palme', baseCost: 8_000, color: '#4fae5c' },
+  { id: 'deco_blumen', name: 'Blumenbeet', art: 'blumen', baseCost: 12_000, color: '#ff7fa4' },
+  { id: 'deco_fackel', name: 'Fackelpaar', art: 'fackel', baseCost: 18_000, color: '#ff9a3c' },
+  { id: 'deco_lagerfeuer', name: 'Lagerfeuer', art: 'lagerfeuer', baseCost: 26_000, color: '#ff7f56' },
+  { id: 'deco_zaun', name: 'Holzzaun', art: 'zaun', baseCost: 34_000, color: '#c08b53' },
+  { id: 'deco_brunnen', name: 'Wunschbrunnen', art: 'brunnen', baseCost: 55_000, color: '#7cc6fe' },
+  { id: 'deco_fahne', name: 'Banditenfahne', art: 'fahne', baseCost: 80_000, color: '#e0533c' },
+  { id: 'deco_statue', name: 'Steinwächter', art: 'statue', baseCost: 130_000, color: '#c9d0dc' },
+];
+
+export function decoById(id: string): DecoDef | undefined {
+  return DECORATIONS.find((deco) => deco.id === id);
+}
+
+/** Deko wird auf späteren Inseln teurer (dort verdient man auch mehr). */
+export function decoCost(deco: DecoDef, villageId: number): number {
+  const village = getVillage(villageId);
+  return Math.round((deco.baseCost * Math.sqrt(village.costMultiplier)) / 100) * 100;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Sammelkarten                                                       */
 /* ------------------------------------------------------------------ */
 

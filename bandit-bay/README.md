@@ -113,6 +113,10 @@ Turnier-Tab.
 Namen hinzufügen. Freunde tauchen bevorzugt als Ziel auf und lassen sich direkt aus der Liste
 angreifen oder ausrauben. Dein eigener Name steht oben zum Weitergeben.
 
+**Dekorationen** – über den 🌴-Knopf lassen sich drei Plätze pro Insel mit Palmen, Blumenbeet,
+Fackeln, Lagerfeuer, Zaun, Brunnen, Fahne oder Steinwächter schmücken. Deko kostet Taler
+(auf späteren Inseln mehr) und bleibt dauerhaft stehen.
+
 **Karten verschenken** – doppelte Karten lassen sich über das 🎁 auf der Karte an Freunde
 weitergeben (fünf pro Tag). Der Beschenkte sieht es beim nächsten Start in der Übersicht.
 
@@ -199,6 +203,7 @@ bandit-bay/
 | `GET` | `/api/targets` | Ziele für Angriff/Raubzug (Freunde bevorzugt) |
 | `GET/POST` | `/api/friends`, `/api/friends/add`, `/api/friends/remove` | Freundesliste |
 | `GET` | `/api/villages` | Übersicht aller Inseln mit Fortschritt |
+| `GET/POST` | `/api/decorations`, `/api/decorations/buy`, `/api/decorations/remove` | Insel-Deko |
 | `POST` | `/api/attack`, `/api/raid` | Minispiele auswerten |
 | `POST` | `/api/raid/prepare` | Grabstellen vorbereiten (für Finas Spürnase) |
 | `GET` | `/api/collection` | Karten, Sets, Truhenpreise |
@@ -220,7 +225,7 @@ Authentifizierung: `Authorization: Bearer <token>`; der Token liegt im `localSto
 
 Gespeichert werden: Nutzer, Taler, Drehungen, Schilde, Level, Erfahrung, Inseln, Gebäude und
 deren Stufen, Karten, Karten-Sets, Quests, Meilensteine, Tagesbelohnungen, Glücksrad-Drehungen,
-Turnierpunkte, Begleiter, Freundschaften sowie Angriffs- und Raid-Historie.
+Turnierpunkte, Begleiter, Freundschaften, Dekorationen sowie Angriffs- und Raid-Historie.
 
 Das gebaute Spiel ist eine PWA: `client/public/manifest.webmanifest`, ein kleiner Service
 Worker (`client/public/sw.js`, hält nur die App-Hülle im Cache, niemals Spielstände) und
@@ -236,7 +241,8 @@ eigene Icons unter `client/public/icons/`.
   abschalten (Musik startet erst nach der ersten Berührung, so wollen es die Browser).
 * **Grafiken**: Die SVG-Komponenten unter `client/src/components/art/` austauschen –
   `SymbolIcon` (Walzensymbole), `BuildingArt` (Gebäude nach Typ und Stufe),
-  `CardArt` (Kartenmotive), `PetArt` (fünf Begleiter), `Scenery` (Palmen, Wolken, Sandhügel …),
+  `CardArt` (Kartenmotive), `PetArt` (fünf Begleiter), `DecoArt` (Dekorationen),
+  `Scenery` (Palmen, Wolken, Sandhügel …),
   `HudIcons` (Taler, Drehungen, Schild, Karten) und `Raccoon` (Maskottchen).
 * **Inhalte**: Inseln, Gebäude, Karten, Quests und Belohnungen in
   `server/src/content/content.ts` anpassen – Client und Datenbank folgen automatisch.

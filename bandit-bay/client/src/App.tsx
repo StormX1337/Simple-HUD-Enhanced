@@ -10,6 +10,7 @@ import { RaidOverlay } from './components/RaidOverlay';
 import { CardReveal } from './components/CardReveal';
 import { NewsOverlay } from './components/NewsOverlay';
 import { VillageOverviewOverlay } from './components/VillageOverviewOverlay';
+import { DecoShop } from './components/DecoShop';
 import { Toasts } from './components/Toasts';
 import { LoginScreen } from './screens/LoginScreen';
 import { CardsScreen } from './screens/CardsScreen';
@@ -28,6 +29,7 @@ export default function App(): JSX.Element {
   const [rewardsTab, setRewardsTab] = useState<RewardsTab>('daily');
   const [revengeTarget, setRevengeTarget] = useState<string | null>(null);
   const [villagesOpen, setVillagesOpen] = useState(false);
+  const [decoOpen, setDecoOpen] = useState(false);
   const openAttack = (targetId?: string) => {
     setRevengeTarget(targetId ?? null);
     setBattle('attack');
@@ -97,6 +99,12 @@ export default function App(): JSX.Element {
                     setRewardsTab('wheel');
                     setScreen('rewards');
                   },
+                },
+                {
+                  id: 'deco',
+                  icon: '🌴',
+                  label: 'Deko',
+                  onClick: () => setDecoOpen(true),
                 },
                 {
                   id: 'pets',
@@ -170,6 +178,7 @@ export default function App(): JSX.Element {
       />
       <RaidOverlay open={battle === 'raid'} initialTargetId={revengeTarget} onClose={closeBattle} />
       <VillageOverviewOverlay open={villagesOpen} onClose={() => setVillagesOpen(false)} />
+      <DecoShop open={decoOpen} onClose={() => setDecoOpen(false)} />
       {news.length > 0 && (
         <NewsOverlay
           news={news}

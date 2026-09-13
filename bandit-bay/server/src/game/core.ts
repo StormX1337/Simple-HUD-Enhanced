@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { db, now, type UserRow, type BuildingRow, type CardRow } from '../db.js';
+import { placedDecorations } from './decorations.js';
 import type { ActivePetState, BuildingState, PlayerState, PublicUser } from '../types.js';
 import {
   BALANCE,
@@ -287,6 +288,7 @@ export function buildState(user: UserRow): PlayerState {
     },
     event: eventStatus(),
     activePet: activePetState(user.id),
+    decorations: placedDecorations(user.id, user.village),
     buildings: buildingStates(user.id, user.village),
     cards: getCards(user.id),
     claimedSets: getClaimedSets(user.id),

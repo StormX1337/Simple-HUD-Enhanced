@@ -45,6 +45,7 @@ import { achievementStates, claimAchievement } from '../game/achievements.js';
 import { spinWheel, wheelStatus } from '../game/wheel.js';
 import { claimTournament, tournamentState } from '../game/tournament.js';
 import { addFriend, friendIds, friendList, removeFriend } from '../game/friends.js';
+import { buyDecoration, decoState, removeDecoration } from '../game/decorations.js';
 import type { SpinOutcomeType } from '../types.js';
 
 let failures = 0;
@@ -432,6 +433,33 @@ check(
 const noon = Date.UTC(2026, 8, 13, 12, 30);
 check('Mittagsfenster ist aktiv', eventStatus(noon).active, eventStatus(noon).name);
 check('Nachts läuft kein Event', !eventStatus(Date.UTC(2026, 8, 13, 3, 0)).active);
+
+/* --- Dekorationen ----------------------------------------------------- */
+player.coins = 10_000_000;
+saveUser(player);
+const decoOffers = decoState(player);
+check('Deko-Angebot vorhanden', decoOffers.offers.length === 8, `${decoOffers.offers.length}`);
+check('Drei Deko-Plätze', decoOffers.slots === 3);
+const bought = buyDecoration(player, 0, decoOffers.offers[0].id);
+check('Deko gekauft', bought.cost > 0, bought.deco.name);
+check('Deko steht auf der Insel', decoState(player).placed.length === 1);
+check('Deko ist im Spielzustand', buildState(player).decorations.length === 1);
+let sameDeco = false;
+try {
+  buyDecoration(player, 0, decoOffers.offers[0].id);
+} catch {
+  sameDeco = true;
+}
+check('Gleiche Deko nicht doppelt auf einen Platz', sameDeco);
+let badSlot = false;
+try {
+  buyDecoration(player, 9, decoOffers.offers[0].id);
+} catch {
+  badSlot = true;
+}
+check('Ungültiger Platz wird abgelehnt', badSlot);
+removeDecoration(player, 0);
+check('Deko entfernt', decoState(player).placed.length === 0);
 
 /* --- Begleiter-Fähigkeiten -------------------------------------------- */
 player.village = 5;

@@ -43,6 +43,7 @@ import { achievementStates, claimAchievement } from '../game/achievements.js';
 import { spinWheel, wheelStatus } from '../game/wheel.js';
 import { claimTournament, tournamentState } from '../game/tournament.js';
 import { addFriend, friendList, removeFriend } from '../game/friends.js';
+import { buyDecoration, decoState, placedDecorations, removeDecoration } from '../game/decorations.js';
 import {
   claimDaily,
   claimQuest,
@@ -215,6 +216,30 @@ api.post('/friends/remove', auth, (req: AuthedRequest, res, next) => {
     const user = me(req);
     removeFriend(user, String(req.body?.friendId ?? ''));
     res.json({ friends: friendList(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+api.get('/decorations', auth, (req: AuthedRequest, res) => {
+  res.json({ decorations: decoState(me(req)) });
+});
+
+api.post('/decorations/buy', auth, (req: AuthedRequest, res, next) => {
+  try {
+    const user = me(req);
+    const result = buyDecoration(user, num(req.body?.slot, -1), String(req.body?.decoId ?? ''));
+    res.json({ ...result, decorations: decoState(user), state: buildState(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+api.post('/decorations/remove', auth, (req: AuthedRequest, res, next) => {
+  try {
+    const user = me(req);
+    removeDecoration(user, num(req.body?.slot, -1));
+    res.json({ decorations: decoState(user), state: buildState(user) });
   } catch (error) {
     next(error);
   }

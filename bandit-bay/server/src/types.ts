@@ -141,6 +141,24 @@ export interface EventWindowInfo {
   active: boolean;
 }
 
+export type DecoArt =
+  | 'palme'
+  | 'blumen'
+  | 'fackel'
+  | 'brunnen'
+  | 'zaun'
+  | 'statue'
+  | 'fahne'
+  | 'lagerfeuer';
+
+export interface PlacedDeco {
+  slot: number;
+  id: string;
+  name: string;
+  art: DecoArt;
+  color: string;
+}
+
 export interface PlayerState {
   id: string;
   name: string;
@@ -164,6 +182,7 @@ export interface PlayerState {
   stats: { attacks: number; raids: number; timesRaided: number; spins: number };
   event: EventState;
   activePet: ActivePetState | null;
+  decorations: PlacedDeco[];
   buildings: BuildingState[];
   cards: Record<string, number>;
   claimedSets: string[];
@@ -265,7 +284,8 @@ export type HistoryType =
   | 'wheel'
   | 'tournament'
   | 'gift'
-  | 'gifted';
+  | 'gifted'
+  | 'deco';
 
 export interface HistoryEntry {
   id: number;

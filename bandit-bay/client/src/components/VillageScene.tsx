@@ -6,12 +6,20 @@ import { formatCoins, formatDuration, formatFull } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { useShortScreen } from '../lib/useMediaQuery';
 import { BuildingArt } from './art/BuildingArt';
+import { DecoArt } from './art/DecoArt';
 import { Raccoon } from './art/Raccoon';
 import { PetArt } from './art/PetArt';
 import { CoinIcon } from './art/HudIcons';
 import { Boat, Bush, Cloud, FarIsland, Palm, Rock, Sun } from './art/Scenery';
 import { EventBanner } from './EventBanner';
 import type { VillageDef } from '../types';
+
+/** Plätze für Dekorationen (Prozentwerte). */
+const DECO_SPOTS = [
+  { x: 19, y: 68 },
+  { x: 50, y: 63 },
+  { x: 82, y: 68 },
+];
 
 /** Feste Bauplätze auf der Insel (Prozentwerte). */
 const SPOTS = [
@@ -140,6 +148,20 @@ export function VillageScene({ onOpenEvents, onOpenVillages }: VillageProps): JS
         </button>
         <EventBanner onOpenEvents={onOpenEvents} />
       </div>
+
+      {/* Dekorationen */}
+      {state.decorations.map((deco) => {
+        const spot = DECO_SPOTS[deco.slot] ?? DECO_SPOTS[0];
+        return (
+          <div
+            key={`${deco.slot}-${deco.id}`}
+            className="pointer-events-none absolute z-[9] -translate-x-1/2 -translate-y-1/2"
+            style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
+          >
+            <DecoArt art={deco.art} size={short ? 44 : 58} />
+          </div>
+        );
+      })}
 
       {/* Gebäude */}
       {state.buildings.map((building, index) => {
