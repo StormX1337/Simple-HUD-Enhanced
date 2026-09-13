@@ -373,6 +373,16 @@ if (news.length > 0) {
 /* --- Meilensteine ----------------------------------------------------- */
 const achievements = achievementStates(player);
 check('Meilensteine vorhanden', achievements.length > 0, `${achievements.length}`);
+check('Acht Inseln vorhanden', VILLAGES.length === 8, `${VILLAGES.length}`);
+check('40 Karten in 8 Sets', CARDS.length === 40 && CARD_SETS.length === 8, `${CARDS.length}/${CARD_SETS.length}`);
+check(
+  'Jedes Set hat fünf Karten',
+  CARD_SETS.every((entry) => cardsOfSet(entry.id).length === 5),
+);
+check(
+  'Jede Insel hat ein eigenes Set',
+  VILLAGES.every((village) => CARD_SETS.some((entry) => entry.id === village.setId)),
+);
 const spinsAch = achievements.find((entry) => entry.id === 'spins_100');
 check('Spin-Meilenstein zählt mit', (spinsAch?.progress ?? 0) > 0, `${spinsAch?.progress}`);
 

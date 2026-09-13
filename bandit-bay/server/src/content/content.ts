@@ -585,9 +585,9 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   {
     id: 'cards_30',
     name: 'Komplettist',
-    description: 'Alle 30 Karten gefunden',
+    description: 'Alle 40 Karten gefunden',
     metric: 'cards',
-    target: 30,
+    target: 40,
     reward: { coins: 2_000_000, spins: 150, xp: 4000 },
   },
   {
@@ -613,6 +613,14 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     metric: 'village',
     target: 6,
     reward: { coins: 5_000_000, spins: 200, xp: 6000 },
+  },
+  {
+    id: 'village_8',
+    name: 'Herr der Bucht',
+    description: 'Insel 8 erreicht',
+    metric: 'village',
+    target: 8,
+    reward: { coins: 50_000_000, spins: 300, xp: 12_000 },
   },
   {
     id: 'level_10',
@@ -731,6 +739,36 @@ export const VILLAGES: VillageDef[] = [
       { id: 'v6_lighthouse', name: 'Himmelsfeuer', kind: 'lighthouse', baseCost: 9300 },
     ],
   },
+  {
+    id: 7,
+    name: 'Vulkanküste',
+    subtitle: 'Heiße Steine, heißere Beute',
+    setId: 'set_vulkan',
+    costMultiplier: 150,
+    palette: { skyTop: '#ff9a6b', skyBottom: '#ffd9c2', ground: '#8c6b63', accent: '#c8402a' },
+    buildings: [
+      { id: 'v7_forge', name: 'Lavaschmiede', kind: 'forge', baseCost: 4200 },
+      { id: 'v7_hut', name: 'Aschehütte', kind: 'hut', baseCost: 5400 },
+      { id: 'v7_tower', name: 'Rauchturm', kind: 'tower', baseCost: 7000 },
+      { id: 'v7_market', name: 'Glutmarkt', kind: 'market', baseCost: 9200 },
+      { id: 'v7_statue', name: 'Feuerwächter', kind: 'statue', baseCost: 12000 },
+    ],
+  },
+  {
+    id: 8,
+    name: 'Eisfjord',
+    subtitle: 'Das kälteste Versteck der Bucht',
+    setId: 'set_eis',
+    costMultiplier: 330,
+    palette: { skyTop: '#bfe6ff', skyBottom: '#eaf7ff', ground: '#cfe3f0', accent: '#4a8fd0' },
+    buildings: [
+      { id: 'v8_hut', name: 'Frosthütte', kind: 'hut', baseCost: 5600 },
+      { id: 'v8_dock', name: 'Eisbrecher-Pier', kind: 'dock', baseCost: 7400 },
+      { id: 'v8_mill', name: 'Windmühle im Frost', kind: 'mill', baseCost: 9800 },
+      { id: 'v8_lighthouse', name: 'Polarleuchtturm', kind: 'lighthouse', baseCost: 13000 },
+      { id: 'v8_statue', name: 'Eisbandit', kind: 'statue', baseCost: 17000 },
+    ],
+  },
 ];
 
 export const MAX_VILLAGE = VILLAGES.length;
@@ -837,6 +875,18 @@ export const CARD_SETS: CardSetDef[] = [
     villageId: 6,
     reward: { coins: 40_000_000, spins: 250, xp: 7000, shields: 3 },
   },
+  {
+    id: 'set_vulkan',
+    name: 'Vulkanküste',
+    villageId: 7,
+    reward: { coins: 120_000_000, spins: 300, xp: 11_000, shields: 3 },
+  },
+  {
+    id: 'set_eis',
+    name: 'Eisfjord',
+    villageId: 8,
+    reward: { coins: 400_000_000, spins: 400, xp: 16_000, shields: 3 },
+  },
 ];
 
 function card(
@@ -887,6 +937,18 @@ export const CARDS: CardDef[] = [
   card('c_himmelskrone', 'Himmelskrone', 'set_wolken', 4, 'crown', '#ffd0e4'),
   card('c_wolkenkarte', 'Himmelsatlas', 'set_wolken', 1, 'map', '#e5d5ff'),
   card('c_grossbandit', 'Grosser Bandit', 'set_wolken', 5, 'raccoon', '#ff7ea8'),
+  // Set 7 – Vulkanküste
+  card('c_lavastein', 'Lavastein', 'set_vulkan', 1, 'gem', '#ff7f56'),
+  card('c_ascheblatt', 'Ascheblatt', 'set_vulkan', 2, 'leaf', '#b07668'),
+  card('c_glutfisch', 'Glutfisch', 'set_vulkan', 3, 'fish', '#ff9a3c'),
+  card('c_feuerkrone', 'Feuerkrone', 'set_vulkan', 4, 'crown', '#e0533c'),
+  card('c_vulkanmaske', 'Vulkanmaske', 'set_vulkan', 5, 'mask', '#c8402a'),
+  // Set 8 – Eisfjord
+  card('c_eiskarte', 'Frostkarte', 'set_eis', 1, 'map', '#cfe3f0'),
+  card('c_eislaterne', 'Eislaterne', 'set_eis', 2, 'lantern', '#a9e1ff'),
+  card('c_eisschiff', 'Eisbrecher', 'set_eis', 3, 'ship', '#7cc6fe'),
+  card('c_polarstern', 'Polarstern', 'set_eis', 4, 'star', '#eaf7ff'),
+  card('c_eisbandit', 'Eisbandit', 'set_eis', 5, 'raccoon', '#4a8fd0'),
 ];
 
 export function cardById(id: string): CardDef | undefined {

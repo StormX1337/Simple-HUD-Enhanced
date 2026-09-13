@@ -82,8 +82,8 @@ serverseitig berechnet und validiert. Der Client sendet nur Absichten („dreh",
 4. **Raubzug** – vier Grabstellen, ein Jackpot, zwei mittlere Funde, eine leer.
    Die erbeuteten Taler werden dem Ziel abgezogen.
 5. **Ausbauen** – fünf Gebäude pro Insel, je fünf Stufen. Ist alles ausgebaut, geht es zur
-   nächsten von sechs Inseln (höhere Inseln zahlen deutlich mehr).
-6. **Sammeln** – 30 Karten in 6 Sets, Karten aus Truhen (Taler) oder dem Automaten.
+   nächsten von acht Inseln (höhere Inseln zahlen deutlich mehr).
+6. **Sammeln** – 40 Karten in 8 Sets, Karten aus Truhen (Taler) oder dem Automaten.
    Ein komplettes Set gibt ein großes Bonuspaket.
 
 Dazu: Tagesquests, **Meilensteine** (dauerhafte Ziele mit Belohnung), 7-Tage-Belohnungsleiter,
@@ -150,7 +150,7 @@ Alle Werte stehen an einer Stelle: `server/src/content/content.ts`.
 * **Gewinntabelle** `SPIN_TABLE`: ~32 % Dreifachtreffer, ~48 % Zweifachtreffer, ~20 % Niete.
   Angriff ca. alle 17 Drehungen, Raubzug ca. alle 20.
 * **Auszahlung** `coinValue(level, insel)`: Grundwert 90, +32 % pro Level, +55 % pro Insel.
-* **Ausbaukosten** `upgradeCost()`: Faktor 1,62 pro Stufe, Insel-Multiplikator 1 → 68.
+* **Ausbaukosten** `upgradeCost()`: Faktor 1,62 pro Stufe, Insel-Multiplikator 1 → 330.
   Dadurch geht Insel 1 sehr schnell, spätere Inseln brauchen echte Raubzüge.
 * **Drehungen**: Start 75, Kapazität 75 + 3 × Level, +1 alle 3 Minuten.
 * **Level**: `xpForNextLevel = 260 × level^1.35`, Level-Up gibt Taler, Drehungen und
@@ -160,8 +160,9 @@ Alle Werte stehen an einer Stelle: `server/src/content/content.ts`.
 * **Drehungen voll?** Beutel-Symbole und Rad-Felder zahlen dann in Talern aus, statt zu verfallen.
 
 **Wie lange dauert das Spiel?** `npm run balance -w server` spielt die echte Engine durch.
-Aktueller Stand: Insel 1 nach rund 40 Drehungen, danach 200 / 400 / 800 / 1.900 / 3.000 –
-zusammen etwa 5.800 Drehungen, von denen der Automat rund zwei Drittel wieder zurückgibt.
+Aktueller Stand: Insel 1 nach wenigen Drehungen, danach etwa 180 / 360 / 640 / 1.600 / 2.900 /
+4.800 / 8.800 – zusammen rund 19.000 Drehungen bis Insel 8, von denen der Automat gut die
+Hälfte wieder zurückgibt.
 
 ---
 
