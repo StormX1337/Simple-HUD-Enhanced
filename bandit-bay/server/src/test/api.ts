@@ -57,7 +57,12 @@ check('Health-Route antwortet', health.status === 200 && health.body.ok === true
 
 const config = await call('GET', '/config', undefined, false);
 check('Config liefert acht Inseln', (config.body.villages as unknown[])?.length === 8);
-check('Config liefert sechs Symbole', (config.body.symbols as unknown[])?.length === 6);
+const symbols = (config.body.symbols ?? []) as { id: string; weight: number }[];
+check('Config liefert sieben Symbole', symbols.length === 7, symbols.map((entry) => entry.id).join(','));
+check(
+  'Joker ist nur Wild-Symbol',
+  symbols.find((entry) => entry.id === 'joker')?.weight === 0,
+);
 check('Config liefert 40 Karten', (config.body.cards as unknown[])?.length === 40);
 check('Config enthält Event und Avatare', !!config.body.event && !!config.body.avatars);
 
