@@ -208,6 +208,13 @@ function iconFor(type: HistoryEntry['type']): string {
       return '🃏';
     case 'upgrade':
       return '🔨';
+    case 'gift':
+    case 'gifted':
+      return '🎁';
+    case 'wheel':
+      return '🎡';
+    case 'tournament':
+      return '🏆';
     default:
       return '✨';
   }
@@ -236,6 +243,14 @@ function labelFor(entry: HistoryEntry): string {
     case 'set':
       return `Set eingelöst: ${entry.detail}`;
     case 'upgrade':
+      return entry.detail;
+    case 'gift':
+      return `Karte verschenkt: ${entry.detail}`;
+    case 'gifted':
+      return `${entry.otherName} schenkte dir ${entry.detail}`;
+    case 'wheel':
+      return `Glücksrad: ${entry.detail}`;
+    case 'tournament':
       return entry.detail;
     default:
       return entry.detail || 'Ereignis';

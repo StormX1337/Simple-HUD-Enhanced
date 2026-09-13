@@ -45,7 +45,13 @@ export function NewsOverlay({ news, onClose, onRevenge }: Props): JSX.Element {
               className="flex items-center gap-2 rounded-2xl border-2 border-black/15 bg-black/5 px-2.5 py-1.5"
             >
               <span className="text-xl">
-                {entry.type === 'raided' ? '🕳️' : entry.type === 'blocked' ? '🛡️' : '⚒️'}
+                {entry.type === 'raided'
+                  ? '🕳️'
+                  : entry.type === 'blocked'
+                    ? '🛡️'
+                    : entry.type === 'gifted'
+                      ? '🎁'
+                      : '⚒️'}
               </span>
               <div className="min-w-0 flex-1">
                 <div className="truncate font-display text-[14px] font-black leading-tight">
@@ -55,6 +61,7 @@ export function NewsOverlay({ news, onClose, onRevenge }: Props): JSX.Element {
                   {entry.type === 'raided' && 'hat dich ausgeraubt'}
                   {entry.type === 'blocked' && 'prallte am Schild ab'}
                   {entry.type === 'attacked' && 'hat ein Gebäude beschädigt'}
+                  {entry.type === 'gifted' && `schenkte dir ${entry.detail}`}
                   {' · '}
                   {formatTime(entry.createdAt)}
                 </div>

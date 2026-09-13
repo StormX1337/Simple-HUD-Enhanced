@@ -7,7 +7,7 @@ import { playSound } from '../lib/sound';
 import { CardArt } from '../components/art/CardArt';
 import { SymbolIcon } from '../components/art/SymbolIcon';
 import { CardIcon, CoinIcon, ShieldIcon, SpinIcon } from '../components/art/HudIcons';
-import type { CardDrop, ChestOffer, SetProgress } from '../types';
+import type { CardDef, CardDrop, ChestOffer, FriendInfo, SetProgress } from '../types';
 
 export function CardsScreen(): JSX.Element {
   const { state, config, applyState, pushToast, refresh } = useGame();
@@ -15,12 +15,16 @@ export function CardsScreen(): JSX.Element {
   const [sets, setSets] = useState<SetProgress[]>([]);
   const [drops, setDrops] = useState<CardDrop[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [gifts, setGifts] = useState({ sentToday: 0, limit: 5, left: 5 });
+  const [giftCard, setGiftCard] = useState<CardDef | null>(null);
+  const [friends, setFriends] = useState<FriendInfo[]>([]);
 
   const load = useCallback(async () => {
     try {
       const data = await api.collection();
       setChests(data.chests);
       setSets(data.sets);
+      setGifts(data.gifts);
       applyState(data.state);
     } catch {
       pushToast('Sammlung konnte nicht geladen werden', 'bad');
@@ -68,6 +72,36 @@ export function CardsScreen(): JSX.Element {
     }
   };
 
+  const openGiftPicker = async (card: CardDef) => {
+    playSound('click', 0.35);
+    setGiftCard(card);
+    try {
+      const data = await api.friends();
+      setFriends(data.friends);
+    } catch {
+      pushToast('Freunde konnten nicht geladen werden', 'bad');
+    }
+  };
+
+  const sendGift = async (friendId: string) => {
+    if (!giftCard || busy) return;
+    setBusy(true);
+    try {
+      const data = await api.giftCard(friendId, giftCard.id);
+      applyState(data.state);
+      setGifts(data.gifts);
+      setGiftCard(null);
+      playSound('card', 0.7);
+      pushToast(`${data.card.name} an ${data.friendName} verschenkt`, 'good');
+      await load();
+    } catch (error) {
+      playSound('fail', 0.4);
+      pushToast(error instanceof ApiError ? error.message : 'Verschenken fehlgeschlagen', 'bad');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const ownedTotal = Object.values(state.cards).filter((count) => count > 0).length;
 
   return (
@@ -77,6 +111,10 @@ export function CardsScreen(): JSX.Element {
         <div className="text-xs text-white/70">
           {ownedTotal} von {config.cards.length} Karten · {sets.filter((entry) => entry.claimed).length} von{' '}
           {sets.length} Sets eingelöst
+        </div>
+        <div className="mt-1 text-[11px] text-white/60">
+          Doppelte Karten kannst du über 🎁 an Freunde verschenken – noch {gifts.left} von{' '}
+          {gifts.limit} heute.
         </div>
         <div className="mt-2 grid grid-cols-4 gap-1.5 text-center text-[11px] font-black">
           <div className="flex flex-col items-center gap-0.5 rounded-xl border-2 border-black/40 bg-black/30 py-1.5">
@@ -179,9 +217,20 @@ export function CardsScreen(): JSX.Element {
                       </div>
                       <div className="text-[9px] text-bay-golddark">{'★'.repeat(card.rarity)}</div>
                       {count > 1 && (
-                        <span className="absolute -right-1 -top-1 rounded-full border border-black/30 bg-bay-coral px-1 text-[9px] font-black text-white">
-                          ×{count}
-                        </span>
+                        <>
+                          <span className="absolute -right-1 -top-1 rounded-full border border-black/30 bg-bay-coral px-1 text-[9px] font-black text-white">
+                            ×{count}
+                          </span>
+                          <button
+                            type="button"
+                            data-testid="gift-card"
+                            onClick={() => void openGiftPicker(card)}
+                            className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#1d4a1f] bg-gradient-to-b from-[#8ee06a] to-[#3f9a3a] text-[10px] shadow-chunkysm"
+                            aria-label={`${card.name} verschenken`}
+                          >
+                            🎁
+                          </button>
+                        </>
                       )}
                     </motion.div>
                   );
@@ -206,6 +255,54 @@ export function CardsScreen(): JSX.Element {
           );
         })}
       </div>
+
+      {/* Freund auswählen */}
+      {giftCard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-5">
+          <motion.div
+            initial={{ scale: 0.85, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="panel w-full max-w-sm p-4"
+          >
+            <div className="text-center font-display text-lg font-black">
+              „{giftCard.name}" verschenken
+            </div>
+            <div className="mt-1 text-center text-[11px] opacity-70">
+              An wen soll die doppelte Karte gehen?
+            </div>
+            <div className="mt-3 max-h-64 space-y-1.5 overflow-y-auto">
+              {friends.length === 0 && (
+                <div className="rounded-2xl bg-black/5 p-3 text-center text-sm">
+                  Du hast noch keine Freunde. Füge welche im Freunde-Tab hinzu.
+                </div>
+              )}
+              {friends.map((friend) => (
+                <button
+                  key={friend.id}
+                  type="button"
+                  data-testid="gift-friend"
+                  disabled={busy}
+                  onClick={() => void sendGift(friend.id)}
+                  className="flex w-full items-center gap-2 rounded-2xl border-2 border-black/15 bg-black/5 px-3 py-2 text-left active:scale-[0.98]"
+                >
+                  <span className="text-xl">{friend.avatar}</span>
+                  <span className="min-w-0 flex-1 truncate font-display text-sm font-bold">
+                    {friend.name}
+                  </span>
+                  <span className="text-[11px] opacity-60">Lvl {friend.level}</span>
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="btn border-black/20 bg-black/10 mt-3 w-full text-sm text-[#3b2a14]"
+              onClick={() => setGiftCard(null)}
+            >
+              Abbrechen
+            </button>
+          </motion.div>
+        </div>
+      )}
 
       {/* Truhen-Ergebnis */}
       {drops && (

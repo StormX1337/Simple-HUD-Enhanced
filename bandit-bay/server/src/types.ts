@@ -263,7 +263,9 @@ export type HistoryType =
   | 'spin'
   | 'pet'
   | 'wheel'
-  | 'tournament';
+  | 'tournament'
+  | 'gift'
+  | 'gifted';
 
 export interface HistoryEntry {
   id: number;

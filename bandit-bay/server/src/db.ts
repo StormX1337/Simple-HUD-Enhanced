@@ -153,6 +153,13 @@ export function migrate(): void {
       PRIMARY KEY (user_id, pet_id)
     );
 
+    CREATE TABLE IF NOT EXISTS card_gifts (
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      day TEXT NOT NULL,
+      count INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (user_id, day)
+    );
+
     CREATE TABLE IF NOT EXISTS friends (
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       friend_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,

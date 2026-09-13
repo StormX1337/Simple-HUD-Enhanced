@@ -127,7 +127,7 @@ export function unseenNews(user: UserRow, limit = 12): HistoryEntry[] {
   const rows = db
     .prepare<[string, number, number], EventRow>(
       `SELECT * FROM events
-       WHERE user_id = ? AND id > ? AND type IN ('attacked', 'raided', 'blocked')
+       WHERE user_id = ? AND id > ? AND type IN ('attacked', 'raided', 'blocked', 'gifted')
        ORDER BY id DESC LIMIT ?`,
     )
     .all(user.id, user.last_seen_event, limit);

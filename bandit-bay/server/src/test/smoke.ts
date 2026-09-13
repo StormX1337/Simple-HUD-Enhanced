@@ -7,6 +7,7 @@ import { seedBots } from '../seed.js';
 import {
   BALANCE,
   BOT_NAMES,
+  CARDS,
   CARD_SETS,
   eventStatus,
   tournamentCycle,
@@ -18,11 +19,25 @@ import {
   chestCost,
   upgradeCost,
 } from '../content/content.js';
-import { buildState, createUser, ensureBuildings, getUserById, saveUser } from '../game/core.js';
+import {
+  buildState,
+  createUser,
+  ensureBuildings,
+  getCards,
+  getUserById,
+  saveUser,
+} from '../game/core.js';
 import { spin } from '../game/slot.js';
 import { upgradeBuilding } from '../game/village.js';
 import { attack, getTargets, prepareRaid, raid } from '../game/battle.js';
-import { claimSet, effectiveChestCost, grantCard, openChest } from '../game/collection.js';
+import {
+  claimSet,
+  effectiveChestCost,
+  giftCard,
+  GIFTS_PER_DAY,
+  grantCard,
+  openChest,
+} from '../game/collection.js';
 import { claimDaily, claimQuest, dailyState, questStates } from '../game/progress.js';
 import { feedPet, petBonus, petStates } from '../game/pets.js';
 import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
@@ -239,6 +254,40 @@ if (earlyClaim.ok) {
   check('Vollständiges Set eingelöst', setResult.ok, `${setResult.coins} Taler`);
 }
 check('Set kann nicht doppelt eingelöst werden', !claimSet(player, firstSet.id).ok);
+
+/* --- Karten verschenken ----------------------------------------------- */
+const giftFriend = addFriend(player, BOT_NAMES[1].name);
+const giftCardDef = cardsOfSet(firstSet.id)[0];
+grantCard(player, giftCardDef);
+grantCard(player, giftCardDef);
+saveUser(player);
+const gift = giftCard(player, giftFriend.id, giftCardDef.id);
+check('Karte verschenkt', gift.friendName === giftFriend.name, giftCardDef.name);
+check('Geschenk-Limit sinkt', gift.left === GIFTS_PER_DAY - 1, `${gift.left} übrig`);
+check(
+  'Freund hat die Karte',
+  (getCards(giftFriend.id)[giftCardDef.id] ?? 0) > 0,
+);
+
+const singleCard = CARDS.find((entry) => (getCards(player.id)[entry.id] ?? 0) === 1);
+if (singleCard) {
+  let singleFailed = false;
+  try {
+    giftCard(player, giftFriend.id, singleCard.id);
+  } catch {
+    singleFailed = true;
+  }
+  check('Einzelne Karten bleiben beim Spieler', singleFailed);
+}
+let strangerFailed = false;
+try {
+  const stranger = getTargets(player).find((entry) => entry.id !== giftFriend.id);
+  if (stranger) giftCard(player, stranger.id, giftCardDef.id);
+  else strangerFailed = true;
+} catch {
+  strangerFailed = true;
+}
+check('Nur an Freunde verschenken', strangerFailed);
 
 /* --- Quests & Tagesbelohnung ------------------------------------------ */
 const quests = questStates(player.id);

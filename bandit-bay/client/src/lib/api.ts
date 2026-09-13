@@ -1,6 +1,7 @@
 import type {
   AchievementState,
   AttackResult,
+  CardDef,
   EventState,
   EventWindowInfo,
   FriendInfo,
@@ -105,7 +106,20 @@ export const api = {
       { targetId },
     ),
   collection: () =>
-    request<{ state: PlayerState; chests: ChestOffer[]; sets: SetProgress[] }>('/collection'),
+    request<{
+      state: PlayerState;
+      chests: ChestOffer[];
+      sets: SetProgress[];
+      gifts: { sentToday: number; limit: number; left: number };
+    }>('/collection'),
+  giftCard: (friendId: string, cardId: string) =>
+    post<{
+      card: CardDef;
+      friendName: string;
+      left: number;
+      state: PlayerState;
+      gifts: { sentToday: number; limit: number; left: number };
+    }>('/collection/gift', { friendId, cardId }),
   openChest: (chestId: string) => post<ChestResponse>('/collection/chest', { chestId }),
   claimSet: (setId: string) => post<ClaimResponse>('/collection/set', { setId }),
   quests: () => request<{ quests: QuestState[] }>('/quests'),

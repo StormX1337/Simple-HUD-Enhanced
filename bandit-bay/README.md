@@ -113,6 +113,9 @@ Turnier-Tab.
 Namen hinzufügen. Freunde tauchen bevorzugt als Ziel auf und lassen sich direkt aus der Liste
 angreifen oder ausrauben. Dein eigener Name steht oben zum Weitergeben.
 
+**Karten verschenken** – doppelte Karten lassen sich über das 🎁 auf der Karte an Freunde
+weitergeben (fünf pro Tag). Der Beschenkte sieht es beim nächsten Start in der Übersicht.
+
 **Inselübersicht** – ein Tipp auf das Inselschild zeigt alle sechs Inseln mit Fortschritt und
 Gebäudestand; fertige Inseln bleiben sichtbar.
 
@@ -200,6 +203,7 @@ bandit-bay/
 | `POST` | `/api/raid/prepare` | Grabstellen vorbereiten (für Finas Spürnase) |
 | `GET` | `/api/collection` | Karten, Sets, Truhenpreise |
 | `POST` | `/api/collection/chest`, `/api/collection/set` | Truhe öffnen, Set einlösen |
+| `POST` | `/api/collection/gift` | Doppelte Karte an einen Freund verschenken |
 | `GET/POST` | `/api/quests`, `/api/quests/claim` | Tagesquests |
 | `GET/POST` | `/api/daily`, `/api/daily/claim` | Tagesbelohnung |
 | `GET/POST` | `/api/achievements`, `/api/achievements/claim` | Meilensteine und ihre Belohnungen |

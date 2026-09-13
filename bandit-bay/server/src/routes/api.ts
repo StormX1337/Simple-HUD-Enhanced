@@ -29,7 +29,14 @@ import {
 import { GameError, setBet, spin } from '../game/slot.js';
 import { upgradeBuilding } from '../game/village.js';
 import { attack, getTarget, getTargets, prepareRaid, raid } from '../game/battle.js';
-import { claimSet, effectiveChestCost, grantRandomCard, openChest } from '../game/collection.js';
+import {
+  claimSet,
+  effectiveChestCost,
+  giftCard,
+  giftStatus,
+  grantRandomCard,
+  openChest,
+} from '../game/collection.js';
 import { feedPet, petStates } from '../game/pets.js';
 import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
 import { achievementStates, claimAchievement } from '../game/achievements.js';
@@ -284,6 +291,7 @@ api.get('/collection', auth, (req: AuthedRequest, res) => {
   const state = buildState(user);
   res.json({
     state,
+    gifts: giftStatus(user.id),
     chests: CHESTS.map((chest) => ({ ...chest, cost: effectiveChestCost(user, chest.id) })),
     sets: CARD_SETS.map((set) => {
       const cards = cardsOfSet(set.id);
@@ -300,6 +308,16 @@ api.get('/collection', auth, (req: AuthedRequest, res) => {
       };
     }),
   });
+});
+
+api.post('/collection/gift', auth, (req: AuthedRequest, res, next) => {
+  try {
+    const user = me(req);
+    const result = giftCard(user, String(req.body?.friendId ?? ''), String(req.body?.cardId ?? ''));
+    res.json({ ...result, state: buildState(user), gifts: giftStatus(user.id) });
+  } catch (error) {
+    next(error);
+  }
 });
 
 api.post('/collection/chest', auth, (req: AuthedRequest, res, next) => {

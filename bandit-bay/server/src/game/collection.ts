@@ -1,8 +1,9 @@
-import { db, now, type UserRow } from '../db.js';
+import { db, dayKey, now, type UserRow } from '../db.js';
 import type { CardDef, Rarity } from '../types.js';
 import {
   BALANCE,
   CARDS,
+  cardById,
   CARD_SETS,
   CHESTS,
   RARITY_WEIGHTS,
@@ -11,8 +12,9 @@ import {
   duplicateValue,
   spinCapacity,
 } from '../content/content.js';
-import { addXp, logEvent, pickWeighted, saveUser } from './core.js';
+import { addXp, getUserById, logEvent, pickWeighted, saveUser } from './core.js';
 import { hasPetAbility, petBonus } from './pets.js';
+import { GameError } from './slot.js';
 import { trackQuest } from './progress.js';
 
 export interface CardDrop {
@@ -143,4 +145,90 @@ export function claimSet(user: UserRow, setId: string): SetClaimResult {
     shields: set.reward.shields ?? 0,
     levelUps,
   };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Karten verschenken                                                 */
+/* ------------------------------------------------------------------ */
+
+/** So viele Karten darf man pro Tag verschenken. */
+export const GIFTS_PER_DAY = 5;
+
+export interface GiftStatus {
+  sentToday: number;
+  limit: number;
+  left: number;
+}
+
+export function giftStatus(userId: string): GiftStatus {
+  const row = db
+    .prepare<[string, string], { count: number }>(
+      'SELECT count FROM card_gifts WHERE user_id = ? AND day = ?',
+    )
+    .get(userId, dayKey());
+  const sent = row?.count ?? 0;
+  return { sentToday: sent, limit: GIFTS_PER_DAY, left: Math.max(0, GIFTS_PER_DAY - sent) };
+}
+
+export interface GiftResult {
+  card: CardDef;
+  friendName: string;
+  left: number;
+}
+
+/** Eine doppelte Karte an einen Freund verschenken. */
+export function giftCard(user: UserRow, friendId: string, cardId: string): GiftResult {
+  const card = cardById(cardId);
+  if (!card) throw new GameError('Unbekannte Karte', 404);
+
+  const isFriend = db
+    .prepare('SELECT friend_id FROM friends WHERE user_id = ? AND friend_id = ?')
+    .get(user.id, friendId);
+  if (!isFriend) throw new GameError('Das ist keiner deiner Freunde');
+
+  const friend = getUserById(friendId);
+  if (!friend) throw new GameError('Freund nicht gefunden', 404);
+
+  const status = giftStatus(user.id);
+  if (status.left <= 0) throw new GameError(`Heute sind ${GIFTS_PER_DAY} Karten verschenkt`);
+
+  const owned = db
+    .prepare<[string, string], { count: number }>(
+      'SELECT count FROM cards WHERE user_id = ? AND card_id = ?',
+    )
+    .get(user.id, cardId);
+  if (!owned || owned.count < 2)
+    throw new GameError('Du kannst nur doppelte Karten verschenken');
+
+  const tx = db.transaction(() => {
+    db.prepare('UPDATE cards SET count = count - 1 WHERE user_id = ? AND card_id = ?').run(
+      user.id,
+      cardId,
+    );
+    db.prepare(
+      `INSERT INTO card_gifts (user_id, day, count) VALUES (?, ?, 1)
+       ON CONFLICT(user_id, day) DO UPDATE SET count = count + 1`,
+    ).run(user.id, dayKey());
+  });
+  tx();
+
+  grantCard(friend, card);
+  saveUser(friend);
+
+  logEvent({
+    userId: user.id,
+    type: 'gift',
+    otherId: friend.id,
+    otherName: friend.name,
+    detail: `${card.name} an ${friend.name}`,
+  });
+  logEvent({
+    userId: friend.id,
+    type: 'gifted',
+    otherId: user.id,
+    otherName: user.name,
+    detail: `${card.name} geschenkt`,
+  });
+
+  return { card, friendName: friend.name, left: giftStatus(user.id).left };
 }
