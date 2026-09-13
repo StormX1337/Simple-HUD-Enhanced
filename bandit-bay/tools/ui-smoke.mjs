@@ -130,7 +130,37 @@ for (const [id, file] of [['cards', '12-cards'], ['friends', '13-friends'], ['qu
   await page.screenshot({ path: `${SHOTS}/${file}.png` });
 }
 
+// Quest-Belohnung abholen (nach den vielen Drehungen sollte eine fertig sein)
+await page.locator('[data-testid=nav-quests]').click();
+await page.waitForTimeout(1100);
+let questClaimed = false;
+const questButton = page.locator('button:has-text("Abholen")').first();
+if (await questButton.isVisible().catch(() => false)) {
+  await questButton.click();
+  await page.waitForTimeout(1200);
+  questClaimed = true;
+  await page.screenshot({ path: `${SHOTS}/14b-quest-claimed.png` });
+}
+
+// Meilenstein-Tab kurz öffnen
+await page.locator('[data-testid=quests-tab-goals]').click();
+await page.waitForTimeout(1000);
+await page.screenshot({ path: `${SHOTS}/14c-goals.png` });
+await page.locator('[data-testid=quests-tab-daily]').click();
+await page.waitForTimeout(600);
+
+// Insel-Übersicht
+await page.locator('[data-testid=nav-village]').click();
+await page.waitForTimeout(800);
+await page.locator('[data-testid=village-sign]').click();
+await page.waitForTimeout(1100);
+const islandsSeen = await page.locator('[data-testid=villages-close]').isVisible().catch(() => false);
+if (islandsSeen) await page.locator('[data-testid=villages-close]').click();
+await page.waitForTimeout(500);
+
 // Tagesbelohnung
+await page.locator('[data-testid=nav-rewards]').click();
+await page.waitForTimeout(1000);
 const claim = page.locator('button:has-text("abholen")').first();
 let dailyClaimed = false;
 if (await claim.isVisible().catch(() => false) && await claim.isEnabled()) {
@@ -165,13 +195,19 @@ const stillLoggedIn = await visible('[data-testid=spin-button]') || await visibl
 await page.screenshot({ path: `${SHOTS}/19-reload.png` });
 
 const realErrors = errors.filter((entry) => !entry.includes('ERR_CONNECTION_RESET'));
-console.log(JSON.stringify({ name, seen, dailyClaimed, chestOpened, stillLoggedIn, errors }, null, 2));
+console.log(
+  JSON.stringify(
+    { name, seen, questClaimed, islandsSeen, dailyClaimed, chestOpened, stillLoggedIn, errors },
+    null,
+    2,
+  ),
+);
 await browser.close();
 if (realErrors.length > 0) {
   console.error('JavaScript-Fehler im Client:', realErrors);
   process.exit(1);
 }
-if (seen.spins < 5 || seen.upgrade < 1 || !dailyClaimed || !stillLoggedIn) {
+if (seen.spins < 5 || seen.upgrade < 1 || !dailyClaimed || !stillLoggedIn || !islandsSeen) {
   console.error('Kernabläufe wurden nicht durchlaufen.');
   process.exit(1);
 }
