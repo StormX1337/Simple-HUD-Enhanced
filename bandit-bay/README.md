@@ -38,7 +38,8 @@ Weitere Skripte:
 | `npm run test` | Smoke-Test der kompletten Spiellogik (In-Memory-DB) |
 | `npm run typecheck` | TypeScript-Prüfung für Server und Client |
 | `npm run seed -w server` | Mitspieler-Bots nachlegen |
-| `python3 tools/generate-audio.py` | Platzhalter-Sounds neu erzeugen |
+| `python3 tools/generate-audio.py` | Sounds und Musik neu erzeugen |
+| `npm run balance -w server` | Balance-Simulation: spielt die Engine durch und zeigt den Aufwand pro Insel |
 | `node tools/ui-smoke.mjs` | Durchspiel-Test der Oberfläche (braucht laufenden Dev-Server und Playwright) |
 | `node tools/generate-icons.mjs` | App-Icons neu erzeugen (braucht Playwright) |
 
@@ -151,6 +152,10 @@ Alle Werte stehen an einer Stelle: `server/src/content/content.ts`.
   4 Stunden. Boni und Fähigkeiten rechnet der Server auf Auszahlung, Beute und Truhenpreise.
 * **Drehungen voll?** Beutel-Symbole und Rad-Felder zahlen dann in Talern aus, statt zu verfallen.
 
+**Wie lange dauert das Spiel?** `npm run balance -w server` spielt die echte Engine durch.
+Aktueller Stand: Insel 1 nach rund 40 Drehungen, danach 200 / 400 / 800 / 1.900 / 3.000 –
+zusammen etwa 5.800 Drehungen, von denen der Automat rund zwei Drittel wieder zurückgibt.
+
 ---
 
 ## Projektstruktur
@@ -223,6 +228,8 @@ eigene Icons unter `client/public/icons/`.
 
 * **Sounds**: Dateien in `client/public/audio/` mit gleichem Namen ersetzen
   (`spin.wav`, `coin.wav`, `attack.wav`, `raid.wav`, `upgrade.wav`, `reward.wav`, `levelup.wav`, …).
+  `music.wav` ist eine ruhige Endlosschleife; Ton und Musik lassen sich im Menü getrennt
+  abschalten (Musik startet erst nach der ersten Berührung, so wollen es die Browser).
 * **Grafiken**: Die SVG-Komponenten unter `client/src/components/art/` austauschen –
   `SymbolIcon` (Walzensymbole), `BuildingArt` (Gebäude nach Typ und Stufe),
   `CardArt` (Kartenmotive), `PetArt` (fünf Begleiter), `Scenery` (Palmen, Wolken, Sandhügel …),

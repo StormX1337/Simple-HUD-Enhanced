@@ -10,7 +10,8 @@
     "start": "node dist/index.js",
     "seed": "tsx src/seed.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "DB_FILE=:memory: tsx src/test/smoke.ts"
+    "test": "DB_FILE=:memory: tsx src/test/smoke.ts",
+    "balance": "DB_FILE=:memory: tsx src/tools/balance.ts"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",

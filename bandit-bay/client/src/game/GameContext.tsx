@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { ApiError, api, clearToken, getToken, setToken } from '../lib/api';
-import { preloadSounds, playSound } from '../lib/sound';
+import { preloadSounds, playSound, startMusic } from '../lib/sound';
 import type { DailyState, GameConfig, HistoryEntry, PlayerState, QuestState } from '../types';
 
 export interface Toast {
@@ -113,6 +113,17 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
     }, 1000);
     return () => window.clearInterval(timer);
   }, [state, refresh]);
+
+  // Musik darf erst nach der ersten Interaktion starten (Browser-Regel).
+  useEffect(() => {
+    const start = () => startMusic();
+    window.addEventListener('pointerdown', start, { once: true });
+    window.addEventListener('keydown', start, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', start);
+      window.removeEventListener('keydown', start);
+    };
+  }, []);
 
   // Beim Zurueckkehren in den Tab aktuellen Stand holen.
   useEffect(() => {

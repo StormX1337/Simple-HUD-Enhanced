@@ -36,9 +36,14 @@ const FILES: Record<SoundName, string> = {
 };
 
 const MUTE_KEY = 'bandit-bay.muted';
+const MUSIC_KEY = 'bandit-bay.music';
+const MUSIC_FILE = '/audio/music.wav';
 const cache = new Map<SoundName, HTMLAudioElement>();
 
 let muted = localStorage.getItem(MUTE_KEY) === '1';
+// Musik ist standardmäßig aus, damit niemand überrascht wird.
+let musicOn = localStorage.getItem(MUSIC_KEY) === '1';
+let musicElement: HTMLAudioElement | null = null;
 
 export function isMuted(): boolean {
   return muted;
@@ -47,7 +52,40 @@ export function isMuted(): boolean {
 export function toggleMute(): boolean {
   muted = !muted;
   localStorage.setItem(MUTE_KEY, muted ? '1' : '0');
+  if (muted) stopMusic();
+  else if (musicOn) startMusic();
   return muted;
+}
+
+export function isMusicOn(): boolean {
+  return musicOn;
+}
+
+/** Hintergrundmusik in Dauerschleife, leise im Hintergrund. */
+export function startMusic(): void {
+  if (muted || !musicOn) return;
+  try {
+    if (!musicElement) {
+      musicElement = new Audio(MUSIC_FILE);
+      musicElement.loop = true;
+      musicElement.volume = 0.22;
+    }
+    void musicElement.play().catch(() => undefined);
+  } catch {
+    /* Musik ist optional. */
+  }
+}
+
+export function stopMusic(): void {
+  musicElement?.pause();
+}
+
+export function toggleMusic(): boolean {
+  musicOn = !musicOn;
+  localStorage.setItem(MUSIC_KEY, musicOn ? '1' : '0');
+  if (musicOn) startMusic();
+  else stopMusic();
+  return musicOn;
 }
 
 export function playSound(name: SoundName, volume = 0.6): void {

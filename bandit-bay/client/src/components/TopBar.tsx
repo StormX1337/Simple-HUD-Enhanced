@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useGame } from '../game/GameContext';
 import { formatCoins, formatDuration, formatFull } from '../lib/format';
-import { isMuted, playSound, toggleMute } from '../lib/sound';
+import { isMuted, isMusicOn, playSound, toggleMusic, toggleMute } from '../lib/sound';
 import { CoinIcon, ShieldIcon, SpinIcon, StarIcon } from './art/HudIcons';
 import { Raccoon } from './art/Raccoon';
 
@@ -12,6 +12,7 @@ interface Props {
 export function TopBar({ onOpenBonus }: Props): JSX.Element | null {
   const { state, secondsToNextSpin, logout, config } = useGame();
   const [muted, setMuted] = useState(isMuted());
+  const [music, setMusic] = useState(isMusicOn());
   const [menuOpen, setMenuOpen] = useState(false);
   if (!state) return null;
 
@@ -105,17 +106,32 @@ export function TopBar({ onOpenBonus }: Props): JSX.Element | null {
               <div className="text-[11px] font-normal text-white/60">Einstellungen</div>
             </div>
           </div>
-          <button
-            type="button"
-            className="btn-ghost mb-2 w-full text-sm"
-            onClick={() => {
-              const next = toggleMute();
-              setMuted(next);
-              if (!next) playSound('click');
-            }}
-          >
-            {muted ? '🔇 Ton aus' : '🔊 Ton an'}
-          </button>
+          <div className="mb-2 flex gap-1.5">
+            <button
+              type="button"
+              data-testid="toggle-sound"
+              className="btn-ghost flex-1 text-sm"
+              onClick={() => {
+                const next = toggleMute();
+                setMuted(next);
+                if (!next) playSound('click');
+              }}
+            >
+              {muted ? '🔇 Ton aus' : '🔊 Ton an'}
+            </button>
+            <button
+              type="button"
+              data-testid="toggle-music"
+              className="btn-ghost flex-1 text-sm"
+              onClick={() => {
+                const next = toggleMusic();
+                setMusic(next);
+                playSound('click', 0.3);
+              }}
+            >
+              {music ? '🎵 Musik an' : '🎵 Musik aus'}
+            </button>
+          </div>
           <div className="mb-2 grid grid-cols-2 gap-1 rounded-2xl bg-black/30 p-2 text-[11px] text-white/80">
             <div className="flex items-center gap-1">
               <StarIcon size={14} /> Level {state.level}
