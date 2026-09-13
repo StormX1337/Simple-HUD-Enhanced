@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins } from '../lib/format';
@@ -73,14 +73,14 @@ export function DecoShop({ open, onClose }: Props): JSX.Element | null {
 
   return (
     <AnimatePresence>
-      <motion.div
+      <m.div
         className="fixed inset-0 z-50 flex items-end bg-black/60 p-2.5"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
       >
-        <motion.div
+        <m.div
           className="panel max-h-[80vh] w-full overflow-y-auto p-3"
           initial={{ y: 80 }}
           animate={{ y: 0 }}
@@ -181,8 +181,8 @@ export function DecoShop({ open, onClose }: Props): JSX.Element | null {
               );
             })}
           </div>
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </m.div>
     </AnimatePresence>
   );
 }

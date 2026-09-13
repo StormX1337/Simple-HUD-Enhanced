@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 
 export function Toasts(): JSX.Element {
@@ -7,7 +7,7 @@ export function Toasts(): JSX.Element {
     <div className="pointer-events-none fixed inset-x-0 top-24 z-50 mx-auto flex w-full max-w-[460px] flex-col items-center gap-2 px-4">
       <AnimatePresence>
         {toasts.map((toast) => (
-          <motion.div
+          <m.div
             key={toast.id}
             initial={{ opacity: 0, y: -12, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -21,7 +21,7 @@ export function Toasts(): JSX.Element {
             }`}
           >
             {toast.text}
-          </motion.div>
+          </m.div>
         ))}
       </AnimatePresence>
     </div>

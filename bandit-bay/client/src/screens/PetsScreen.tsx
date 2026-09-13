@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins, formatDuration } from '../lib/format';
@@ -74,7 +74,7 @@ export function PetsScreen(): JSX.Element {
         const seconds = pet.active ? Math.max(0, pet.secondsLeft - tick) : 0;
         const affordable = state.coins >= pet.cost;
         return (
-          <motion.div
+          <m.div
             key={pet.id}
             layout
             className={`panel flex items-center gap-3 p-3 ${pet.unlocked ? '' : 'opacity-70'}`}
@@ -135,7 +135,7 @@ export function PetsScreen(): JSX.Element {
                 </button>
               )}
             </div>
-          </motion.div>
+          </m.div>
         );
       })}
     </div>

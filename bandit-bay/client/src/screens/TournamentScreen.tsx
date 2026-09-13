@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins, formatDuration } from '../lib/format';
@@ -80,7 +80,7 @@ export function TournamentScreen(): JSX.Element {
       </div>
 
       {tournament.reward?.available && (
-        <motion.div animate={{ scale: [1, 1.02, 1] }} transition={{ repeat: Infinity, duration: 1.8 }} className="panel p-3 text-center">
+        <m.div animate={{ scale: [1, 1.02, 1] }} transition={{ repeat: Infinity, duration: 1.8 }} className="panel p-3 text-center">
           <div className="font-display text-base font-black">
             Preis aus dem letzten Turnier: {tournament.reward.label}
           </div>
@@ -101,7 +101,7 @@ export function TournamentScreen(): JSX.Element {
           >
             Preis abholen
           </button>
-        </motion.div>
+        </m.div>
       )}
 
       <div className="space-y-1.5">

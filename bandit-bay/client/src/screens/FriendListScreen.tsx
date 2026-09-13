@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins } from '../lib/format';
@@ -99,7 +99,7 @@ export function FriendListScreen({ onAttack, onRaid }: Props): JSX.Element {
       {friends.map((friend) => {
         const intact = friend.buildings.filter((building) => building.level > 0).length;
         return (
-          <motion.div key={friend.id} layout className="panel p-2.5">
+          <m.div key={friend.id} layout className="panel p-2.5">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border-2 border-black/20 bg-[#2b4874] text-2xl">
                 {friend.avatar}
@@ -156,7 +156,7 @@ export function FriendListScreen({ onAttack, onRaid }: Props): JSX.Element {
                 ✕
               </button>
             </div>
-          </motion.div>
+          </m.div>
         );
       })}
     </div>

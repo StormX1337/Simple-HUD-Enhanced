@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins } from '../lib/format';
@@ -166,7 +166,7 @@ export function AttackOverlay({ open, onClose, initialTargetId }: Props): JSX.El
           </div>
 
           {/* Insel des Ziels */}
-          <motion.div
+          <m.div
             className="relative flex-1 overflow-hidden"
             animate={swinging && result ? { x: [0, -9, 9, -5, 0], y: [0, 5, -4, 0] } : {}}
             transition={{ duration: 0.45 }}
@@ -208,7 +208,7 @@ export function AttackOverlay({ open, onClose, initialTargetId }: Props): JSX.El
                   className="absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center transition-transform active:scale-95 disabled:cursor-default"
                   style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
                 >
-                  <motion.div
+                  <m.div
                     animate={isHit && result ? { rotate: [0, -6, 6, -3, 0], scale: [1, 0.94, 1] } : {}}
                     transition={{ duration: 0.5 }}
                   >
@@ -218,7 +218,7 @@ export function AttackOverlay({ open, onClose, initialTargetId }: Props): JSX.El
                       accent={village.palette.accent}
                       size={short ? 66 : 88}
                     />
-                  </motion.div>
+                  </m.div>
                   <span className="-mt-1.5 max-w-[92px] truncate rounded-full border-2 border-black/40 bg-black/55 px-1.5 text-[10px] font-black text-white">
                     {building.name}
                   </span>
@@ -227,7 +227,7 @@ export function AttackOverlay({ open, onClose, initialTargetId }: Props): JSX.El
                   <AnimatePresence>
                     {isHit && (
                       <>
-                        <motion.div
+                        <m.div
                           initial={{ rotate: -75, x: 40, y: -70, opacity: 0 }}
                           animate={{ rotate: 18, x: 10, y: -18, opacity: 1 }}
                           exit={{ opacity: 0 }}
@@ -235,21 +235,21 @@ export function AttackOverlay({ open, onClose, initialTargetId }: Props): JSX.El
                           className="pointer-events-none absolute -top-10 left-1/2 origin-bottom"
                         >
                           <Hammer size={short ? 64 : 84} />
-                        </motion.div>
+                        </m.div>
                         {result && (
-                          <motion.span
+                          <m.span
                             initial={{ scale: 0.2, opacity: 1 }}
                             animate={{ scale: 2.4, opacity: 0 }}
                             transition={{ duration: 0.8 }}
                             className="pointer-events-none absolute inset-0 flex items-center justify-center text-5xl"
                           >
                             {result.blocked ? '🛡️' : '💥'}
-                          </motion.span>
+                          </m.span>
                         )}
                         {result && !result.blocked && (
                           <>
                             {[...Array(6)].map((_, index) => (
-                              <motion.span
+                              <m.span
                                 key={index}
                                 initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
                                 animate={{
@@ -287,13 +287,13 @@ export function AttackOverlay({ open, onClose, initialTargetId }: Props): JSX.El
                 </span>
               </div>
             )}
-          </motion.div>
+          </m.div>
         </>
       )}
 
       <AnimatePresence>
         {result && (
-          <motion.div
+          <m.div
             initial={{ y: 90, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="panel z-30 m-2.5 p-3 text-center"
@@ -321,7 +321,7 @@ export function AttackOverlay({ open, onClose, initialTargetId }: Props): JSX.El
                 ? `Nächster Angriff (${state.pendingAttacks})`
                 : 'Zurück zur Insel'}
             </button>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

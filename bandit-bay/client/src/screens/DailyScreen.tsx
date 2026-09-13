@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins } from '../lib/format';
@@ -54,7 +54,7 @@ export function DailyScreen(): JSX.Element {
           const isNext = daily?.nextDay === step.day;
           const done = (daily?.streak ?? 0) >= step.day && !(daily?.canClaim && isNext);
           return (
-            <motion.div
+            <m.div
               key={step.day}
               animate={isNext && daily?.canClaim ? { scale: [1, 1.05, 1] } : {}}
               transition={{ repeat: Infinity, duration: 1.6 }}
@@ -86,7 +86,7 @@ export function DailyScreen(): JSX.Element {
                 )}
               </div>
               {done && <div className="mt-1 text-[11px] font-black">✓</div>}
-            </motion.div>
+            </m.div>
           );
         })}
       </div>
@@ -118,7 +118,7 @@ export function DailyScreen(): JSX.Element {
 
       {drops && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-5">
-          <motion.div
+          <m.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="panel w-full max-w-sm p-4 text-center"
@@ -145,7 +145,7 @@ export function DailyScreen(): JSX.Element {
             >
               Danke!
             </button>
-          </motion.div>
+          </m.div>
         </div>
       )}
     </div>

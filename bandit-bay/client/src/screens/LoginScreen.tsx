@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError } from '../lib/api';
 import { playSound } from '../lib/sound';
@@ -46,7 +46,7 @@ export function LoginScreen(): JSX.Element {
       <Palm size={70} className="absolute bottom-[2%] left-[6%]" />
       <Palm size={54} className="absolute bottom-[1%] right-[8%]" />
 
-      <motion.div
+      <m.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className="relative z-10 w-full max-w-sm"
@@ -111,7 +111,7 @@ export function LoginScreen(): JSX.Element {
             <SymbolIcon key={id} id={id} size={34} />
           ))}
         </div>
-      </motion.div>
+      </m.div>
     </div>
   );
 }

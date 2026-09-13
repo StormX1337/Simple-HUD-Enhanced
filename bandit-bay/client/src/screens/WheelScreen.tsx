@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins, formatDuration } from '../lib/format';
@@ -106,7 +106,7 @@ export function WheelScreen(): JSX.Element {
           </svg>
         </div>
 
-        <motion.div
+        <m.div
           className="absolute inset-x-0 top-3"
           animate={{ rotate: rotation }}
           transition={{ duration: 3.6, ease: [0.16, 0.72, 0.16, 1] }}
@@ -153,7 +153,7 @@ export function WheelScreen(): JSX.Element {
             <circle cx={CENTER} cy={CENTER} r="26" fill="#f8c73c" stroke="#3b2412" strokeWidth="4" />
             <circle cx={CENTER} cy={CENTER} r="14" fill="#ffe9a0" stroke="#c8900f" strokeWidth="3" />
           </svg>
-        </motion.div>
+        </m.div>
       </div>
 
       <button
@@ -187,14 +187,14 @@ export function WheelScreen(): JSX.Element {
 
       <AnimatePresence>
         {result && (
-          <motion.div
+          <m.div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setResult(null)}
           >
-            <motion.div
+            <m.div
               initial={{ scale: 0.7, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               className="panel w-full max-w-xs p-4 text-center"
@@ -231,8 +231,8 @@ export function WheelScreen(): JSX.Element {
               <button type="button" className="btn-gold mt-4 w-full" onClick={() => setResult(null)}>
                 Super!
               </button>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

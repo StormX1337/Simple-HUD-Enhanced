@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { formatCoins } from '../lib/format';
 import { CoinIcon } from './art/HudIcons';
 
@@ -22,7 +22,7 @@ export function BigWin({ amount, onDone }: Props): JSX.Element {
   }, []);
 
   return (
-    <motion.div
+    <m.div
       data-testid="big-win"
       className="pointer-events-auto fixed inset-0 z-[60] flex items-center justify-center bg-black/55"
       initial={{ opacity: 0 }}
@@ -31,7 +31,7 @@ export function BigWin({ amount, onDone }: Props): JSX.Element {
       onClick={onDone}
     >
       {/* Strahlenkranz */}
-      <motion.div
+      <m.div
         className="pointer-events-none absolute h-[520px] w-[520px]"
         animate={{ rotate: 360 }}
         transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}
@@ -45,7 +45,7 @@ export function BigWin({ amount, onDone }: Props): JSX.Element {
 
       {/* Konfetti */}
       {[...Array(18)].map((_, index) => (
-        <motion.span
+        <m.span
           key={index}
           className="pointer-events-none absolute h-2.5 w-2.5 rounded-[2px]"
           style={{ background: CONFETTI[index % CONFETTI.length] }}
@@ -60,7 +60,7 @@ export function BigWin({ amount, onDone }: Props): JSX.Element {
         />
       ))}
 
-      <motion.div
+      <m.div
         initial={{ scale: 0.5, rotate: -8, opacity: 0 }}
         animate={{ scale: 1, rotate: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 220, damping: 13 }}
@@ -75,7 +75,7 @@ export function BigWin({ amount, onDone }: Props): JSX.Element {
           </span>
         </div>
         <div className="mt-3 text-xs font-bold text-white/70">Tippen zum Fortfahren</div>
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   );
 }

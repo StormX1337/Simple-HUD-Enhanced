@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { CardArt } from './art/CardArt';
 import { formatCoins } from '../lib/format';
 import { playSound } from '../lib/sound';
@@ -14,7 +14,7 @@ interface Props {
 export function CardReveal({ card, isNew, coins = 0, onClose }: Props): JSX.Element {
   return (
     <div data-testid="card-reveal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6">
-      <motion.div
+      <m.div
         initial={{ scale: 0.6, rotateY: 90, opacity: 0 }}
         animate={{ scale: 1, rotateY: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 180, damping: 16 }}
@@ -45,7 +45,7 @@ export function CardReveal({ card, isNew, coins = 0, onClose }: Props): JSX.Elem
         >
           Super!
         </button>
-      </motion.div>
+      </m.div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { playSound } from '../lib/sound';
 import { Raccoon } from './art/Raccoon';
@@ -60,7 +60,7 @@ export function Tutorial(): JSX.Element | null {
 
   return (
     <AnimatePresence>
-      <motion.div
+      <m.div
         key={step}
         initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -83,7 +83,7 @@ export function Tutorial(): JSX.Element | null {
             {step === 'explore' ? 'Alles klar' : 'Später'}
           </button>
         </div>
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { DevGallery } from './DevGallery';
+import { LazyMotion, domAnimation } from 'framer-motion';
 import { GameProvider } from './game/GameContext';
 import './index.css';
 
@@ -14,8 +15,10 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <GameProvider>
-      {window.location.search.includes('gallery') ? <DevGallery /> : <App />}
-    </GameProvider>
+    <LazyMotion features={domAnimation} strict>
+      <GameProvider>
+        {window.location.search.includes('gallery') ? <DevGallery /> : <App />}
+      </GameProvider>
+    </LazyMotion>
   </React.StrictMode>,
 );

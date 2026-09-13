@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins } from '../lib/format';
@@ -209,23 +209,23 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
                   }`}
                   style={{ left: `${position.x}%`, top: `${position.y}%` }}
                 >
-                  <motion.div
+                  <m.div
                     animate={picked && !shown ? { rotate: [0, -8, 8, -6, 0], y: [0, -4, 0] } : {}}
                     transition={{ duration: 0.5, repeat: picked && !shown ? Infinity : 0 }}
                     className="relative"
                   >
                     <DigPile size={short ? 92 : 116} dug={shown || hinted} />
                     {shown && spot && spot.amount > 0 && (
-                      <motion.span
+                      <m.span
                         initial={{ scale: 0.3, y: 10, opacity: 0 }}
                         animate={{ scale: 1, y: -6, opacity: 1 }}
                         className="absolute inset-0 flex items-center justify-center gap-0.5"
                       >
                         <CoinIcon size={spot.kind === 'jackpot' ? 34 : 24} />
                         {spot.kind === 'jackpot' && <CoinIcon size={28} />}
-                      </motion.span>
+                      </m.span>
                     )}
-                  </motion.div>
+                  </m.div>
 
                   <span
                     className={`-mt-2 rounded-full border-2 px-2 py-0.5 font-display text-[11px] font-black ${
@@ -251,7 +251,7 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
                   {shown && picked && spot && spot.amount > 0 && (
                     <>
                       {[...Array(7)].map((_, coin) => (
-                        <motion.span
+                        <m.span
                           key={coin}
                           initial={{ x: 0, y: 0, opacity: 1, scale: 0.7 }}
                           animate={{
@@ -264,7 +264,7 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
                           className="pointer-events-none absolute top-1/2"
                         >
                           <CoinIcon size={20} />
-                        </motion.span>
+                        </m.span>
                       ))}
                     </>
                   )}
@@ -273,9 +273,9 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
             })}
 
             <div className="pointer-events-none absolute bottom-0 left-0 z-10">
-              <motion.div animate={digging !== null && !result ? { y: [0, -6, 0] } : {}} transition={{ duration: 0.5, repeat: Infinity }}>
+              <m.div animate={digging !== null && !result ? { y: [0, -6, 0] } : {}} transition={{ duration: 0.5, repeat: Infinity }}>
                 <Raccoon size={short ? 62 : 82} cheer={!!result && result.loot > 0} />
-              </motion.div>
+              </m.div>
             </div>
 
             {!result && (
@@ -293,7 +293,7 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
 
       <AnimatePresence>
         {result && (
-          <motion.div
+          <m.div
             initial={{ y: 90, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="panel z-30 m-2.5 p-3 text-center"
@@ -319,7 +319,7 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
                 ? `Nächster Raubzug (${state.pendingRaids})`
                 : 'Zurück zur Insel'}
             </button>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

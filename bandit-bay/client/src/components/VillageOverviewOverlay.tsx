@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { api } from '../lib/api';
 import { playSound } from '../lib/sound';
 import { BuildingArt } from './art/BuildingArt';
@@ -48,7 +48,7 @@ export function VillageOverviewOverlay({ open, onClose }: Props): JSX.Element | 
           const percent = Math.round(village.progress * 100);
           const done = percent >= 100;
           return (
-            <motion.div
+            <m.div
               key={village.id}
               layout
               className={`rounded-3xl border-[3px] p-2.5 ${
@@ -112,7 +112,7 @@ export function VillageOverviewOverlay({ open, onClose }: Props): JSX.Element | 
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </m.div>
           );
         })}
       </div>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins } from '../lib/format';
@@ -215,7 +215,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
       {/* Gewinnbanner */}
       <AnimatePresence>
         {result && result.outcome !== 'nothing' && (
-          <motion.div
+          <m.div
             key={`${result.outcome}-${result.amount}-${result.message}`}
             initial={{ opacity: 0, y: 14, scale: 0.8 }}
             animate={{ opacity: 1, y: -10, scale: 1 }}
@@ -228,7 +228,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
             {result.outcome === 'attack' && 'ANGRIFF BEREIT!'}
             {result.outcome === 'raid' && 'RAUBZUG BEREIT!'}
             {result.outcome === 'card' && (result.cardIsNew ? 'NEUE KARTE!' : 'KARTE DOPPELT')}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -286,7 +286,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
 
           {/* Gewinnlinie */}
           {tripleHit && (
-            <motion.span
+            <m.span
               initial={{ opacity: 0, scaleX: 0.4 }}
               animate={{ opacity: 1, scaleX: 1 }}
               className="pointer-events-none absolute inset-x-2 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-[#fff6d0] shadow-[0_0_14px_6px_rgba(248,199,60,0.75)]"
@@ -356,7 +356,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
       {/* Münzflug */}
       <div className="pointer-events-none fixed inset-0 z-[55]">
         {flies.map((fly, index) => (
-          <motion.div
+          <m.div
             key={fly.id}
             className="absolute left-0 top-0"
             initial={{ x: fly.x, y: fly.y, scale: 0.5, opacity: 0 }}
@@ -369,7 +369,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
             transition={{ duration: 0.95, delay: index * 0.05, ease: 'easeInOut' }}
           >
             <CoinIcon size={26} />
-          </motion.div>
+          </m.div>
         ))}
       </div>
 
@@ -397,13 +397,13 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
 
         <div className="relative flex-1">
           {state.stats.spins === 0 && !anySpinning && (
-            <motion.div
+            <m.div
               animate={{ y: [0, -7, 0] }}
               transition={{ repeat: Infinity, duration: 1.1 }}
               className="pointer-events-none absolute -top-8 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border-2 border-black/40 bg-[#0b1830] px-2.5 py-1 font-display text-xs font-black text-[#ffd95e]"
             >
               👆 Hier tippen!
-            </motion.div>
+            </m.div>
           )}
           {!anySpinning && state.spins >= state.bet && (
             <span className="pointer-events-none absolute -inset-2 animate-pulse rounded-full bg-[#ff6b5b]/35 blur-xl" />

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { api, ApiError } from '../lib/api';
 import { formatCoins, formatDuration, formatFull } from '../lib/format';
@@ -230,14 +230,14 @@ export function VillageScene({ onOpenEvents, onOpenVillages }: VillageProps): JS
       {/* Ausbau-Panel */}
       <AnimatePresence>
         {selectedBuilding && selectedDef && (
-          <motion.div
+          <m.div
             className="absolute inset-0 z-20 flex items-end bg-black/50 p-2.5"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelected(null)}
           >
-            <motion.div
+            <m.div
               className="panel w-full p-3"
               initial={{ y: 60 }}
               animate={{ y: 0 }}
@@ -296,21 +296,21 @@ export function VillageScene({ onOpenEvents, onOpenVillages }: VillageProps): JS
                   </button>
                 )}
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       {/* Insel abgeschlossen */}
       <AnimatePresence>
         {celebrate && (
-          <motion.div
+          <m.div
             className="absolute inset-0 z-30 flex items-center justify-center bg-black/65 p-5"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <motion.div
+            <m.div
               className="panel w-full max-w-sm p-5 text-center"
               initial={{ scale: 0.7, rotate: -4 }}
               animate={{ scale: 1, rotate: 0 }}
@@ -331,8 +331,8 @@ export function VillageScene({ onOpenEvents, onOpenVillages }: VillageProps): JS
               >
                 Weiter
               </button>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

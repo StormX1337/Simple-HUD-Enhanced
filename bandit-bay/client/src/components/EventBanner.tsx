@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { formatDuration } from '../lib/format';
 
@@ -28,7 +28,7 @@ export function EventBanner({ onOpenEvents }: Props): JSX.Element | null {
   if (!event) return null;
 
   return (
-    <motion.button
+    <m.button
       type="button"
       data-testid="event-banner"
       onClick={onOpenEvents}
@@ -62,6 +62,6 @@ export function EventBanner({ onOpenEvents }: Props): JSX.Element | null {
       >
         {event.active ? 'LÄUFT' : 'PLAN'}
       </span>
-    </motion.button>
+    </m.button>
   );
 }

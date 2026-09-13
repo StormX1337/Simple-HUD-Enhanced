@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins } from '../lib/format';
@@ -60,7 +60,7 @@ export function AchievementsScreen(): JSX.Element {
         const percent = Math.min(100, (entry.progress / entry.target) * 100);
         const ready = entry.done && !entry.claimed;
         return (
-          <motion.div key={entry.id} layout className={`panel p-3 ${entry.claimed ? 'opacity-75' : ''}`}>
+          <m.div key={entry.id} layout className={`panel p-3 ${entry.claimed ? 'opacity-75' : ''}`}>
             <div className="flex items-start gap-2">
               <div className="min-w-0 flex-1">
                 <div className="font-display text-base font-black leading-tight">{entry.name}</div>
@@ -103,7 +103,7 @@ export function AchievementsScreen(): JSX.Element {
                 </span>
               )}
             </div>
-          </motion.div>
+          </m.div>
         );
       })}
     </div>

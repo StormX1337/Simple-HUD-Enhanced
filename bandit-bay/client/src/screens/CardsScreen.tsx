@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { ApiError, api } from '../lib/api';
 import { formatCoins } from '../lib/format';
@@ -199,7 +199,7 @@ export function CardsScreen(): JSX.Element {
                   const count = state.cards[card.id] ?? 0;
                   const owned = count > 0;
                   return (
-                    <motion.div
+                    <m.div
                       key={card.id}
                       whileTap={{ scale: 0.94 }}
                       className={`relative rounded-xl border-[3px] p-1 text-center shadow-chunkysm ${
@@ -232,7 +232,7 @@ export function CardsScreen(): JSX.Element {
                           </button>
                         </>
                       )}
-                    </motion.div>
+                    </m.div>
                   );
                 })}
               </div>
@@ -259,7 +259,7 @@ export function CardsScreen(): JSX.Element {
       {/* Freund auswählen */}
       {giftCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-5">
-          <motion.div
+          <m.div
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="panel w-full max-w-sm p-4"
@@ -300,14 +300,14 @@ export function CardsScreen(): JSX.Element {
             >
               Abbrechen
             </button>
-          </motion.div>
+          </m.div>
         </div>
       )}
 
       {/* Truhen-Ergebnis */}
       {drops && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-5">
-          <motion.div
+          <m.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="panel w-full max-w-sm p-4 text-center"
@@ -315,7 +315,7 @@ export function CardsScreen(): JSX.Element {
             <div className="font-display text-lg font-black">Truhe geöffnet!</div>
             <div className="my-3 grid grid-cols-3 gap-2">
               {drops.map((drop, index) => (
-                <motion.div
+                <m.div
                   key={`${drop.card.id}-${index}`}
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -328,7 +328,7 @@ export function CardsScreen(): JSX.Element {
                   <div className="text-[10px] font-black text-bay-golddark">
                     {drop.isNew ? 'NEU' : `+${formatCoins(drop.coins)}`}
                   </div>
-                </motion.div>
+                </m.div>
               ))}
             </div>
             <button
@@ -341,7 +341,7 @@ export function CardsScreen(): JSX.Element {
             >
               Weiter
             </button>
-          </motion.div>
+          </m.div>
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useGame } from '../game/GameContext';
 import { formatCoins, formatTime } from '../lib/format';
 import { playSound } from '../lib/sound';
@@ -23,7 +23,7 @@ export function NewsOverlay({ news, onClose, onRevenge }: Props): JSX.Element {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <motion.div
+      <m.div
         initial={{ scale: 0.85, y: 20, opacity: 0 }}
         animate={{ scale: 1, y: 0, opacity: 1 }}
         className="panel max-h-[86vh] w-full max-w-sm overflow-y-auto p-4"
@@ -109,7 +109,7 @@ export function NewsOverlay({ news, onClose, onRevenge }: Props): JSX.Element {
         >
           Alles klar!
         </button>
-      </motion.div>
+      </m.div>
     </div>
   );
 }
