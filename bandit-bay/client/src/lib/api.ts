@@ -79,6 +79,8 @@ export const api = {
   register: (name: string, avatar: string) =>
     post<{ token: string; state: PlayerState }>('/auth/register', { name, avatar }),
   me: () => request<{ state: PlayerState }>('/auth/me'),
+  updateProfile: (name: string, avatar: string) =>
+    post<{ state: PlayerState }>('/profile', { name, avatar }),
   state: () =>
     request<{
       state: PlayerState;

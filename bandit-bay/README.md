@@ -200,6 +200,7 @@ bandit-bay/
 | `GET` | `/api/auth/me`, `/api/state` | Spielstand, Quests, Tagesbelohnung |
 | `POST` | `/api/spin` | Drehung (Einsatz wird geprüft) |
 | `POST` | `/api/bet` | Einsatzstufe setzen |
+| `POST` | `/api/profile` | Name und Wappentier ändern |
 | `POST` | `/api/village/upgrade` | Gebäude ausbauen |
 | `GET` | `/api/targets` | Ziele für Angriff/Raubzug (Freunde bevorzugt) |
 | `GET/POST` | `/api/friends`, `/api/friends/add`, `/api/friends/remove` | Freundesliste |

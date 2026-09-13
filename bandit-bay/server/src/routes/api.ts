@@ -11,6 +11,7 @@ import {
   VILLAGES,
   chestCost,
   EVENT_TYPES,
+  PLAYER_AVATARS,
   eventStatus,
   PET_DURATION_HOURS,
   upcomingEvents,
@@ -102,6 +103,7 @@ api.get('/config', (_req, res) => {
     event: eventStatus(),
     eventTypes: Object.values(EVENT_TYPES),
     petDurationHours: PET_DURATION_HOURS,
+    avatars: PLAYER_AVATARS,
     balance: {
       maxBuildingLevel: BALANCE.maxBuildingLevel,
       maxShields: BALANCE.maxShields,
@@ -486,6 +488,28 @@ api.get('/leaderboard', auth, (req: AuthedRequest, res) => {
 
 api.get('/history', auth, (req: AuthedRequest, res) => {
   res.json({ entries: history(me(req).id) });
+});
+
+api.post('/profile', auth, (req: AuthedRequest, res, next) => {
+  try {
+    const user = me(req);
+    const name = String(req.body?.name ?? user.name).trim();
+    const avatar = String(req.body?.avatar ?? user.avatar).slice(0, 4);
+
+    if (name !== user.name) {
+      if (name.length < 2 || name.length > 18)
+        throw new GameError('Name muss 2 bis 18 Zeichen lang sein');
+      const taken = getUserByName(name);
+      if (taken && taken.id !== user.id) throw new GameError('Name ist schon vergeben', 409);
+      user.name = name;
+    }
+    if (!PLAYER_AVATARS.includes(avatar)) throw new GameError('Unbekanntes Wappentier');
+    user.avatar = avatar;
+    saveUser(user);
+    res.json({ state: buildState(user) });
+  } catch (error) {
+    next(error);
+  }
 });
 
 api.get('/profile', auth, (req: AuthedRequest, res) => {

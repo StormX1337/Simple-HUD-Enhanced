@@ -2,6 +2,7 @@ import { db, now, type PetRow, type UserRow } from '../db.js';
 import {
   PETS,
   PET_DURATION_HOURS,
+  PET_FEEDS_PER_LEVEL,
   PET_MAX_LEVEL,
   petAbilityChance,
   petBonusValue,
@@ -73,7 +74,8 @@ export function petStates(user: UserRow): PetState[] {
       feeds,
       level,
       maxLevel: PET_MAX_LEVEL,
-      feedsToNextLevel: level >= PET_MAX_LEVEL ? 0 : 4 - (feeds % 4),
+      feedsToNextLevel:
+        level >= PET_MAX_LEVEL ? 0 : PET_FEEDS_PER_LEVEL - (feeds % PET_FEEDS_PER_LEVEL),
     };
   });
 }

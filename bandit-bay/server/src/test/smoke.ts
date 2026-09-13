@@ -25,6 +25,7 @@ import {
   ensureBuildings,
   getCards,
   getUserById,
+  getUserByName,
   saveUser,
 } from '../game/core.js';
 import { spin } from '../game/slot.js';
@@ -203,6 +204,14 @@ if (raidResult.loot > 0) {
     `${raidCoinsBefore} -> ${getUserById(raidTarget.id)!.coins}`,
   );
 }
+
+/* --- Profil ----------------------------------------------------------- */
+const otherPlayer = createUser({ name: 'Namensvetter' });
+player.name = 'Umbenannt';
+saveUser(player);
+check('Umbenennen klappt', getUserByName('Umbenannt')?.id === player.id);
+check('Alter Name ist frei', !getUserByName('Testbandit'));
+check('Anderer Spieler bleibt bestehen', getUserByName('Namensvetter')?.id === otherPlayer.id);
 
 /* --- Freunde ---------------------------------------------------------- */
 const botName = BOT_NAMES[0].name;

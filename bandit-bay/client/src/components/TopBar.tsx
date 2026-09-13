@@ -3,6 +3,7 @@ import { useGame } from '../game/GameContext';
 import { formatCoins, formatDuration, formatFull } from '../lib/format';
 import { isMuted, isMusicOn, playSound, toggleMusic, toggleMute } from '../lib/sound';
 import { CoinIcon, ShieldIcon, SpinIcon, StarIcon } from './art/HudIcons';
+import { ApiError, api } from '../lib/api';
 import { Raccoon } from './art/Raccoon';
 
 interface Props {
@@ -10,11 +11,30 @@ interface Props {
 }
 
 export function TopBar({ onOpenBonus }: Props): JSX.Element | null {
-  const { state, secondsToNextSpin, logout, config } = useGame();
+  const { state, secondsToNextSpin, logout, config, applyState, pushToast } = useGame();
   const [muted, setMuted] = useState(isMuted());
   const [music, setMusic] = useState(isMusicOn());
   const [menuOpen, setMenuOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draftName, setDraftName] = useState('');
+  const [saving, setSaving] = useState(false);
   if (!state) return null;
+
+  const save = async (name: string, avatar: string) => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const data = await api.updateProfile(name.trim(), avatar);
+      applyState(data.state);
+      playSound('reward', 0.5);
+      pushToast('Profil gespeichert', 'good');
+    } catch (error) {
+      playSound('fail', 0.4);
+      pushToast(error instanceof ApiError ? error.message : 'Speichern fehlgeschlagen', 'bad');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const xpPercent = Math.min(100, (state.xp / state.xpForNextLevel) * 100);
   const village = config?.villages.find((v) => v.id === state.villageId);
@@ -140,6 +160,58 @@ export function TopBar({ onOpenBonus }: Props): JSX.Element | null {
             <div>⚒️ {state.stats.attacks} Angriffe</div>
             <div>🐾 {state.stats.raids} Raubzüge</div>
           </div>
+          <button
+            type="button"
+            data-testid="open-profile"
+            className="btn-ghost mb-2 w-full text-sm"
+            onClick={() => {
+              playSound('click', 0.35);
+              setDraftName(state.name);
+              setEditing((value) => !value);
+            }}
+          >
+            ✏️ Profil ändern
+          </button>
+
+          {editing && (
+            <div className="mb-2 rounded-2xl bg-black/30 p-2">
+              <input
+                value={draftName}
+                onChange={(event) => setDraftName(event.target.value)}
+                maxLength={18}
+                data-testid="profile-name"
+                className="w-full rounded-xl border-2 border-black/30 bg-white/85 px-2 py-1 font-display text-sm text-[#3b2a14] outline-none focus:border-[#f8c73c]"
+              />
+              <div className="mt-1.5 grid grid-cols-5 gap-1">
+                {(config?.avatars ?? []).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    data-testid="profile-avatar"
+                    onClick={() => {
+                      playSound('click', 0.3);
+                      void save(draftName, option);
+                    }}
+                    className={`rounded-xl border-2 py-1 text-lg ${
+                      state.avatar === option ? 'border-[#f8c73c] bg-[#f8c73c]/25' : 'border-white/15 bg-white/10'
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                data-testid="profile-save"
+                disabled={saving}
+                className="btn-green mt-2 w-full py-1.5 text-sm"
+                onClick={() => void save(draftName, state.avatar)}
+              >
+                Speichern
+              </button>
+            </div>
+          )}
+
           <button
             type="button"
             className="btn-red w-full text-sm"

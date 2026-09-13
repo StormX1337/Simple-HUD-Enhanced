@@ -327,6 +327,7 @@ export interface GameConfig {
   quests: QuestDef[];
   dailyLadder: DailyRewardDef[];
   petDurationHours: number;
+  avatars: string[];
   eventTypes: { kind: EventKind; name: string; icon: string; description: string; short: string; color: string }[];
   balance: {
     maxBuildingLevel: number;
