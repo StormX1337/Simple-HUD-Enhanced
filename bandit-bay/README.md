@@ -35,7 +35,9 @@ Weitere Skripte:
 
 | Befehl | Wirkung |
 | --- | --- |
-| `npm run test` | Smoke-Test der kompletten Spiellogik (In-Memory-DB) |
+| `npm run test` | Spiellogik- und HTTP-Tests (beide mit In-Memory-DB) |
+| `npm run test:engine -w server` | nur die Spiellogik |
+| `npm run test:api -w server` | nur die REST-Routen |
 | `npm run typecheck` | TypeScript-Prüfung für Server und Client |
 | `npm run seed -w server` | Mitspieler-Bots nachlegen |
 | `python3 tools/generate-audio.py` | Sounds und Musik neu erzeugen |
@@ -177,8 +179,10 @@ bandit-bay/
 │  │                          absence (Bot-Überfälle während der Abwesenheit)
 │  ├─ src/routes/api.ts        REST-Endpunkte
 │  ├─ src/db.ts                SQLite-Schema und Migration
+│  ├─ src/app.ts               Express-App (von Server und Tests genutzt)
 │  ├─ src/seed.ts              Mitspieler-Bots
-│  └─ src/test/smoke.ts        Test des kompletten Spielablaufs
+│  ├─ src/tools/balance.ts     Balance-Simulation
+│  └─ src/test/                smoke.ts (Spielablauf), api.ts (REST-Routen)
 ├─ client/
 │  ├─ src/components/art/      eigene SVGs (Symbole, Gebäude, Karten, Maskottchen)
 │  ├─ src/components/          TopBar, VillageScene, SlotMachine, Overlays, Navigation
