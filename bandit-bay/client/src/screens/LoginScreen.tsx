@@ -107,7 +107,7 @@ export function LoginScreen(): JSX.Element {
         </form>
 
         <div className="mt-4 flex items-center justify-center gap-2 opacity-90">
-          {(['taler', 'beutel', 'hammer', 'pfote', 'schild', 'truhe'] as const).map((id) => (
+          {(['taler', 'beutel', 'hammer', 'joker', 'pfote', 'schild', 'truhe'] as const).map((id) => (
             <SymbolIcon key={id} id={id} size={34} />
           ))}
         </div>

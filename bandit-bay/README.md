@@ -70,8 +70,10 @@ serverseitig berechnet und validiert. Der Client sendet nur Absichten („dreh",
 
 ## Spielablauf
 
-1. **Drehen** – 6 Symbole (Taler, Beutel, Schild, Sturmhammer, Banditenpfote, Truhe).
-   Der Server zieht das Ergebnis aus einer Gewinntabelle und baut das Walzenbild passend dazu.
+1. **Drehen** – 6 Symbole (Taler, Beutel, Schild, Sturmhammer, Banditenpfote, Truhe) plus die
+   **Banditenmaske** als Joker: Sie taucht nur auf, wenn sie ein Paar zum Dreifachtreffer
+   vervollständigt. Der Server zieht das Ergebnis aus einer Gewinntabelle und baut das
+   Walzenbild passend dazu.
 2. **Auswerten** – 3 gleiche Symbole zahlen groß, 2 gleiche klein:
    * Taler → Münzen (× Einsatz × Level × Insel)
    * Beutel → zusätzliche Drehungen
@@ -149,8 +151,8 @@ bringt eine Stufe (max. 5), die Bonus und Fähigkeitschance um je 15 % anhebt.
 
 Alle Werte stehen an einer Stelle: `server/src/content/content.ts`.
 
-* **Gewinntabelle** `SPIN_TABLE`: ~32 % Dreifachtreffer, ~48 % Zweifachtreffer, ~20 % Niete.
-  Angriff ca. alle 17 Drehungen, Raubzug ca. alle 20.
+* **Gewinntabelle** `SPIN_TABLE`: rund 39 % Dreifachtreffer (davon 8 % über den Joker),
+  46 % Zweifachtreffer, 15 % Niete. Angriff ca. alle 15 Drehungen, Raubzug ca. alle 18.
 * **Auszahlung** `coinValue(level, insel)`: Grundwert 90, +32 % pro Level, +55 % pro Insel.
 * **Ausbaukosten** `upgradeCost()`: Faktor 1,62 pro Stufe, Insel-Multiplikator 1 → 330.
   Dadurch geht Insel 1 sehr schnell, spätere Inseln brauchen echte Raubzüge.

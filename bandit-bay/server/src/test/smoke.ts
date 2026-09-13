@@ -78,8 +78,24 @@ for (let i = 0; i < 400; i++) {
   }
   const result = spin(player, 1);
   outcomes[result.outcome] = (outcomes[result.outcome] ?? 0) + 1;
+  if (result.wild) outcomes.wildHits = (outcomes.wildHits ?? 0) + 1;
   const [a, b, c] = result.reels;
-  const realMatches = a === b && b === c ? 3 : a === b || a === c || b === c ? 2 : 0;
+  const withoutJoker = [a, b, c].filter((symbol) => symbol !== 'joker');
+  const jokers = 3 - withoutJoker.length;
+  const realMatches =
+    jokers === 1
+      ? withoutJoker[0] === withoutJoker[1]
+        ? 3
+        : 0
+      : a === b && b === c
+        ? 3
+        : a === b || a === c || b === c
+          ? 2
+          : 0;
+  if (jokers > 0 && !result.wild && reelsConsistent.ok) {
+    reelsConsistent.ok = false;
+    reelsConsistent.detail = `Joker ohne Wild-Flag: ${result.reels.join('/')}`;
+  }
   if (realMatches !== result.matches && reelsConsistent.ok) {
     reelsConsistent.ok = false;
     reelsConsistent.detail = `${result.reels.join('/')} != ${result.matches}`;
@@ -92,6 +108,7 @@ for (let i = 0; i < 400; i++) {
 }
 check('Ressourcen nie negativ', minSpins >= 0);
 check('Walzenbild passt zum Ergebnis', reelsConsistent.ok, reelsConsistent.detail);
+check('Joker taucht auf', (outcomes.wildHits ?? 0) > 0, `${outcomes.wildHits ?? 0}x`);
 for (const type of ['coins', 'spins', 'attack', 'raid', 'card'] as SpinOutcomeType[]) {
   check(`Spin-Ergebnis "${type}" tritt auf`, (outcomes[type] ?? 0) > 0, `${outcomes[type] ?? 0}x`);
 }

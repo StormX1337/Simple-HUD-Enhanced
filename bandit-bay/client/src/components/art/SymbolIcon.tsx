@@ -152,6 +152,34 @@ export function SymbolIcon({ id, size = 64, className = '' }: Props): JSX.Elemen
         </g>
       )}
 
+      {id === 'joker' && (
+        <g>
+          <circle cx="36" cy="36" r="30" fill={`url(#${uid}-gold)`} stroke={OUTLINE} strokeWidth="3" />
+          <circle cx="36" cy="36" r="23" fill="#fff3c9" opacity="0.35" />
+          {/* Banditenmaske */}
+          <path
+            d="M8 34c10-14 26-16 36-9-3 13-12 23-25 24-7 0-12-7-11-15z"
+            fill="#38415a"
+            stroke={OUTLINE}
+            strokeWidth="3"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M64 34c-10-14-26-16-36-9 3 13 12 23 25 24 7 0 12-7 11-15z"
+            fill="#38415a"
+            stroke={OUTLINE}
+            strokeWidth="3"
+            strokeLinejoin="round"
+          />
+          <circle cx="24" cy="33" r="7" fill="#ffffff" stroke={OUTLINE} strokeWidth="2.4" />
+          <circle cx="48" cy="33" r="7" fill="#ffffff" stroke={OUTLINE} strokeWidth="2.4" />
+          <circle cx="25" cy="34" r="3.4" fill="#1c2231" />
+          <circle cx="49" cy="34" r="3.4" fill="#1c2231" />
+          <path d="M36 46l6 5-6 5-6-5z" fill="#1c2231" />
+          <path d="M20 14l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#fff6d0" />
+        </g>
+      )}
+
       {id === 'truhe' && (
         <g>
           <path

@@ -85,6 +85,9 @@ export const SYMBOLS: SymbolDef[] = [
   { id: 'hammer', name: 'Sturmhammer', weight: 15, color: '#ff8a5b' },
   { id: 'pfote', name: 'Banditenpfote', weight: 11, color: '#c792ea' },
   { id: 'truhe', name: 'Truhe', weight: 12, color: '#ffb0c8' },
+  // Der Joker taucht nie als Füllsymbol auf (Gewicht 0), sondern nur,
+  // wenn die Gewinntabelle einen Wild-Treffer zieht.
+  { id: 'joker', name: 'Banditenmaske', weight: 0, color: '#ffd95e' },
 ];
 
 /**
@@ -96,6 +99,8 @@ export interface PayoutEntry {
   symbol: SymbolId;
   matches: 3 | 2;
   weight: number;
+  /** Zwei Symbole plus Joker zählen als Dreifachtreffer. */
+  wild?: boolean;
 }
 
 export const SPIN_TABLE: PayoutEntry[] = [
@@ -111,6 +116,13 @@ export const SPIN_TABLE: PayoutEntry[] = [
   { symbol: 'hammer', matches: 2, weight: 6 },
   { symbol: 'pfote', matches: 2, weight: 5 },
   { symbol: 'truhe', matches: 2, weight: 7 },
+  // Wilde Treffer: Joker vervollständigt ein Paar.
+  { symbol: 'taler', matches: 3, weight: 2.5, wild: true },
+  { symbol: 'hammer', matches: 3, weight: 1.5, wild: true },
+  { symbol: 'pfote', matches: 3, weight: 1.2, wild: true },
+  { symbol: 'beutel', matches: 3, weight: 1.2, wild: true },
+  { symbol: 'truhe', matches: 3, weight: 0.8, wild: true },
+  { symbol: 'schild', matches: 3, weight: 0.8, wild: true },
 ];
 
 /** Gewicht für "kein Treffer" – gleiche Skala wie SPIN_TABLE. */

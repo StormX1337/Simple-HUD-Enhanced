@@ -1,6 +1,6 @@
 /** Gemeinsame Typen für Server und (per JSON-API) Client. */
 
-export type SymbolId = 'taler' | 'beutel' | 'hammer' | 'pfote' | 'schild' | 'truhe';
+export type SymbolId = 'taler' | 'beutel' | 'hammer' | 'pfote' | 'schild' | 'truhe' | 'joker';
 
 export type BuildingKind =
   | 'hut'
@@ -207,6 +207,8 @@ export type SpinOutcomeType =
 
 export interface SpinResult {
   reels: SymbolId[];
+  /** Ein Joker hat den Treffer vervollständigt. */
+  wild?: boolean;
   /** Pia hat die Drehung zurückgegeben. */
   refunded?: boolean;
   matches: 3 | 2 | 0;

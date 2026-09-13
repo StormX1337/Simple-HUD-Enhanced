@@ -39,15 +39,21 @@ function rollSymbol(exclude: SymbolId[] = []): SymbolId {
 }
 
 /** Zieht das Ergebnis gewichtet aus der Gewinntabelle. */
-function rollOutcome(): { matches: 3 | 2 | 0; symbol: SymbolId | null } {
+function rollOutcome(): { matches: 3 | 2 | 0; symbol: SymbolId | null; wild: boolean } {
   const entries: (PayoutEntry | null)[] = [...SPIN_TABLE, null];
   const chosen = pickWeighted(entries, (entry) => (entry ? entry.weight : NO_MATCH_WEIGHT));
-  if (!chosen) return { matches: 0, symbol: null };
-  return { matches: chosen.matches, symbol: chosen.symbol };
+  if (!chosen) return { matches: 0, symbol: null, wild: false };
+  return { matches: chosen.matches, symbol: chosen.symbol, wild: !!chosen.wild };
 }
 
 /** Baut die sichtbaren Walzen passend zum gezogenen Ergebnis. */
-function buildReels(matches: 3 | 2 | 0, symbol: SymbolId | null): SymbolId[] {
+function buildReels(matches: 3 | 2 | 0, symbol: SymbolId | null, wild = false): SymbolId[] {
+  if (matches === 3 && symbol && wild) {
+    // Zwei echte Symbole und ein Joker an zufälliger Stelle.
+    const reels: SymbolId[] = [symbol, symbol, 'joker'];
+    const shift = Math.floor(Math.random() * 3);
+    return [reels[(0 + shift) % 3], reels[(1 + shift) % 3], reels[(2 + shift) % 3]];
+  }
   if (matches === 3 && symbol) return [symbol, symbol, symbol];
   if (matches === 2 && symbol) {
     const filler = rollSymbol([symbol]);
@@ -78,8 +84,8 @@ export function spin(user: UserRow, betInput: number): SpinResult {
   const refunded = rollPetAbility(user.id, 'refund');
   if (refunded) user.spins = Math.min(spinCapacity(user.level), user.spins + bet);
 
-  const { matches, symbol } = rollOutcome();
-  const reels: SymbolId[] = buildReels(matches, symbol);
+  const { matches, symbol, wild } = rollOutcome();
+  const reels: SymbolId[] = buildReels(matches, symbol, wild);
   const base =
     coinValue(user.level, user.village) * coinEventMultiplier() * petBonus(user.id, 'coins');
   const spinBonus = spinEventMultiplier();
@@ -194,6 +200,7 @@ export function spin(user: UserRow, betInput: number): SpinResult {
     }
   }
 
+  if (wild && matches === 3) message = `Banditenmaske! ${message}`;
   trackQuest(user.id, 'spin', 1);
   const levelUps = addXp(user, Math.min(60, 3 + bet * 0.4));
   saveUser(user);
@@ -205,6 +212,7 @@ export function spin(user: UserRow, betInput: number): SpinResult {
   return {
     reels,
     refunded,
+    wild,
     matches,
     outcome,
     amount,

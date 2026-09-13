@@ -222,6 +222,7 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
             exit={{ opacity: 0, y: -26, scale: 0.9 }}
             className="pointer-events-none absolute -top-4 left-1/2 z-30 -translate-x-1/2 rounded-full border-[3px] border-[#7a4a05] bg-gradient-to-b from-[#ffe9a0] via-[#f8c73c] to-[#e0a21a] px-5 py-1.5 font-display text-base font-black text-[#4a2f05] shadow-[0_4px_0_rgba(0,0,0,0.35),0_0_22px_rgba(248,199,60,0.7)]"
           >
+            {result.wild && '🃏 '}
             {result.outcome === 'coins' && `+${formatCoins(result.amount)} TALER`}
             {result.outcome === 'spins' && `+${result.amount} DREHUNGEN`}
             {result.outcome === 'shield' && 'SCHILD ERHALTEN!'}
