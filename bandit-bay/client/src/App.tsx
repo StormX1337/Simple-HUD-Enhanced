@@ -1,24 +1,55 @@
-import { useState } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { useGame } from './game/GameContext';
 import { TopBar } from './components/TopBar';
 import { BottomNav, type Screen } from './components/BottomNav';
 import { SideRail } from './components/SideRail';
 import { VillageScene } from './components/VillageScene';
 import { SlotMachine } from './components/SlotMachine';
-import { AttackOverlay } from './components/AttackOverlay';
-import { RaidOverlay } from './components/RaidOverlay';
 import { CardReveal } from './components/CardReveal';
 import { NewsOverlay } from './components/NewsOverlay';
-import { VillageOverviewOverlay } from './components/VillageOverviewOverlay';
-import { DecoShop } from './components/DecoShop';
+
+// Erst laden, wenn sie gebraucht werden – hält den Start klein.
+const AttackOverlay = lazy(() =>
+  import('./components/AttackOverlay').then((module) => ({ default: module.AttackOverlay })),
+);
+const RaidOverlay = lazy(() =>
+  import('./components/RaidOverlay').then((module) => ({ default: module.RaidOverlay })),
+);
+const VillageOverviewOverlay = lazy(() =>
+  import('./components/VillageOverviewOverlay').then((module) => ({
+    default: module.VillageOverviewOverlay,
+  })),
+);
+const DecoShop = lazy(() =>
+  import('./components/DecoShop').then((module) => ({ default: module.DecoShop })),
+);
 import { Toasts } from './components/Toasts';
 import { LoginScreen } from './screens/LoginScreen';
-import { CardsScreen } from './screens/CardsScreen';
-import { FriendsScreen } from './screens/FriendsScreen';
-import { QuestsScreen } from './screens/QuestsScreen';
-import { RewardsScreen, type RewardsTab } from './screens/RewardsScreen';
+import type { RewardsTab } from './screens/RewardsScreen';
+
+const CardsScreen = lazy(() =>
+  import('./screens/CardsScreen').then((module) => ({ default: module.CardsScreen })),
+);
+const FriendsScreen = lazy(() =>
+  import('./screens/FriendsScreen').then((module) => ({ default: module.FriendsScreen })),
+);
+const QuestsScreen = lazy(() =>
+  import('./screens/QuestsScreen').then((module) => ({ default: module.QuestsScreen })),
+);
+const RewardsScreen = lazy(() =>
+  import('./screens/RewardsScreen').then((module) => ({ default: module.RewardsScreen })),
+);
 import { Raccoon } from './components/art/Raccoon';
 import type { CardDef } from './types';
+
+/** Kurze Ladeanzeige, während ein Bildschirm nachgeladen wird. */
+function ScreenLoader(): JSX.Element {
+  return (
+    <div className="flex flex-1 items-center justify-center">
+      <div className="animate-pulse font-display text-sm text-white/70">Lädt …</div>
+    </div>
+  );
+}
 
 export default function App(): JSX.Element {
   const { state, booting, quests, daily, news, dismissNews } = useGame();
@@ -155,13 +186,15 @@ export default function App(): JSX.Element {
             />
           </>
         )}
-        {screen === 'cards' && <CardsScreen />}
-        {screen === 'friends' && (
-          <FriendsScreen onAttack={openAttack} onRaid={openRaid} />
-        )}
-        {screen === 'quests' && <QuestsScreen />}
-        {screen === 'rewards' && (
-          <RewardsScreen tab={rewardsTab} onTab={setRewardsTab} badge={rewardBadge > 0} />
+        {screen !== 'village' && (
+          <Suspense fallback={<ScreenLoader />}>
+            {screen === 'cards' && <CardsScreen />}
+            {screen === 'friends' && <FriendsScreen onAttack={openAttack} onRaid={openRaid} />}
+            {screen === 'quests' && <QuestsScreen />}
+            {screen === 'rewards' && (
+              <RewardsScreen tab={rewardsTab} onTab={setRewardsTab} badge={rewardBadge > 0} />
+            )}
+          </Suspense>
         )}
       </main>
 
@@ -171,14 +204,16 @@ export default function App(): JSX.Element {
         badges={{ quests: questBadge, rewards: rewardBadge }}
       />
 
-      <AttackOverlay
-        open={battle === 'attack'}
-        initialTargetId={revengeTarget}
-        onClose={closeBattle}
-      />
-      <RaidOverlay open={battle === 'raid'} initialTargetId={revengeTarget} onClose={closeBattle} />
-      <VillageOverviewOverlay open={villagesOpen} onClose={() => setVillagesOpen(false)} />
-      <DecoShop open={decoOpen} onClose={() => setDecoOpen(false)} />
+      <Suspense fallback={null}>
+        {battle === 'attack' && (
+          <AttackOverlay open initialTargetId={revengeTarget} onClose={closeBattle} />
+        )}
+        {battle === 'raid' && (
+          <RaidOverlay open initialTargetId={revengeTarget} onClose={closeBattle} />
+        )}
+        {villagesOpen && <VillageOverviewOverlay open onClose={() => setVillagesOpen(false)} />}
+        {decoOpen && <DecoShop open onClose={() => setDecoOpen(false)} />}
+      </Suspense>
       {news.length > 0 && (
         <NewsOverlay
           news={news}
