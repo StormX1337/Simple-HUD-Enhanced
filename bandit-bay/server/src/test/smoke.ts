@@ -38,6 +38,7 @@ import {
   GIFTS_PER_DAY,
   grantCard,
   openChest,
+  useWildcard,
 } from '../game/collection.js';
 import { claimDaily, claimQuest, dailyState, questStates } from '../game/progress.js';
 import { feedPet, petBonus, petStates } from '../game/pets.js';
@@ -289,6 +290,63 @@ if (earlyClaim.ok) {
   check('Vollständiges Set eingelöst', setResult.ok, `${setResult.coins} Taler`);
 }
 check('Set kann nicht doppelt eingelöst werden', !claimSet(player, firstSet.id).ok);
+
+/* --- Banditenmaske ----------------------------------------------------- */
+// Eine noch fehlende Karte aus einem erreichbaren Set suchen.
+const reachableSets = CARD_SETS.filter((set) => set.villageId <= player.village + 1);
+const missing = reachableSets
+  .flatMap((set) => cardsOfSet(set.id))
+  .find((card) => {
+    const row = db
+      .prepare<[string, string], { count: number }>(
+        'SELECT count FROM cards WHERE user_id = ? AND card_id = ?',
+      )
+      .get(player.id, card.id);
+    return (row?.count ?? 0) === 0;
+  });
+
+let noMask = false;
+try {
+  useWildcard(player, missing?.id ?? CARDS[0].id);
+} catch {
+  noMask = true;
+}
+check('Ohne Banditenmaske kein Eintausch', noMask);
+
+if (missing) {
+  player.wildcards = 2;
+  saveUser(player);
+  const wild = useWildcard(player, missing.id);
+  check('Banditenmaske eingetauscht', wild.card.id === missing.id, missing.name);
+  check('Maske wurde verbraucht', wild.left === 1 && player.wildcards === 1, `${player.wildcards} übrig`);
+
+  let ownedTwice = false;
+  try {
+    useWildcard(player, missing.id);
+  } catch {
+    ownedTwice = true;
+  }
+  check('Vorhandene Karte kostet keine Maske', ownedTwice && player.wildcards === 1);
+} else {
+  check('Banditenmaske eingetauscht', true, 'alle erreichbaren Karten bereits vorhanden');
+  check('Maske wurde verbraucht', true, 'übersprungen');
+  check('Vorhandene Karte kostet keine Maske', true, 'übersprungen');
+}
+
+const lockedSet = CARD_SETS.find((set) => set.villageId > player.village + 1);
+if (lockedSet) {
+  player.wildcards = 1;
+  saveUser(player);
+  let lockedRejected = false;
+  try {
+    useWildcard(player, cardsOfSet(lockedSet.id)[0].id);
+  } catch {
+    lockedRejected = true;
+  }
+  check('Gesperrte Insel lehnt die Maske ab', lockedRejected && player.wildcards === 1);
+} else {
+  check('Gesperrte Insel lehnt die Maske ab', true, 'übersprungen');
+}
 
 /* --- Karten verschenken ----------------------------------------------- */
 const giftFriend = addFriend(player, BOT_NAMES[1].name);
@@ -569,8 +627,14 @@ db.prepare(
   'INSERT OR REPLACE INTO tournament (user_id, cycle, points, claimed) VALUES (?, ?, ?, 0)',
 ).run(player.id, lastCycle, 5_000);
 const coinsBeforePrize = player.coins;
+const masksBeforePrize = player.wildcards;
 const prize = claimTournament(player);
 check('Turnierpreis abgeholt', prize.coins > 0 && player.coins > coinsBeforePrize, `Rang ${prize.rank}`);
+check(
+  'Masken aus dem Turnier passen zum Rang',
+  player.wildcards === masksBeforePrize + prize.wildcards,
+  `+${prize.wildcards}`,
+);
 let prizeTwice = false;
 try {
   claimTournament(player);

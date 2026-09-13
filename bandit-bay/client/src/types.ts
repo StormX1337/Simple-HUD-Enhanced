@@ -66,6 +66,7 @@ export interface ChestDef {
   cards: number;
   minRarity: Rarity;
   color: string;
+  wildChance?: number;
 }
 
 export type QuestType = 'spin' | 'upgrade' | 'attack' | 'raid' | 'coins' | 'cards';
@@ -179,6 +180,7 @@ export interface PlayerState {
   villageProgress: number;
   pendingAttacks: number;
   pendingRaids: number;
+  wildcards: number;
   stats: { attacks: number; raids: number; timesRaided: number; spins: number };
   event: EventState;
   activePet: ActivePetState | null;
@@ -287,6 +289,7 @@ export type HistoryType =
   | 'tournament'
   | 'gift'
   | 'gifted'
+  | 'wildcard'
   | 'deco';
 
 export interface HistoryEntry {
@@ -370,6 +373,7 @@ export interface TournamentPrize {
   label: string;
   coins: number;
   spins: number;
+  wildcards?: number;
 }
 
 export interface TournamentState {
@@ -380,7 +384,14 @@ export interface TournamentState {
   myRank: number;
   entries: TournamentEntry[];
   prizes: TournamentPrize[];
-  reward: { available: boolean; rank: number; label: string; coins: number; spins: number } | null;
+  reward: {
+    available: boolean;
+    rank: number;
+    label: string;
+    coins: number;
+    spins: number;
+    wildcards: number;
+  } | null;
 }
 
 export interface WheelSegmentView {
@@ -523,5 +534,13 @@ export interface ChestResponse {
   ok: boolean;
   cost: number;
   drops: CardDrop[];
+  /** Gefundene Banditenmasken. */
+  wilds: number;
+  state: PlayerState;
+}
+
+export interface WildcardResponse {
+  card: CardDef;
+  left: number;
   state: PlayerState;
 }

@@ -6,7 +6,7 @@
  */
 import type { AddressInfo } from 'node:net';
 import { createApp } from '../app.js';
-import { BOT_NAMES } from '../content/content.js';
+import { BOT_NAMES, CARDS } from '../content/content.js';
 
 let failures = 0;
 function check(label: string, condition: boolean, extra = ''): void {
@@ -164,6 +164,20 @@ check('Inselübersicht liefert acht Inseln', (villages.body.villages as unknown[
 const collection = await call('GET', '/collection');
 check('Sammlung liefert acht Sets', (collection.body.sets as unknown[])?.length === 8);
 check('Truhenpreise dabei', (collection.body.chests as unknown[])?.length === 3);
+
+check(
+  'Truhen nennen die Maskenchance',
+  (collection.body.chests as { wildChance?: number }[]).every((c) => typeof c.wildChance === 'number'),
+);
+check(
+  'Spielstand kennt die Maskenzahl',
+  typeof (collection.body.state as { wildcards?: number })?.wildcards === 'number',
+);
+
+const noMaskYet = await call('POST', '/collection/wildcard', { cardId: CARDS[0].id });
+check('Ohne Maske wird der Eintausch abgelehnt', noMaskYet.status === 400);
+const unknownMaskCard = await call('POST', '/collection/wildcard', { cardId: 'gibt_es_nicht' });
+check('Unbekannte Karte wird abgelehnt', unknownMaskCard.status === 404);
 
 const leaderboard = await call('GET', '/leaderboard');
 check('Rangliste kommt zurück', (leaderboard.body.entries as unknown[])?.length > 0);

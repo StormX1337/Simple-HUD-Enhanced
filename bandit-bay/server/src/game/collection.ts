@@ -65,6 +65,8 @@ export interface ChestResult {
   error?: string;
   cost: number;
   drops: CardDrop[];
+  /** Gefundene Banditenmasken (Joker-Karten). */
+  wilds: number;
 }
 
 /** Truhenpreis inklusive Begleiter-Rabatt (Otto). */
@@ -77,9 +79,9 @@ export function effectiveChestCost(user: UserRow, chestId: string): number {
 
 export function openChest(user: UserRow, chestId: string): ChestResult {
   const chest = CHESTS.find((c) => c.id === chestId);
-  if (!chest) return { ok: false, error: 'Unbekannte Truhe', cost: 0, drops: [] };
+  if (!chest) return { ok: false, error: 'Unbekannte Truhe', cost: 0, drops: [], wilds: 0 };
   const cost = effectiveChestCost(user, chest.id);
-  if (user.coins < cost) return { ok: false, error: 'Nicht genug Taler', cost, drops: [] };
+  if (user.coins < cost) return { ok: false, error: 'Nicht genug Taler', cost, drops: [], wilds: 0 };
 
   user.coins -= cost;
   const drops: CardDrop[] = [];
@@ -88,9 +90,51 @@ export function openChest(user: UserRow, chestId: string): ChestResult {
     const minRarity: Rarity = i === 0 ? chest.minRarity : 1;
     drops.push(grantRandomCard(user, minRarity));
   }
+  const wilds = Math.random() < (chest.wildChance ?? 0) ? 1 : 0;
+  if (wilds > 0) {
+    user.wildcards += wilds;
+    logEvent({ userId: user.id, type: 'wildcard', amount: wilds, detail: 'Banditenmaske gefunden' });
+  }
   saveUser(user);
   logEvent({ userId: user.id, type: 'chest', amount: -cost, detail: chest.name });
-  return { ok: true, cost, drops };
+  return { ok: true, cost, drops, wilds };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Banditenmaske (Joker-Karte)                                        */
+/* ------------------------------------------------------------------ */
+
+export interface WildcardResult {
+  card: CardDef;
+  left: number;
+}
+
+/**
+ * Eine Banditenmaske gegen eine beliebige fehlende Karte eintauschen.
+ * Nur Karten aus bereits erreichbaren Sets und nur Karten, die noch fehlen.
+ */
+export function useWildcard(user: UserRow, cardId: string): WildcardResult {
+  const card = cardById(cardId);
+  if (!card) throw new GameError('Unbekannte Karte', 404);
+  if (user.wildcards < 1) throw new GameError('Du hast keine Banditenmaske');
+
+  const set = CARD_SETS.find((s) => s.id === card.setId);
+  if (!set) throw new GameError('Unbekanntes Set', 404);
+  if (set.villageId > user.village + 1)
+    throw new GameError('Diese Insel hast du noch nicht erreicht');
+
+  const owned = db
+    .prepare<[string, string], { count: number }>(
+      'SELECT count FROM cards WHERE user_id = ? AND card_id = ?',
+    )
+    .get(user.id, cardId);
+  if (owned && owned.count > 0) throw new GameError('Diese Karte hast du schon');
+
+  user.wildcards -= 1;
+  grantCard(user, card);
+  saveUser(user);
+  logEvent({ userId: user.id, type: 'wildcard', amount: -1, detail: `${card.name} eingetauscht` });
+  return { card, left: user.wildcards };
 }
 
 export interface SetClaimResult {

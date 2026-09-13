@@ -12,6 +12,7 @@ import type {
   WheelStatus,
   ChestOffer,
   ChestResponse,
+  WildcardResponse,
   ClaimResponse,
   DailyState,
   GameConfig,
@@ -166,6 +167,7 @@ export const api = {
       gifts: { sentToday: number; limit: number; left: number };
     }>('/collection/gift', { friendId, cardId }),
   openChest: (chestId: string) => post<ChestResponse>('/collection/chest', { chestId }),
+  useWildcard: (cardId: string) => post<WildcardResponse>('/collection/wildcard', { cardId }),
   claimSet: (setId: string) => post<ClaimResponse>('/collection/set', { setId }),
   quests: () => request<{ quests: QuestState[] }>('/quests'),
   claimQuest: (questId: string) => post<ClaimResponse>('/quests/claim', { questId }),
@@ -173,9 +175,14 @@ export const api = {
   claimDaily: () => post<ClaimResponse>('/daily/claim'),
   tournament: () => request<{ tournament: TournamentState }>('/tournament'),
   claimTournament: () =>
-    post<{ rank: number; coins: number; spins: number; tournament: TournamentState; state: PlayerState }>(
-      '/tournament/claim',
-    ),
+    post<{
+      rank: number;
+      coins: number;
+      spins: number;
+      wildcards: number;
+      tournament: TournamentState;
+      state: PlayerState;
+    }>('/tournament/claim'),
   events: () =>
     request<{ event: EventState; upcoming: EventWindowInfo[] }>('/events'),
   wheel: () => request<{ wheel: WheelStatus; state: PlayerState }>('/wheel'),

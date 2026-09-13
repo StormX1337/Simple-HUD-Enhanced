@@ -64,7 +64,8 @@ export function saveUser(user: UserRow): void {
        level = @level, xp = @xp, village = @village, bet = @bet,
        pending_attacks = @pending_attacks, pending_raids = @pending_raids,
        last_regen = @last_regen, total_spins = @total_spins, total_attacks = @total_attacks,
-       total_raids = @total_raids, times_raided = @times_raided, last_sim = @last_sim,
+       total_raids = @total_raids, times_raided = @times_raided, wildcards = @wildcards,
+       last_sim = @last_sim,
        last_seen_event = @last_seen_event, updated_at = @updated_at
      WHERE id = @id`,
   ).run(user);
@@ -100,6 +101,7 @@ export function createUser(opts: {
     total_attacks: 0,
     total_raids: 0,
     times_raided: 0,
+    wildcards: 0,
     last_sim: ts,
     last_seen_event: 0,
     created_at: ts,
@@ -108,10 +110,11 @@ export function createUser(opts: {
   db.prepare(
     `INSERT INTO users (id, name, token, avatar, is_bot, coins, spins, shields, level, xp, village,
        bet, pending_attacks, pending_raids, last_regen, total_spins, total_attacks, total_raids,
-       times_raided, last_sim, last_seen_event, created_at, updated_at)
+       times_raided, wildcards, last_sim, last_seen_event, created_at, updated_at)
      VALUES (@id, @name, @token, @avatar, @is_bot, @coins, @spins, @shields, @level, @xp, @village,
        @bet, @pending_attacks, @pending_raids, @last_regen, @total_spins, @total_attacks,
-       @total_raids, @times_raided, @last_sim, @last_seen_event, @created_at, @updated_at)`,
+       @total_raids, @times_raided, @wildcards, @last_sim, @last_seen_event, @created_at,
+       @updated_at)`,
   ).run(user);
   ensureBuildings(user.id, user.village);
   db.prepare('INSERT OR IGNORE INTO daily (user_id, streak, last_day) VALUES (?, 0, ?)').run(
@@ -280,6 +283,7 @@ export function buildState(user: UserRow): PlayerState {
     villageProgress: villageProgress(user.id, user.village),
     pendingAttacks: user.pending_attacks,
     pendingRaids: user.pending_raids,
+    wildcards: user.wildcards,
     stats: {
       attacks: user.total_attacks,
       raids: user.total_raids,

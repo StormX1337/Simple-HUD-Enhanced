@@ -66,6 +66,8 @@ export interface ChestDef {
   cards: number;
   minRarity: Rarity;
   color: string;
+  /** Chance auf eine Banditenmaske (Joker-Karte) pro Truhe. */
+  wildChance?: number;
 }
 
 export type QuestType = 'spin' | 'upgrade' | 'attack' | 'raid' | 'coins' | 'cards';
@@ -179,6 +181,7 @@ export interface PlayerState {
   villageProgress: number;
   pendingAttacks: number;
   pendingRaids: number;
+  wildcards: number;
   stats: { attacks: number; raids: number; timesRaided: number; spins: number };
   event: EventState;
   activePet: ActivePetState | null;
@@ -287,6 +290,7 @@ export type HistoryType =
   | 'tournament'
   | 'gift'
   | 'gifted'
+  | 'wildcard'
   | 'deco';
 
 export interface HistoryEntry {

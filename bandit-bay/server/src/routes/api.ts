@@ -37,6 +37,7 @@ import {
   giftStatus,
   grantRandomCard,
   openChest,
+  useWildcard,
 } from '../game/collection.js';
 import { feedPet, petStates } from '../game/pets.js';
 import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
@@ -352,6 +353,16 @@ api.post('/collection/chest', auth, (req: AuthedRequest, res, next) => {
     const user = me(req);
     const result = openChest(user, String(req.body?.chestId ?? ''));
     if (!result.ok) throw new GameError(result.error ?? 'Truhe konnte nicht geöffnet werden');
+    res.json({ ...result, state: buildState(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+api.post('/collection/wildcard', auth, (req: AuthedRequest, res, next) => {
+  try {
+    const user = me(req);
+    const result = useWildcard(user, String(req.body?.cardId ?? ''));
     res.json({ ...result, state: buildState(user) });
   } catch (error) {
     next(error);

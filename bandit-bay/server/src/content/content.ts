@@ -322,12 +322,14 @@ export interface TournamentPrize {
   label: string;
   coins: number;
   spins: number;
+  /** Banditenmasken als Extra-Preis für die vorderen Plätze. */
+  wildcards?: number;
 }
 
 export const TOURNAMENT_PRIZES: TournamentPrize[] = [
-  { from: 1, to: 1, label: 'Platz 1', coins: 3_000_000, spins: 200 },
-  { from: 2, to: 3, label: 'Platz 2–3', coins: 1_200_000, spins: 120 },
-  { from: 4, to: 10, label: 'Platz 4–10', coins: 400_000, spins: 60 },
+  { from: 1, to: 1, label: 'Platz 1', coins: 3_000_000, spins: 200, wildcards: 3 },
+  { from: 2, to: 3, label: 'Platz 2–3', coins: 1_200_000, spins: 120, wildcards: 2 },
+  { from: 4, to: 10, label: 'Platz 4–10', coins: 400_000, spins: 60, wildcards: 1 },
   { from: 11, to: 25, label: 'Platz 11–25', coins: 120_000, spins: 25 },
 ];
 
@@ -980,9 +982,33 @@ export function duplicateValue(rarity: Rarity, level: number): number {
 export const RARITY_WEIGHTS: Record<Rarity, number> = { 1: 42, 2: 28, 3: 17, 4: 9, 5: 4 };
 
 export const CHESTS: ChestDef[] = [
-  { id: 'chest_wood', name: 'Treibholztruhe', baseCost: 30_000, cards: 2, minRarity: 1, color: '#c89b6a' },
-  { id: 'chest_silver', name: 'Silbertruhe', baseCost: 120_000, cards: 4, minRarity: 2, color: '#b9c6d6' },
-  { id: 'chest_gold', name: 'Goldtruhe', baseCost: 400_000, cards: 6, minRarity: 3, color: '#f6c343' },
+  {
+    id: 'chest_wood',
+    name: 'Treibholztruhe',
+    baseCost: 30_000,
+    cards: 2,
+    minRarity: 1,
+    color: '#c89b6a',
+    wildChance: 0.02,
+  },
+  {
+    id: 'chest_silver',
+    name: 'Silbertruhe',
+    baseCost: 120_000,
+    cards: 4,
+    minRarity: 2,
+    color: '#b9c6d6',
+    wildChance: 0.08,
+  },
+  {
+    id: 'chest_gold',
+    name: 'Goldtruhe',
+    baseCost: 400_000,
+    cards: 6,
+    minRarity: 3,
+    color: '#f6c343',
+    wildChance: 0.22,
+  },
 ];
 
 /** Truhenpreis steigt mit dem Spielerlevel. */

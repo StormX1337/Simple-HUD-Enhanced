@@ -110,8 +110,8 @@ Karte und Jackpot. Das Feld zieht der Server, der Client animiert nur darauf zu.
 
 **Turnier „Beutejagd"** – dreitägige Zyklen. Angriffe und Raubzüge geben Punkte
 (10/15 für Angriffe, 5/20/35 für Raubzüge), die Rangliste läuft gegen alle Mitspieler.
-Nach Zyklusende wartet der Preis (bis 3 Mio. Taler und 200 Drehungen für Platz 1) im
-Turnier-Tab.
+Nach Zyklusende wartet der Preis (bis 3 Mio. Taler, 200 Drehungen und 3 Banditenmasken für
+Platz 1) im Turnier-Tab.
 
 **Freunde** – im Freunde-Tab kannst du Mitspieler (auch die Bots wie „Miko Maske") über ihren
 Namen hinzufügen. Freunde tauchen bevorzugt als Ziel auf und lassen sich direkt aus der Liste
@@ -123,6 +123,12 @@ Fackeln, Lagerfeuer, Zaun, Brunnen, Fahne oder Steinwächter schmücken. Deko ko
 
 **Karten verschenken** – doppelte Karten lassen sich über das 🎁 auf der Karte an Freunde
 weitergeben (fünf pro Tag). Der Beschenkte sieht es beim nächsten Start in der Übersicht.
+
+**Banditenmaske** – die seltene Joker-Karte. Sie steckt in Truhen (Treibholz 2 %, Silber 8 %,
+Gold 22 %) und in den vorderen Turnierplätzen (Platz 1–10). Eine Maske tauschst du im
+Karten-Tab gegen **jede fehlende Karte** einer bereits erreichbaren Insel – damit lässt sich ein
+Set gezielt vervollständigen, statt auf die richtige Truhe zu hoffen. Der Server prüft Bestand,
+Insel und ob die Karte wirklich fehlt.
 
 **Inselübersicht** – ein Tipp auf das Inselschild zeigt alle sechs Inseln mit Fortschritt und
 Gebäudestand; fertige Inseln bleiben sichtbar.
@@ -217,6 +223,7 @@ bandit-bay/
 | `GET` | `/api/collection` | Karten, Sets, Truhenpreise |
 | `POST` | `/api/collection/chest`, `/api/collection/set` | Truhe öffnen, Set einlösen |
 | `POST` | `/api/collection/gift` | Doppelte Karte an einen Freund verschenken |
+| `POST` | `/api/collection/wildcard` | Banditenmaske gegen eine fehlende Karte eintauschen |
 | `GET/POST` | `/api/quests`, `/api/quests/claim` | Tagesquests |
 | `GET/POST` | `/api/daily`, `/api/daily/claim` | Tagesbelohnung |
 | `GET/POST` | `/api/achievements`, `/api/achievements/claim` | Meilensteine und ihre Belohnungen |

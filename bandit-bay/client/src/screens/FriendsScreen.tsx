@@ -215,6 +215,8 @@ function iconFor(type: HistoryEntry['type']): string {
       return '🎡';
     case 'tournament':
       return '🏆';
+    case 'wildcard':
+      return '🎭';
     default:
       return '✨';
   }
@@ -252,6 +254,8 @@ function labelFor(entry: HistoryEntry): string {
       return `Glücksrad: ${entry.detail}`;
     case 'tournament':
       return entry.detail;
+    case 'wildcard':
+      return entry.amount > 0 ? 'Banditenmaske gefunden' : `Banditenmaske: ${entry.detail}`;
     default:
       return entry.detail || 'Ereignis';
   }

@@ -28,6 +28,7 @@ export interface TournamentReward {
   label: string;
   coins: number;
   spins: number;
+  wildcards: number;
 }
 
 export interface TournamentState {
@@ -125,6 +126,7 @@ function pendingReward(user: UserRow, cycle: number): TournamentReward | null {
     label: prize.label,
     coins: prize.coins,
     spins: prize.spins,
+    wildcards: prize.wildcards ?? 0,
   };
 }
 
@@ -148,6 +150,7 @@ export interface TournamentClaim {
   rank: number;
   coins: number;
   spins: number;
+  wildcards: number;
 }
 
 export function claimTournament(user: UserRow): TournamentClaim {
@@ -161,6 +164,7 @@ export function claimTournament(user: UserRow): TournamentClaim {
   );
   user.coins += reward.coins;
   user.spins = Math.min(spinCapacity(user.level), user.spins + reward.spins);
+  user.wildcards += reward.wildcards;
   saveUser(user);
   logEvent({
     userId: user.id,
@@ -168,5 +172,10 @@ export function claimTournament(user: UserRow): TournamentClaim {
     amount: reward.coins,
     detail: `${TOURNAMENT.name}: ${reward.label}`,
   });
-  return { rank: reward.rank, coins: reward.coins, spins: reward.spins };
+  return {
+    rank: reward.rank,
+    coins: reward.coins,
+    spins: reward.spins,
+    wildcards: reward.wildcards,
+  };
 }

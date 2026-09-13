@@ -5,6 +5,7 @@ import { api, errorText } from '../lib/api';
 import { formatCoins, formatDuration } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { CoinIcon, SpinIcon } from '../components/art/HudIcons';
+import { SymbolIcon } from '../components/art/SymbolIcon';
 import type { TournamentState } from '../types';
 
 export function TournamentScreen(): JSX.Element {
@@ -39,7 +40,11 @@ export function TournamentScreen(): JSX.Element {
       setTournament(data.tournament);
       applyState(data.state);
       playSound('reward', 0.85);
-      pushToast(`Turnierpreis Rang ${data.rank}: +${formatCoins(data.coins)} Taler`, 'good');
+      pushToast(
+        `Turnierpreis Rang ${data.rank}: +${formatCoins(data.coins)} Taler` +
+          (data.wildcards > 0 ? ` und ${data.wildcards}× Banditenmaske` : ''),
+        'good',
+      );
     } catch (error) {
       playSound('fail', 0.4);
       pushToast(errorText(error, 'Preis nicht verfügbar'), 'bad');
@@ -91,6 +96,11 @@ export function TournamentScreen(): JSX.Element {
             <span className="flex items-center gap-1">
               <SpinIcon size={20} /> {tournament.reward.spins}
             </span>
+            {tournament.reward.wildcards > 0 && (
+              <span className="flex items-center gap-1">
+                <SymbolIcon id="joker" size={20} /> {tournament.reward.wildcards}
+              </span>
+            )}
           </div>
           <button
             type="button"
@@ -140,6 +150,11 @@ export function TournamentScreen(): JSX.Element {
                 <span className="flex items-center gap-1">
                   <SpinIcon size={14} /> {prize.spins}
                 </span>
+                {!!prize.wildcards && (
+                  <span className="flex items-center gap-1">
+                    <SymbolIcon id="joker" size={14} /> {prize.wildcards}
+                  </span>
+                )}
               </span>
             </div>
           ))}

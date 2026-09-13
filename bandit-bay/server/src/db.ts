@@ -25,6 +25,7 @@ export interface UserRow {
   total_attacks: number;
   total_raids: number;
   times_raided: number;
+  wildcards: number;
   last_sim: number;
   last_seen_event: number;
   created_at: number;
@@ -102,6 +103,7 @@ export function migrate(): void {
       total_attacks INTEGER NOT NULL DEFAULT 0,
       total_raids INTEGER NOT NULL DEFAULT 0,
       times_raided INTEGER NOT NULL DEFAULT 0,
+      wildcards INTEGER NOT NULL DEFAULT 0,
       last_sim INTEGER NOT NULL DEFAULT 0,
       last_seen_event INTEGER NOT NULL DEFAULT 0,
       created_at INTEGER NOT NULL,
@@ -224,6 +226,7 @@ export function migrate(): void {
   // Nachträglich ergänzte Spalten für bestehende Datenbanken.
   addColumnIfMissing('users', 'last_sim', 'INTEGER NOT NULL DEFAULT 0');
   addColumnIfMissing('users', 'last_seen_event', 'INTEGER NOT NULL DEFAULT 0');
+  addColumnIfMissing('users', 'wildcards', 'INTEGER NOT NULL DEFAULT 0');
 }
 
 function addColumnIfMissing(table: string, column: string, definition: string): void {

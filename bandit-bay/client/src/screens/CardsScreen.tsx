@@ -18,6 +18,8 @@ export function CardsScreen(): JSX.Element {
   const [gifts, setGifts] = useState({ sentToday: 0, limit: 5, left: 5 });
   const [giftCard, setGiftCard] = useState<CardDef | null>(null);
   const [friends, setFriends] = useState<FriendInfo[]>([]);
+  const [wildCard, setWildCard] = useState<CardDef | null>(null);
+  const [foundWilds, setFoundWilds] = useState(0);
 
   const load = useCallback(async () => {
     try {
@@ -44,7 +46,8 @@ export function CardsScreen(): JSX.Element {
       const data = await api.openChest(chestId);
       applyState(data.state);
       setDrops(data.drops);
-      playSound('card', 0.7);
+      setFoundWilds(data.wilds);
+      playSound(data.wilds > 0 ? 'reward' : 'card', 0.7);
       await load();
     } catch (error) {
       playSound('fail', 0.4);
@@ -67,6 +70,24 @@ export function CardsScreen(): JSX.Element {
     } catch (error) {
       playSound('fail', 0.4);
       pushToast(errorText(error, 'Set konnte nicht eingelöst werden'), 'bad');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const redeemWildcard = async () => {
+    if (!wildCard || busy) return;
+    setBusy(true);
+    try {
+      const data = await api.useWildcard(wildCard.id);
+      applyState(data.state);
+      setWildCard(null);
+      playSound('reward', 0.8);
+      pushToast(`Banditenmaske eingetauscht: ${data.card.name}`, 'good');
+      await load();
+    } catch (error) {
+      playSound('fail', 0.4);
+      pushToast(errorText(error, 'Eintausch fehlgeschlagen'), 'bad');
     } finally {
       setBusy(false);
     }
@@ -116,7 +137,11 @@ export function CardsScreen(): JSX.Element {
           Doppelte Karten kannst du über 🎁 an Freunde verschenken – noch {gifts.left} von{' '}
           {gifts.limit} heute.
         </div>
-        <div className="mt-2 grid grid-cols-4 gap-1.5 text-center text-[11px] font-black">
+        <div className="mt-1 text-[11px] text-white/60">
+          Eine Banditenmaske tauschst du gegen jede fehlende Karte – sie steckt in Truhen und in
+          den vorderen Turnierplätzen.
+        </div>
+        <div className="mt-2 grid grid-cols-5 gap-1.5 text-center text-[11px] font-black">
           <div className="flex flex-col items-center gap-0.5 rounded-xl border-2 border-black/40 bg-black/30 py-1.5">
             <CoinIcon size={20} />
             {formatCoins(state.coins)}
@@ -132,6 +157,13 @@ export function CardsScreen(): JSX.Element {
           <div className="flex flex-col items-center gap-0.5 rounded-xl border-2 border-black/40 bg-black/30 py-1.5">
             <CardIcon size={20} />
             {Object.values(state.cards).reduce((sum, count) => sum + count, 0)}
+          </div>
+          <div
+            data-testid="wildcard-count"
+            className="flex flex-col items-center gap-0.5 rounded-xl border-2 border-black/40 bg-black/30 py-1.5"
+          >
+            <SymbolIcon id="joker" size={20} />
+            {state.wildcards}
           </div>
         </div>
       </div>
@@ -156,6 +188,11 @@ export function CardsScreen(): JSX.Element {
               </span>
               <span className="mt-1 font-display text-xs font-bold leading-tight">{chest.name}</span>
               <span className="text-[10px] opacity-70">{chest.cards} Karten</span>
+              {!!chest.wildChance && (
+                <span className="mt-0.5 flex items-center gap-0.5 text-[10px] font-bold text-bay-golddark">
+                  <SymbolIcon id="joker" size={13} /> {Math.round(chest.wildChance * 100)} %
+                </span>
+              )}
               <span className="mt-1 rounded-full bg-black/10 px-2 py-0.5 text-[11px] font-black">
                 🪙 {formatCoins(chest.cost)}
               </span>
@@ -168,6 +205,7 @@ export function CardsScreen(): JSX.Element {
       <div className="space-y-3">
         {sets.map((set) => {
           const cards = config.cards.filter((card) => card.setId === set.id);
+          const reachable = set.villageId <= state.villageId + 1;
           return (
             <div key={set.id} className="panel p-3">
               <div className="mb-2 flex items-center gap-2">
@@ -216,6 +254,20 @@ export function CardsScreen(): JSX.Element {
                         {owned ? card.name : '???'}
                       </div>
                       <div className="text-[9px] text-bay-golddark">{'★'.repeat(card.rarity)}</div>
+                      {!owned && reachable && state.wildcards > 0 && (
+                        <button
+                          type="button"
+                          data-testid="wildcard-use"
+                          onClick={() => {
+                            playSound('click', 0.35);
+                            setWildCard(card);
+                          }}
+                          className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#4a2d6b] bg-gradient-to-b from-[#c9a6ff] to-[#7c4bd0] shadow-chunkysm"
+                          aria-label={`Banditenmaske für ${card.name} einsetzen`}
+                        >
+                          <SymbolIcon id="joker" size={14} />
+                        </button>
+                      )}
                       {count > 1 && (
                         <>
                           <span className="absolute -right-1 -top-1 rounded-full border border-black/30 bg-bay-coral px-1 text-[9px] font-black text-white">
@@ -255,6 +307,45 @@ export function CardsScreen(): JSX.Element {
           );
         })}
       </div>
+
+      {/* Banditenmaske einsetzen */}
+      {wildCard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-5">
+          <m.div
+            initial={{ scale: 0.85, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="panel w-full max-w-xs p-4 text-center"
+          >
+            <SymbolIcon id="joker" size={54} />
+            <div className="mt-1 font-display text-lg font-black">Banditenmaske einsetzen?</div>
+            <div className="mt-2 rounded-2xl border-[3px] bg-gradient-to-b from-white to-[#f3e6cd] p-2" style={{ borderColor: wildCard.color }}>
+              <CardArt art={wildCard.art} color={wildCard.color} size={64} className="mx-auto" />
+              <div className="text-xs font-bold leading-tight">{wildCard.name}</div>
+              <div className="text-[10px] text-bay-golddark">{'★'.repeat(wildCard.rarity)}</div>
+            </div>
+            <div className="mt-2 text-[11px] opacity-70">
+              Du hast {state.wildcards} Maske{state.wildcards === 1 ? '' : 'n'}. Die Karte landet
+              sofort in deinem Album.
+            </div>
+            <button
+              type="button"
+              data-testid="wildcard-confirm"
+              disabled={busy}
+              className="btn-gold mt-3 w-full"
+              onClick={() => void redeemWildcard()}
+            >
+              Einlösen
+            </button>
+            <button
+              type="button"
+              className="btn border-black/20 bg-black/10 mt-2 w-full text-sm text-[#3b2a14]"
+              onClick={() => setWildCard(null)}
+            >
+              Abbrechen
+            </button>
+          </m.div>
+        </div>
+      )}
 
       {/* Freund auswählen */}
       {giftCard && (
@@ -313,6 +404,20 @@ export function CardsScreen(): JSX.Element {
             className="panel w-full max-w-sm p-4 text-center"
           >
             <div className="font-display text-lg font-black">Truhe geöffnet!</div>
+            {foundWilds > 0 && (
+              <m.div
+                data-testid="wildcard-found"
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="mt-2 flex items-center justify-center gap-2 rounded-2xl border-2 border-[#7c4bd0] bg-[#7c4bd0]/15 px-3 py-2"
+              >
+                <SymbolIcon id="joker" size={30} />
+                <span className="font-display text-sm font-black">
+                  +{foundWilds} Banditenmaske!
+                </span>
+              </m.div>
+            )}
             <div className="my-3 grid grid-cols-3 gap-2">
               {drops.map((drop, index) => (
                 <m.div
@@ -337,6 +442,7 @@ export function CardsScreen(): JSX.Element {
               onClick={() => {
                 playSound('click', 0.4);
                 setDrops(null);
+                setFoundWilds(0);
               }}
             >
               Weiter
