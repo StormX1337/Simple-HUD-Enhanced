@@ -4,9 +4,10 @@ import { api } from '../lib/api';
 import { formatCoins, formatTime } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { TargetList } from '../components/TargetList';
+import { TournamentScreen } from './TournamentScreen';
 import type { HistoryEntry, LeaderboardEntry, TargetInfo } from '../types';
 
-type Tab = 'targets' | 'ranking' | 'history';
+type Tab = 'targets' | 'tournament' | 'ranking' | 'history';
 
 interface Props {
   onAttack: () => void;
@@ -50,7 +51,8 @@ export function FriendsScreen({ onAttack, onRaid }: Props): JSX.Element {
         {(
           [
             ['targets', 'Ziele'],
-            ['ranking', 'Rangliste'],
+            ['tournament', 'Turnier'],
+            ['ranking', 'Rang'],
             ['history', 'Verlauf'],
           ] as [Tab, string][]
         ).map(([id, label]) => (
@@ -61,7 +63,8 @@ export function FriendsScreen({ onAttack, onRaid }: Props): JSX.Element {
               playSound('click', 0.3);
               setTab(id);
             }}
-            className={`flex-1 rounded-2xl border-2 px-2 py-1.5 font-display text-sm font-bold ${
+            data-testid={`friends-tab-${id}`}
+            className={`flex-1 rounded-2xl border-2 px-1.5 py-1.5 font-display text-[13px] font-bold ${
               tab === id
                 ? 'border-black/25 bg-gradient-to-b from-[#ffd95e] to-[#e0a21a] text-[#4a2f05]'
                 : 'border-white/15 bg-white/10 text-white'
@@ -112,6 +115,8 @@ export function FriendsScreen({ onAttack, onRaid }: Props): JSX.Element {
           />
         </div>
       )}
+
+      {tab === 'tournament' && <TournamentScreen />}
 
       {tab === 'ranking' && (
         <div className="space-y-1.5">

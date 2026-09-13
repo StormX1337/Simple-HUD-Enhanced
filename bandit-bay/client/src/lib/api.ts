@@ -1,6 +1,11 @@
 import type {
   AchievementState,
   AttackResult,
+  EventState,
+  EventWindowInfo,
+  TournamentState,
+  WheelResult,
+  WheelStatus,
   ChestOffer,
   ChestResponse,
   ClaimResponse,
@@ -94,6 +99,15 @@ export const api = {
   claimQuest: (questId: string) => post<ClaimResponse>('/quests/claim', { questId }),
   daily: () => request<{ daily: DailyState }>('/daily'),
   claimDaily: () => post<ClaimResponse>('/daily/claim'),
+  tournament: () => request<{ tournament: TournamentState }>('/tournament'),
+  claimTournament: () =>
+    post<{ rank: number; coins: number; spins: number; tournament: TournamentState; state: PlayerState }>(
+      '/tournament/claim',
+    ),
+  events: () =>
+    request<{ event: EventState; upcoming: EventWindowInfo[] }>('/events'),
+  wheel: () => request<{ wheel: WheelStatus; state: PlayerState }>('/wheel'),
+  spinWheel: () => post<WheelResult>('/wheel/spin'),
   achievements: () =>
     request<{ achievements: AchievementState[]; state: PlayerState }>('/achievements'),
   claimAchievement: (id: string) =>

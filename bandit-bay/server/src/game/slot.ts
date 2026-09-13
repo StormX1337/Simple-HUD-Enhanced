@@ -6,7 +6,9 @@ import {
   SPIN_TABLE,
   SYMBOLS,
   coinValue,
-  eventMultiplier,
+  coinEventMultiplier,
+  shieldEventBonus,
+  spinEventMultiplier,
   maxBetForLevel,
   spinCapacity,
   type PayoutEntry,
@@ -74,8 +76,9 @@ export function spin(user: UserRow, betInput: number): SpinResult {
 
   const { matches, symbol } = rollOutcome();
   const reels: SymbolId[] = buildReels(matches, symbol);
-  const eventBonus = eventMultiplier();
-  const base = coinValue(user.level, user.village) * eventBonus * petBonus(user.id, 'coins');
+  const base =
+    coinValue(user.level, user.village) * coinEventMultiplier() * petBonus(user.id, 'coins');
+  const spinBonus = spinEventMultiplier();
 
   let outcome: SpinOutcomeType = 'nothing';
   let amount = 0;
@@ -98,7 +101,7 @@ export function spin(user: UserRow, betInput: number): SpinResult {
         break;
       case 'beutel': {
         outcome = 'spins';
-        const gain = 10 * bet;
+        const gain = 10 * bet * spinBonus;
         const before = user.spins;
         user.spins = Math.min(spinCapacity(user.level), user.spins + gain);
         amount = user.spins - before;
@@ -108,9 +111,13 @@ export function spin(user: UserRow, betInput: number): SpinResult {
       case 'schild':
         if (user.shields < BALANCE.maxShields) {
           outcome = 'shield';
-          user.shields += 1;
-          amount = 1;
-          message = 'Schild aufgebaut – dein Dorf ist geschützt!';
+          const before = user.shields;
+          user.shields = Math.min(BALANCE.maxShields, user.shields + shieldEventBonus());
+          amount = user.shields - before;
+          message =
+            amount > 1
+              ? `Schildstunde: +${amount} Schilde für dein Dorf!`
+              : 'Schild aufgebaut – dein Dorf ist geschützt!';
         } else {
           gainCoins(base * bet * 5, 'Schilde voll – dafür klingeln die Taler!');
         }
@@ -147,7 +154,7 @@ export function spin(user: UserRow, betInput: number): SpinResult {
         break;
       case 'beutel': {
         outcome = 'spins';
-        const gain = 3 * bet;
+        const gain = 3 * bet * spinBonus;
         const before = user.spins;
         user.spins = Math.min(spinCapacity(user.level), user.spins + gain);
         amount = user.spins - before;
@@ -155,7 +162,12 @@ export function spin(user: UserRow, betInput: number): SpinResult {
         break;
       }
       case 'schild':
-        gainCoins(base * bet * 2, 'Zwei Schilde – Trostpreis in Talern.');
+        gainCoins(
+          base * bet * 2 * shieldEventBonus(),
+          shieldEventBonus() > 1
+            ? 'Schildstunde: zwei Schilde zahlen doppelt!'
+            : 'Zwei Schilde – Trostpreis in Talern.',
+        );
         break;
       case 'hammer':
         gainCoins(base * bet * 2, 'Zwei Hämmer – ein paar Taler fallen ab.');

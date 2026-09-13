@@ -22,7 +22,11 @@ const SPOTS = [
   { x: 66, y: 78 },
 ];
 
-export function VillageScene(): JSX.Element | null {
+interface VillageProps {
+  onOpenEvents?: () => void;
+}
+
+export function VillageScene({ onOpenEvents }: VillageProps): JSX.Element | null {
   const { state, config, applyState, pushToast, refresh } = useGame();
   const short = useShortScreen();
   const [selected, setSelected] = useState<number | null>(null);
@@ -125,7 +129,7 @@ export function VillageScene(): JSX.Element | null {
             </div>
           </div>
         </div>
-        <EventBanner />
+        <EventBanner onOpenEvents={onOpenEvents} />
       </div>
 
       {/* Gebäude */}

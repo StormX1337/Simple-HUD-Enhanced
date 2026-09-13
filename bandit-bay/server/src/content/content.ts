@@ -117,64 +117,251 @@ export const SPIN_TABLE: PayoutEntry[] = [
 export const NO_MATCH_WEIGHT = 20;
 
 /* ------------------------------------------------------------------ */
-/*  Event: Talerregen                                                  */
+/*  Events                                                             */
 /* ------------------------------------------------------------------ */
 
-/**
- * Mehrmals täglich läuft der "Talerregen": alle Taler-Gewinne aus dem
- * Automaten sowie Beute aus Angriff und Raubzug zählen doppelt.
- * Die Fenster sind feste UTC-Zeiten, damit Server und Client dasselbe sehen.
- */
-export const EVENT = {
-  name: 'Talerregen',
-  multiplier: 2,
-  durationMinutes: 60,
+export type EventKind = 'taler' | 'beutel' | 'raub' | 'schild';
+
+export interface EventTypeDef {
+  kind: EventKind;
+  name: string;
+  icon: string;
+  description: string;
+  /** Kurzfassung für das Banner */
+  short: string;
+  color: string;
+}
+
+export const EVENT_TYPES: Record<EventKind, EventTypeDef> = {
+  taler: {
+    kind: 'taler',
+    name: 'Talerregen',
+    icon: '🪙',
+    description: 'Alle Taler aus Automat, Angriff und Raubzug zählen doppelt.',
+    short: 'Doppelte Taler',
+    color: '#f8c73c',
+  },
+  beutel: {
+    kind: 'beutel',
+    name: 'Beutelfest',
+    icon: '🎒',
+    description: 'Beutel-Symbole bringen doppelt so viele Drehungen.',
+    short: 'Doppelte Drehungen',
+    color: '#48a6f0',
+  },
+  raub: {
+    kind: 'raub',
+    name: 'Raubzugnacht',
+    icon: '🐾',
+    description: 'Raubzüge bringen die Hälfte mehr Beute.',
+    short: '+50 % Raubzug-Beute',
+    color: '#a476ee',
+  },
+  schild: {
+    kind: 'schild',
+    name: 'Schildstunde',
+    icon: '🛡️',
+    description: 'Drei Schilde geben gleich zwei Schilde, zwei Schilde doppelte Taler.',
+    short: 'Doppelte Schilde',
+    color: '#66c14c',
+  },
+};
+
+/** Vier feste Zeitfenster pro Tag (UTC), der Typ rotiert Tag für Tag. */
+export const EVENT_SCHEDULE = {
   startHoursUtc: [6, 12, 18, 22],
+  durationMinutes: 60,
+  order: ['taler', 'beutel', 'raub', 'schild'] as EventKind[],
 } as const;
 
+export interface EventWindow {
+  kind: EventKind;
+  start: number;
+  end: number;
+}
+
+/** Alle Fenster von gestern bis morgen, zeitlich sortiert. */
+export function eventWindows(now: number = Date.now()): EventWindow[] {
+  const date = new Date(now);
+  const dayStart = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  const windows: EventWindow[] = [];
+  for (const offsetDay of [-1, 0, 1]) {
+    const day = dayStart + offsetDay * 86_400_000;
+    const dayIndex = Math.floor(day / 86_400_000);
+    EVENT_SCHEDULE.startHoursUtc.forEach((hour, slot) => {
+      const start = day + hour * 3_600_000;
+      const kind =
+        EVENT_SCHEDULE.order[
+          (((dayIndex * EVENT_SCHEDULE.startHoursUtc.length + slot) % EVENT_SCHEDULE.order.length) +
+            EVENT_SCHEDULE.order.length) %
+            EVENT_SCHEDULE.order.length
+        ];
+      windows.push({ kind, start, end: start + EVENT_SCHEDULE.durationMinutes * 60_000 });
+    });
+  }
+  return windows.sort((a, b) => a.start - b.start);
+}
+
 export interface EventStatus {
+  kind: EventKind | null;
   name: string;
-  multiplier: number;
+  icon: string;
+  short: string;
+  description: string;
+  color: string;
   active: boolean;
   secondsLeft: number;
   secondsUntilNext: number;
+  nextKind: EventKind | null;
+  nextName: string;
 }
 
 export function eventStatus(now: number = Date.now()): EventStatus {
-  const date = new Date(now);
-  const dayStart = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-  const windows: { start: number; end: number }[] = [];
-  for (const offsetDay of [-1, 0, 1]) {
-    for (const hour of EVENT.startHoursUtc) {
-      const start = dayStart + offsetDay * 86_400_000 + hour * 3_600_000;
-      windows.push({ start, end: start + EVENT.durationMinutes * 60_000 });
-    }
-  }
-  windows.sort((a, b) => a.start - b.start);
-
+  const windows = eventWindows(now);
   const running = windows.find((window) => now >= window.start && now < window.end);
+  const next = windows.find((window) => window.start > now);
+  const nextType = next ? EVENT_TYPES[next.kind] : null;
+
   if (running) {
+    const type = EVENT_TYPES[running.kind];
     return {
-      name: EVENT.name,
-      multiplier: EVENT.multiplier,
+      kind: type.kind,
+      name: type.name,
+      icon: type.icon,
+      short: type.short,
+      description: type.description,
+      color: type.color,
       active: true,
       secondsLeft: Math.ceil((running.end - now) / 1000),
-      secondsUntilNext: 0,
+      secondsUntilNext: next ? Math.ceil((next.start - now) / 1000) : 0,
+      nextKind: nextType?.kind ?? null,
+      nextName: nextType?.name ?? '',
     };
   }
-  const next = windows.find((window) => window.start > now);
+
   return {
-    name: EVENT.name,
-    multiplier: EVENT.multiplier,
+    kind: null,
+    name: nextType?.name ?? 'Event',
+    icon: nextType?.icon ?? '🎉',
+    short: nextType?.short ?? '',
+    description: nextType?.description ?? '',
+    color: nextType?.color ?? '#f8c73c',
     active: false,
     secondsLeft: 0,
     secondsUntilNext: next ? Math.ceil((next.start - now) / 1000) : 0,
+    nextKind: nextType?.kind ?? null,
+    nextName: nextType?.name ?? '',
   };
 }
 
-/** Aktueller Multiplikator auf Taler-Gewinne. */
-export function eventMultiplier(now: number = Date.now()): number {
-  return eventStatus(now).active ? EVENT.multiplier : 1;
+/** Kommende Fenster für die Event-Übersicht. */
+export function upcomingEvents(now: number = Date.now(), count = 6): EventWindow[] {
+  return eventWindows(now)
+    .filter((window) => window.end > now)
+    .slice(0, count);
+}
+
+function activeKind(now: number): EventKind | null {
+  const status = eventStatus(now);
+  return status.active ? status.kind : null;
+}
+
+/** Faktor auf Taler-Auszahlungen. */
+export function coinEventMultiplier(now: number = Date.now()): number {
+  return activeKind(now) === 'taler' ? 2 : 1;
+}
+
+/** Faktor auf gewonnene Drehungen. */
+export function spinEventMultiplier(now: number = Date.now()): number {
+  return activeKind(now) === 'beutel' ? 2 : 1;
+}
+
+/** Faktor auf Raubzug-Beute. */
+export function raidEventMultiplier(now: number = Date.now()): number {
+  return activeKind(now) === 'raub' ? 1.5 : 1;
+}
+
+/** Zusätzliche Schilde bei drei Schild-Symbolen. */
+export function shieldEventBonus(now: number = Date.now()): number {
+  return activeKind(now) === 'schild' ? 2 : 1;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Turnier                                                            */
+/* ------------------------------------------------------------------ */
+
+/** Ein Turnierzyklus dauert drei Tage. */
+export const TOURNAMENT = {
+  name: 'Beutejagd',
+  cycleDays: 3,
+  points: {
+    attack: 10,
+    attackDestroyed: 15,
+    raidEmpty: 5,
+    raidLoot: 20,
+    raidJackpot: 35,
+  },
+} as const;
+
+export interface TournamentPrize {
+  /** Gilt für Plätze von..bis (1-basiert). */
+  from: number;
+  to: number;
+  label: string;
+  coins: number;
+  spins: number;
+}
+
+export const TOURNAMENT_PRIZES: TournamentPrize[] = [
+  { from: 1, to: 1, label: 'Platz 1', coins: 3_000_000, spins: 200 },
+  { from: 2, to: 3, label: 'Platz 2–3', coins: 1_200_000, spins: 120 },
+  { from: 4, to: 10, label: 'Platz 4–10', coins: 400_000, spins: 60 },
+  { from: 11, to: 25, label: 'Platz 11–25', coins: 120_000, spins: 25 },
+];
+
+export function tournamentCycle(now: number = Date.now()): number {
+  return Math.floor(now / (TOURNAMENT.cycleDays * 86_400_000));
+}
+
+export function tournamentCycleEnd(cycle: number): number {
+  return (cycle + 1) * TOURNAMENT.cycleDays * 86_400_000;
+}
+
+export function tournamentPrizeFor(rank: number): TournamentPrize | undefined {
+  return TOURNAMENT_PRIZES.find((prize) => rank >= prize.from && rank <= prize.to);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Glücksrad                                                          */
+/* ------------------------------------------------------------------ */
+
+export type WheelKind = 'coins' | 'spins' | 'shield' | 'card' | 'jackpot';
+
+export interface WheelSegmentDef {
+  id: string;
+  label: string;
+  kind: WheelKind;
+  /** Taler = Faktor auf den Grundwert, Drehungen/Schilde = feste Menge. */
+  value: number;
+  weight: number;
+  color: string;
+}
+
+/** Acht Felder – einmal pro Tag kostenlos. */
+export const WHEEL: WheelSegmentDef[] = [
+  { id: 'w_coins_s', label: 'Taler', kind: 'coins', value: 40, weight: 22, color: '#f8c73c' },
+  { id: 'w_spins_s', label: '5 Drehungen', kind: 'spins', value: 5, weight: 18, color: '#48a6f0' },
+  { id: 'w_coins_m', label: 'Taler', kind: 'coins', value: 100, weight: 16, color: '#ffb74d' },
+  { id: 'w_shield', label: 'Schild', kind: 'shield', value: 1, weight: 12, color: '#66c14c' },
+  { id: 'w_spins_m', label: '15 Drehungen', kind: 'spins', value: 15, weight: 10, color: '#7cc6fe' },
+  { id: 'w_card', label: 'Karte', kind: 'card', value: 1, weight: 9, color: '#ff8fb0' },
+  { id: 'w_coins_l', label: 'Taler', kind: 'coins', value: 260, weight: 8, color: '#ff9a3c' },
+  { id: 'w_jackpot', label: 'JACKPOT', kind: 'jackpot', value: 650, weight: 5, color: '#c792ea' },
+];
+
+/** Grundwert für Taler-Felder des Rads. */
+export function wheelCoinBase(level: number, villageId: number): number {
+  return coinValue(level, villageId);
 }
 
 /* ------------------------------------------------------------------ */

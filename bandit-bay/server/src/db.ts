@@ -153,6 +153,22 @@ export function migrate(): void {
       PRIMARY KEY (user_id, pet_id)
     );
 
+    CREATE TABLE IF NOT EXISTS tournament (
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      cycle INTEGER NOT NULL,
+      points INTEGER NOT NULL DEFAULT 0,
+      claimed INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (user_id, cycle)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_tournament_cycle ON tournament(cycle, points DESC);
+
+    CREATE TABLE IF NOT EXISTS wheel (
+      user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      last_day TEXT NOT NULL DEFAULT '',
+      spins INTEGER NOT NULL DEFAULT 0
+    );
+
     CREATE TABLE IF NOT EXISTS achievements (
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       ach_id TEXT NOT NULL,

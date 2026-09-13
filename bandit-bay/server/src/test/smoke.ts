@@ -7,6 +7,9 @@ import { seedBots } from '../seed.js';
 import {
   BALANCE,
   CARD_SETS,
+  eventStatus,
+  tournamentCycle,
+  upcomingEvents,
   CHESTS,
   QUESTS,
   VILLAGES,
@@ -23,6 +26,8 @@ import { claimDaily, claimQuest, dailyState, questStates } from '../game/progres
 import { feedPet, petBonus, petStates } from '../game/pets.js';
 import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
 import { achievementStates, claimAchievement } from '../game/achievements.js';
+import { spinWheel, wheelStatus } from '../game/wheel.js';
+import { claimTournament, tournamentState } from '../game/tournament.js';
 import type { SpinOutcomeType } from '../types.js';
 
 let failures = 0;
@@ -298,6 +303,79 @@ try {
   tooEarly = true;
 }
 check('Nicht erreichter Meilenstein wird abgelehnt', tooEarly);
+
+/* --- Glücksrad -------------------------------------------------------- */
+const wheelBefore = wheelStatus(player);
+check('Glücksrad hat acht Felder', wheelBefore.segments.length === 8);
+check('Glücksrad ist verfügbar', wheelBefore.canSpin);
+const coinsBeforeWheel = player.coins;
+const spinsBeforeWheel = player.spins;
+const wheelResult = spinWheel(player);
+check(
+  'Glücksrad zahlt aus',
+  wheelResult.coins > 0 ||
+    wheelResult.spins > 0 ||
+    wheelResult.shields > 0 ||
+    wheelResult.card !== null,
+  wheelResult.segment.label,
+);
+check(
+  'Gewinn wurde gutgeschrieben',
+  player.coins >= coinsBeforeWheel && player.spins >= spinsBeforeWheel,
+);
+let wheelTwice = false;
+try {
+  spinWheel(player);
+} catch {
+  wheelTwice = true;
+}
+check('Glücksrad nur einmal pro Tag', wheelTwice);
+
+/* --- Events ----------------------------------------------------------- */
+const windows = upcomingEvents(Date.now(), 6);
+check('Event-Zeitplan vorhanden', windows.length === 6, windows.map((w) => w.kind).join(','));
+check(
+  'Event-Typen wechseln',
+  new Set(windows.map((entry) => entry.kind)).size > 1,
+  `${new Set(windows.map((entry) => entry.kind)).size} Typen`,
+);
+const noon = Date.UTC(2026, 8, 13, 12, 30);
+check('Mittagsfenster ist aktiv', eventStatus(noon).active, eventStatus(noon).name);
+check('Nachts läuft kein Event', !eventStatus(Date.UTC(2026, 8, 13, 3, 0)).active);
+
+/* --- Turnier ---------------------------------------------------------- */
+const tournament = tournamentState(player);
+check('Turnier läuft', tournament.endsInSeconds > 0, `${Math.round(tournament.endsInSeconds / 3600)}h`);
+check('Turnierpunkte gesammelt', tournament.myPoints > 0, `${tournament.myPoints} Punkte`);
+check('Rangliste gefüllt', tournament.entries.length > 1, `${tournament.entries.length} Einträge`);
+check(
+  'Eigener Eintrag hat einen Rang',
+  tournament.myRank >= 1 && tournament.myRank <= tournament.entries.length + 1,
+  `Rang ${tournament.myRank}`,
+);
+let noReward = false;
+try {
+  claimTournament(player);
+} catch {
+  noReward = true;
+}
+check('Ohne abgeschlossenen Zyklus gibt es nichts', noReward);
+
+// Vorherigen Zyklus simulieren und Preis abholen
+const lastCycle = tournamentCycle() - 1;
+db.prepare(
+  'INSERT OR REPLACE INTO tournament (user_id, cycle, points, claimed) VALUES (?, ?, ?, 0)',
+).run(player.id, lastCycle, 5_000);
+const coinsBeforePrize = player.coins;
+const prize = claimTournament(player);
+check('Turnierpreis abgeholt', prize.coins > 0 && player.coins > coinsBeforePrize, `Rang ${prize.rank}`);
+let prizeTwice = false;
+try {
+  claimTournament(player);
+} catch {
+  prizeTwice = true;
+}
+check('Turnierpreis nur einmal', prizeTwice);
 
 /* --- Ergebnis --------------------------------------------------------- */
 const finalState = buildState(player);

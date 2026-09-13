@@ -86,8 +86,24 @@ Dazu: Tagesquests, **Meilensteine** (dauerhafte Ziele mit Belohnung), 7-Tage-Bel
 Rangliste, Ereignisverlauf, Einsatzstufen (×1 bis ×1000, mit Level freigeschaltet) und
 automatisches Drehen.
 
-**Talerregen** – mehrmals täglich (6, 12, 18 und 22 Uhr UTC, jeweils 60 Minuten) zählen alle
-Taler doppelt. Der Countdown läuft im Banner über der Insel, gerechnet wird serverseitig.
+**Events** – viermal täglich (6, 12, 18 und 22 Uhr UTC, jeweils 60 Minuten) läuft ein Event.
+Der Typ wechselt reihum, der Countdown läuft im Banner über der Insel, gerechnet wird
+serverseitig:
+
+| Event | Wirkung |
+| --- | --- |
+| 🪙 Talerregen | Alle Taler zählen doppelt |
+| 🎒 Beutelfest | Beutel-Symbole geben doppelte Drehungen |
+| 🐾 Raubzugnacht | +50 % Beute bei Raubzügen |
+| 🛡️ Schildstunde | Drei Schilde geben zwei, zwei Schilde doppelte Taler |
+
+**Glücksrad** – einmal pro Tag kostenlos drehen: acht Felder mit Talern, Drehungen, Schild,
+Karte und Jackpot. Das Feld zieht der Server, der Client animiert nur darauf zu.
+
+**Turnier „Beutejagd"** – dreitägige Zyklen. Angriffe und Raubzüge geben Punkte
+(10/15 für Angriffe, 5/20/35 für Raubzüge), die Rangliste läuft gegen alle Mitspieler.
+Nach Zyklusende wartet der Preis (bis 3 Mio. Taler und 200 Drehungen für Platz 1) im
+Turnier-Tab.
 
 **Während du weg warst** – kommst du nach ein paar Stunden zurück, hat die Insel weitergelebt:
 Bots greifen an (Schilde blocken) oder stehlen Taler. Beim Start zeigt eine Übersicht, was
@@ -129,7 +145,8 @@ bandit-bay/
 ├─ server/
 │  ├─ src/content/content.ts   Spielinhalte + Balance (Inseln, Karten, Quests, Gewinntabelle)
 │  ├─ src/game/                core (Nutzer/XP/Spins), slot, village, battle, collection,
-│  │                          progress, pets, absence (Bot-Überfälle während der Abwesenheit)
+│  │                          progress, pets, achievements, wheel, tournament,
+│  │                          absence (Bot-Überfälle während der Abwesenheit)
 │  ├─ src/routes/api.ts        REST-Endpunkte
 │  ├─ src/db.ts                SQLite-Schema und Migration
 │  ├─ src/seed.ts              Mitspieler-Bots
@@ -137,7 +154,8 @@ bandit-bay/
 ├─ client/
 │  ├─ src/components/art/      eigene SVGs (Symbole, Gebäude, Karten, Maskottchen)
 │  ├─ src/components/          TopBar, VillageScene, SlotMachine, Overlays, Navigation
-│  ├─ src/screens/             Login, Karten, Freunde, Quests, Belohnungen, Begleiter
+│  ├─ src/screens/             Login, Karten, Freunde, Turnier, Quests, Meilensteine,
+│  │                          Tagesbonus, Glücksrad, Begleiter, Events
 │  ├─ src/game/GameContext.tsx zentraler Spielzustand
 │  └─ public/audio/            Soundeffekte (austauschbar)
 └─ tools/generate-audio.py     erzeugt die Platzhalter-Sounds
@@ -162,6 +180,9 @@ bandit-bay/
 | `GET/POST` | `/api/quests`, `/api/quests/claim` | Tagesquests |
 | `GET/POST` | `/api/daily`, `/api/daily/claim` | Tagesbelohnung |
 | `GET/POST` | `/api/achievements`, `/api/achievements/claim` | Meilensteine und ihre Belohnungen |
+| `GET` | `/api/events` | Laufendes Event und Zeitplan der nächsten Fenster |
+| `GET/POST` | `/api/wheel`, `/api/wheel/spin` | Glücksrad (einmal pro Tag) |
+| `GET/POST` | `/api/tournament`, `/api/tournament/claim` | Turnierstand und Preis |
 | `GET` | `/api/target/:id` | Einzelnes Ziel laden (Rache aus der Ereignisliste) |
 | `POST` | `/api/news/seen` | Ereignisse als gesehen markieren |
 | `GET` | `/api/pets` | Begleiter mit Status, Kosten und Restlaufzeit |
@@ -171,8 +192,8 @@ bandit-bay/
 Authentifizierung: `Authorization: Bearer <token>`; der Token liegt im `localStorage`.
 
 Gespeichert werden: Nutzer, Taler, Drehungen, Schilde, Level, Erfahrung, Inseln, Gebäude und
-deren Stufen, Karten, Karten-Sets, Quests, Meilensteine, Tagesbelohnungen, Begleiter sowie
-Angriffs- und Raid-Historie.
+deren Stufen, Karten, Karten-Sets, Quests, Meilensteine, Tagesbelohnungen, Glücksrad-Drehungen,
+Turnierpunkte, Begleiter sowie Angriffs- und Raid-Historie.
 
 Das gebaute Spiel ist eine PWA: `client/public/manifest.webmanifest`, ein kleiner Service
 Worker (`client/public/sw.js`, hält nur die App-Hülle im Cache, niemals Spielstände) und

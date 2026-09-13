@@ -14,7 +14,7 @@ import { LoginScreen } from './screens/LoginScreen';
 import { CardsScreen } from './screens/CardsScreen';
 import { FriendsScreen } from './screens/FriendsScreen';
 import { QuestsScreen } from './screens/QuestsScreen';
-import { RewardsScreen } from './screens/RewardsScreen';
+import { RewardsScreen, type RewardsTab } from './screens/RewardsScreen';
 import { Raccoon } from './components/art/Raccoon';
 import type { CardDef } from './types';
 
@@ -24,7 +24,7 @@ export default function App(): JSX.Element {
   // Angriff und Raubzug teilen sich einen Platz – nie beide gleichzeitig.
   const [battle, setBattle] = useState<'attack' | 'raid' | null>(null);
   const [revealed, setRevealed] = useState<{ card: CardDef; isNew: boolean } | null>(null);
-  const [rewardsTab, setRewardsTab] = useState<'daily' | 'pets'>('daily');
+  const [rewardsTab, setRewardsTab] = useState<RewardsTab>('daily');
   const [revengeTarget, setRevengeTarget] = useState<string | null>(null);
   const openAttack = () => setBattle('attack');
   const openRaid = () => setBattle('raid');
@@ -98,6 +98,15 @@ export default function App(): JSX.Element {
                   badge: questBadge,
                   onClick: () => setScreen('quests'),
                 },
+                {
+                  id: 'wheel',
+                  icon: '🎡',
+                  label: 'Rad',
+                  onClick: () => {
+                    setRewardsTab('wheel');
+                    setScreen('rewards');
+                  },
+                },
                 { id: 'shop', icon: '🧰', label: 'Truhen', onClick: () => setScreen('cards') },
               ]}
             />
@@ -123,7 +132,12 @@ export default function App(): JSX.Element {
                 { id: 'rank', icon: '🏆', label: 'Rang', onClick: () => setScreen('friends') },
               ]}
             />
-            <VillageScene />
+            <VillageScene
+              onOpenEvents={() => {
+                setRewardsTab('events');
+                setScreen('rewards');
+              }}
+            />
             <SlotMachine
               onAttack={openAttack}
               onRaid={openRaid}
@@ -136,7 +150,9 @@ export default function App(): JSX.Element {
           <FriendsScreen onAttack={openAttack} onRaid={openRaid} />
         )}
         {screen === 'quests' && <QuestsScreen />}
-        {screen === 'rewards' && <RewardsScreen tab={rewardsTab} onTab={setRewardsTab} />}
+        {screen === 'rewards' && (
+          <RewardsScreen tab={rewardsTab} onTab={setRewardsTab} badge={rewardBadge > 0} />
+        )}
       </main>
 
       <BottomNav

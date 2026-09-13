@@ -10,8 +10,10 @@ import {
   SYMBOLS,
   VILLAGES,
   chestCost,
+  EVENT_TYPES,
   eventStatus,
   PET_DURATION_HOURS,
+  upcomingEvents,
   cardsOfSet,
   maxBetForLevel,
 } from '../content/content.js';
@@ -30,6 +32,8 @@ import { claimSet, grantRandomCard, openChest } from '../game/collection.js';
 import { feedPet, petStates } from '../game/pets.js';
 import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
 import { achievementStates, claimAchievement } from '../game/achievements.js';
+import { spinWheel, wheelStatus } from '../game/wheel.js';
+import { claimTournament, tournamentState } from '../game/tournament.js';
 import {
   claimDaily,
   claimQuest,
@@ -86,6 +90,7 @@ api.get('/config', (_req, res) => {
     quests: QUESTS,
     dailyLadder: DAILY_LADDER,
     event: eventStatus(),
+    eventTypes: Object.values(EVENT_TYPES),
     petDurationHours: PET_DURATION_HOURS,
     balance: {
       maxBuildingLevel: BALANCE.maxBuildingLevel,
@@ -276,6 +281,38 @@ api.post('/quests/claim', auth, (req: AuthedRequest, res, next) => {
   }
 });
 
+api.get('/events', auth, (_req, res) => {
+  const ts = Date.now();
+  res.json({
+    event: eventStatus(ts),
+    upcoming: upcomingEvents(ts, 6).map((window) => ({
+      kind: window.kind,
+      name: EVENT_TYPES[window.kind].name,
+      icon: EVENT_TYPES[window.kind].icon,
+      short: EVENT_TYPES[window.kind].short,
+      color: EVENT_TYPES[window.kind].color,
+      start: window.start,
+      end: window.end,
+      active: ts >= window.start && ts < window.end,
+    })),
+  });
+});
+
+api.get('/wheel', auth, (req: AuthedRequest, res) => {
+  const user = me(req);
+  res.json({ wheel: wheelStatus(user), state: buildState(user) });
+});
+
+api.post('/wheel/spin', auth, (req: AuthedRequest, res, next) => {
+  try {
+    const user = me(req);
+    const result = spinWheel(user);
+    res.json({ ...result, wheel: wheelStatus(user), state: buildState(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
 api.get('/achievements', auth, (req: AuthedRequest, res) => {
   const user = me(req);
   res.json({ achievements: achievementStates(user), state: buildState(user) });
@@ -319,6 +356,20 @@ api.post('/pets/feed', auth, (req: AuthedRequest, res, next) => {
     const user = me(req);
     const result = feedPet(user, String(req.body?.petId ?? ''));
     res.json({ ...result, pets: petStates(user), state: buildState(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+api.get('/tournament', auth, (req: AuthedRequest, res) => {
+  res.json({ tournament: tournamentState(me(req)) });
+});
+
+api.post('/tournament/claim', auth, (req: AuthedRequest, res, next) => {
+  try {
+    const user = me(req);
+    const result = claimTournament(user);
+    res.json({ ...result, tournament: tournamentState(user), state: buildState(user) });
   } catch (error) {
     next(error);
   }

@@ -1,6 +1,13 @@
 import { db, type UserRow } from '../db.js';
 import type { AttackResult, RaidResult, RaidSpot } from '../types.js';
-import { BALANCE, coinValue, eventMultiplier, getVillage } from '../content/content.js';
+import {
+  BALANCE,
+  TOURNAMENT,
+  coinEventMultiplier,
+  coinValue,
+  getVillage,
+  raidEventMultiplier,
+} from '../content/content.js';
 import {
   addXp,
   buildState,
@@ -13,6 +20,7 @@ import {
 } from './core.js';
 import { trackQuest } from './progress.js';
 import { petBonus } from './pets.js';
+import { addTournamentPoints } from './tournament.js';
 import { GameError } from './slot.js';
 
 export interface TargetInfo {
@@ -96,7 +104,8 @@ export function attack(user: UserRow, targetId: string, spotIndex: number): Atta
   user.pending_attacks -= 1;
   user.total_attacks += 1;
 
-  const base = coinValue(user.level, user.village) * eventMultiplier() * petBonus(user.id, 'attack');
+  const base =
+    coinValue(user.level, user.village) * coinEventMultiplier() * petBonus(user.id, 'attack');
   const buildingName = village.buildings[spotIndex].name;
   let blocked = false;
   let destroyed = false;
@@ -145,6 +154,10 @@ export function attack(user: UserRow, targetId: string, spotIndex: number): Atta
   }
 
   user.coins += loot;
+  addTournamentPoints(
+    user.id,
+    destroyed ? TOURNAMENT.points.attackDestroyed : TOURNAMENT.points.attack,
+  );
   trackQuest(user.id, 'attack', 1);
   trackQuest(user.id, 'coins', loot);
   const levelUps = addXp(user, 40 + user.bet * 0.5);
@@ -195,8 +208,8 @@ export function raid(user: UserRow, targetId: string, spotIndex: number): RaidRe
   user.pending_raids -= 1;
   user.total_raids += 1;
 
-  const raidBonus = petBonus(user.id, 'raid');
-  const base = coinValue(user.level, user.village) * eventMultiplier() * raidBonus;
+  const raidBonus = petBonus(user.id, 'raid') * raidEventMultiplier();
+  const base = coinValue(user.level, user.village) * coinEventMultiplier() * raidBonus;
   const minLoot = Math.round(base * user.bet * 5);
   const jackpot = Math.max(minLoot * 3, Math.round(target.coins * BALANCE.raidJackpotShare * raidBonus));
   const normal = Math.max(minLoot, Math.round(target.coins * BALANCE.raidLootShare * raidBonus));
@@ -214,6 +227,14 @@ export function raid(user: UserRow, targetId: string, spotIndex: number): RaidRe
   target.coins = Math.max(0, target.coins - Math.min(loot, target.coins));
   target.times_raided += 1;
 
+  addTournamentPoints(
+    user.id,
+    picked.kind === 'jackpot'
+      ? TOURNAMENT.points.raidJackpot
+      : picked.kind === 'loot'
+        ? TOURNAMENT.points.raidLoot
+        : TOURNAMENT.points.raidEmpty,
+  );
   trackQuest(user.id, 'raid', 1);
   trackQuest(user.id, 'coins', loot);
   const levelUps = addXp(user, 55 + user.bet * 0.5);

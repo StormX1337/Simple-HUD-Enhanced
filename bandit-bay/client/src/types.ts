@@ -109,12 +109,31 @@ export interface ActivePetState {
   secondsLeft: number;
 }
 
+export type EventKind = 'taler' | 'beutel' | 'raub' | 'schild';
+
 export interface EventState {
+  kind: EventKind | null;
   name: string;
-  multiplier: number;
+  icon: string;
+  short: string;
+  description: string;
+  color: string;
   active: boolean;
   secondsLeft: number;
   secondsUntilNext: number;
+  nextKind: EventKind | null;
+  nextName: string;
+}
+
+export interface EventWindowInfo {
+  kind: EventKind;
+  name: string;
+  icon: string;
+  short: string;
+  color: string;
+  start: number;
+  end: number;
+  active: boolean;
 }
 
 export interface PlayerState {
@@ -232,7 +251,9 @@ export type HistoryType =
   | 'upgrade'
   | 'blocked'
   | 'spin'
-  | 'pet';
+  | 'pet'
+  | 'wheel'
+  | 'tournament';
 
 export interface HistoryEntry {
   id: number;
@@ -274,6 +295,7 @@ export interface GameConfig {
   quests: QuestDef[];
   dailyLadder: DailyRewardDef[];
   petDurationHours: number;
+  eventTypes: { kind: EventKind; name: string; icon: string; description: string; short: string; color: string }[];
   balance: {
     maxBuildingLevel: number;
     maxShields: number;
@@ -294,6 +316,62 @@ export interface TargetInfo {
   shields: number;
   buildings: { index: number; name: string; kind: BuildingKind; level: number }[];
   estimatedLoot: number;
+}
+
+export interface TournamentEntry {
+  rank: number;
+  id: string;
+  name: string;
+  avatar: string;
+  level: number;
+  points: number;
+  isBot: boolean;
+  isMe: boolean;
+}
+
+export interface TournamentPrize {
+  from: number;
+  to: number;
+  label: string;
+  coins: number;
+  spins: number;
+}
+
+export interface TournamentState {
+  name: string;
+  cycle: number;
+  endsInSeconds: number;
+  myPoints: number;
+  myRank: number;
+  entries: TournamentEntry[];
+  prizes: TournamentPrize[];
+  reward: { available: boolean; rank: number; label: string; coins: number; spins: number } | null;
+}
+
+export interface WheelSegmentView {
+  id: string;
+  label: string;
+  kind: 'coins' | 'spins' | 'shield' | 'card' | 'jackpot';
+  color: string;
+  amount: number;
+}
+
+export interface WheelStatus {
+  canSpin: boolean;
+  secondsUntilNext: number;
+  segments: WheelSegmentView[];
+}
+
+export interface WheelResult {
+  index: number;
+  segment: WheelSegmentView;
+  coins: number;
+  spins: number;
+  shields: number;
+  card: CardDrop | null;
+  levelUps: number;
+  wheel: WheelStatus;
+  state: PlayerState;
 }
 
 export interface AchievementState {

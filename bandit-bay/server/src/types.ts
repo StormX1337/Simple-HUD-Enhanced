@@ -109,12 +109,31 @@ export interface ActivePetState {
   secondsLeft: number;
 }
 
+export type EventKind = 'taler' | 'beutel' | 'raub' | 'schild';
+
 export interface EventState {
+  kind: EventKind | null;
   name: string;
-  multiplier: number;
+  icon: string;
+  short: string;
+  description: string;
+  color: string;
   active: boolean;
   secondsLeft: number;
   secondsUntilNext: number;
+  nextKind: EventKind | null;
+  nextName: string;
+}
+
+export interface EventWindowInfo {
+  kind: EventKind;
+  name: string;
+  icon: string;
+  short: string;
+  color: string;
+  start: number;
+  end: number;
+  active: boolean;
 }
 
 export interface PlayerState {
@@ -232,7 +251,9 @@ export type HistoryType =
   | 'upgrade'
   | 'blocked'
   | 'spin'
-  | 'pet';
+  | 'pet'
+  | 'wheel'
+  | 'tournament';
 
 export interface HistoryEntry {
   id: number;
