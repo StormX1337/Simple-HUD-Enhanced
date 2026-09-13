@@ -226,8 +226,10 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
             {result.outcome === 'coins' && `+${formatCoins(result.amount)} TALER`}
             {result.outcome === 'spins' && `+${result.amount} DREHUNGEN`}
             {result.outcome === 'shield' && 'SCHILD ERHALTEN!'}
-            {result.outcome === 'attack' && 'ANGRIFF BEREIT!'}
-            {result.outcome === 'raid' && 'RAUBZUG BEREIT!'}
+            {result.outcome === 'attack' &&
+              (result.amount > 1 ? `${result.amount} ANGRIFFE BEREIT!` : 'ANGRIFF BEREIT!')}
+            {result.outcome === 'raid' &&
+              (result.amount > 1 ? `${result.amount} RAUBZÜGE BEREIT!` : 'RAUBZUG BEREIT!')}
             {result.outcome === 'card' && (result.cardIsNew ? 'NEUE KARTE!' : 'KARTE DOPPELT')}
           </m.div>
         )}

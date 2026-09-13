@@ -139,15 +139,21 @@ export function spin(user: UserRow, betInput: number): SpinResult {
         break;
       case 'hammer':
         outcome = 'attack';
-        user.pending_attacks += 1;
-        amount = 1;
-        message = 'Sturmhammer! Such dir ein Ziel aus.';
+        amount = BALANCE.attacksPerHit;
+        user.pending_attacks += amount;
+        message =
+          amount > 1
+            ? `Sturmhammer! ${amount} Angriffe warten auf dich.`
+            : 'Sturmhammer! Such dir ein Ziel aus.';
         break;
       case 'pfote':
         outcome = 'raid';
-        user.pending_raids += 1;
-        amount = 1;
-        message = 'Banditenpfote! Zeit für einen Raubzug.';
+        amount = BALANCE.raidsPerHit;
+        user.pending_raids += amount;
+        message =
+          amount > 1
+            ? `Banditenpfote! ${amount} Raubzüge warten auf dich.`
+            : 'Banditenpfote! Zeit für einen Raubzug.';
         break;
       case 'truhe': {
         const drop = grantRandomCard(user);

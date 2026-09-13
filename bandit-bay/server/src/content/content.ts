@@ -37,6 +37,9 @@ export const BALANCE = {
   raidJackpotShare: 0.22,
   raidLootShare: 0.09,
   attackLootShare: 0.11,
+  /** Wie viele Aktionen ein Dreifachtreffer gutschreibt. */
+  attacksPerHit: 1,
+  raidsPerHit: 3,
 } as const;
 
 export function xpForNextLevel(level: number): number {

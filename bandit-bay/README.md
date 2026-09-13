@@ -79,12 +79,13 @@ serverseitig berechnet und validiert. Der Client sendet nur Absichten („dreh",
    * Beutel → zusätzliche Drehungen
    * Schild → schützt vor einem Angriff (max. 3)
    * Sturmhammer → ein Angriff
-   * Banditenpfote → ein Raubzug
+   * Banditenpfote → **drei** Raubzüge (Anzahl in `BALANCE.raidsPerHit` / `attacksPerHit`)
    * Truhe → Sammelkarte (+ Taler, Duplikate zahlen Taler)
 3. **Angriff** – Ziel wählen, Gebäude antippen. Hat das Ziel ein Schild, prallt der Angriff ab,
    sonst verliert das Gebäude eine Stufe und du bekommst Beute.
 4. **Raubzug** – vier Grabstellen, ein Jackpot, zwei mittlere Funde, eine leer.
-   Die erbeuteten Taler werden dem Ziel abgezogen.
+   Die erbeuteten Taler werden dem Ziel abgezogen. Offene Raubzüge lassen sich direkt
+   hintereinander ausführen („Nächster Raubzug").
 5. **Ausbauen** – fünf Gebäude pro Insel, je fünf Stufen. Ist alles ausgebaut, geht es zur
    nächsten von acht Inseln (höhere Inseln zahlen deutlich mehr).
 6. **Sammeln** – 40 Karten in 8 Sets, Karten aus Truhen (Taler) oder dem Automaten.
@@ -158,7 +159,8 @@ bringt eine Stufe (max. 5), die Bonus und Fähigkeitschance um je 15 % anhebt.
 Alle Werte stehen an einer Stelle: `server/src/content/content.ts`.
 
 * **Gewinntabelle** `SPIN_TABLE`: rund 39 % Dreifachtreffer (davon 8 % über den Joker),
-  46 % Zweifachtreffer, 15 % Niete. Angriff ca. alle 15 Drehungen, Raubzug ca. alle 18.
+  46 % Zweifachtreffer, 15 % Niete. Angriff ca. alle 15 Drehungen (gibt 1 Angriff),
+  Raubzug ca. alle 18 Drehungen (gibt gleich 3 Raubzüge).
 * **Auszahlung** `coinValue(level, insel)`: Grundwert 90, +32 % pro Level, +55 % pro Insel.
 * **Ausbaukosten** `upgradeCost()`: Faktor 1,62 pro Stufe, Insel-Multiplikator 1 → 330.
   Dadurch geht Insel 1 sehr schnell, spätere Inseln brauchen echte Raubzüge.
@@ -170,9 +172,9 @@ Alle Werte stehen an einer Stelle: `server/src/content/content.ts`.
 * **Drehungen voll?** Beutel-Symbole und Rad-Felder zahlen dann in Talern aus, statt zu verfallen.
 
 **Wie lange dauert das Spiel?** `npm run balance -w server` spielt die echte Engine durch.
-Aktueller Stand: Insel 1 nach wenigen Drehungen, danach etwa 180 / 360 / 640 / 1.600 / 2.900 /
-4.800 / 8.800 – zusammen rund 19.000 Drehungen bis Insel 8, von denen der Automat gut die
-Hälfte wieder zurückgibt.
+Aktueller Stand: Insel 1 nach wenigen Drehungen, danach etwa 30 / 50 / 630 / 1.400 / 2.000 /
+4.000 / 6.300 – zusammen rund 14.400 Drehungen bis Insel 8, von denen der Automat mit knapp
+11.800 gewonnenen Drehungen den größten Teil wieder zurückgibt.
 
 ---
 

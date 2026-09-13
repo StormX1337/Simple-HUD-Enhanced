@@ -72,13 +72,31 @@ check('Startgebaeude vorhanden', buildState(player).buildings.length === 5);
 const outcomes: Record<string, number> = {};
 let minSpins = Infinity;
 const reelsConsistent = { ok: true, detail: '' };
+const actionGrants = { ok: true, detail: '' };
 for (let i = 0; i < 400; i++) {
   if (player.spins < 1) {
     player.spins = 50;
     saveUser(player);
   }
+  const raidsBeforeSpin = player.pending_raids;
+  const attacksBeforeSpin = player.pending_attacks;
   const result = spin(player, 1);
   outcomes[result.outcome] = (outcomes[result.outcome] ?? 0) + 1;
+  // Ein Dreifachtreffer schreibt genau so viele Aktionen gut wie die Balance sagt.
+  if (result.outcome === 'raid' && actionGrants.ok) {
+    const gained = player.pending_raids - raidsBeforeSpin;
+    if (gained !== BALANCE.raidsPerHit || result.amount !== BALANCE.raidsPerHit) {
+      actionGrants.ok = false;
+      actionGrants.detail = `Raubzug: +${gained} statt +${BALANCE.raidsPerHit}`;
+    }
+  }
+  if (result.outcome === 'attack' && actionGrants.ok) {
+    const gained = player.pending_attacks - attacksBeforeSpin;
+    if (gained !== BALANCE.attacksPerHit || result.amount !== BALANCE.attacksPerHit) {
+      actionGrants.ok = false;
+      actionGrants.detail = `Angriff: +${gained} statt +${BALANCE.attacksPerHit}`;
+    }
+  }
   if (result.wild) outcomes.wildHits = (outcomes.wildHits ?? 0) + 1;
   const [a, b, c] = result.reels;
   const withoutJoker = [a, b, c].filter((symbol) => symbol !== 'joker');
@@ -110,6 +128,11 @@ for (let i = 0; i < 400; i++) {
 check('Ressourcen nie negativ', minSpins >= 0);
 check('Walzenbild passt zum Ergebnis', reelsConsistent.ok, reelsConsistent.detail);
 check('Joker taucht auf', (outcomes.wildHits ?? 0) > 0, `${outcomes.wildHits ?? 0}x`);
+check(
+  'Pfote gibt drei Raubzüge, Hammer einen Angriff',
+  actionGrants.ok,
+  actionGrants.detail || `${BALANCE.raidsPerHit} Raubzüge / ${BALANCE.attacksPerHit} Angriff`,
+);
 for (const type of ['coins', 'spins', 'attack', 'raid', 'card'] as SpinOutcomeType[]) {
   check(`Spin-Ergebnis "${type}" tritt auf`, (outcomes[type] ?? 0) > 0, `${outcomes[type] ?? 0}x`);
 }
