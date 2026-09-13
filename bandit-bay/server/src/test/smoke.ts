@@ -6,6 +6,7 @@ import { db, migrate } from '../db.js';
 import { seedBots } from '../seed.js';
 import {
   BALANCE,
+  BOT_NAMES,
   CARD_SETS,
   eventStatus,
   tournamentCycle,
@@ -28,6 +29,7 @@ import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
 import { achievementStates, claimAchievement } from '../game/achievements.js';
 import { spinWheel, wheelStatus } from '../game/wheel.js';
 import { claimTournament, tournamentState } from '../game/tournament.js';
+import { addFriend, friendIds, friendList, removeFriend } from '../game/friends.js';
 import type { SpinOutcomeType } from '../types.js';
 
 let failures = 0;
@@ -177,6 +179,43 @@ if (raidResult.loot > 0) {
     `${raidCoinsBefore} -> ${getUserById(raidTarget.id)!.coins}`,
   );
 }
+
+/* --- Freunde ---------------------------------------------------------- */
+const botName = BOT_NAMES[0].name;
+const newFriend = addFriend(player, botName);
+check('Freund hinzugefügt', newFriend.name === botName, botName);
+check('Freundesliste enthält ihn', friendList(player).some((entry) => entry.name === botName));
+check(
+  'Freundschaft gilt in beide Richtungen',
+  friendIds(newFriend.id).includes(player.id),
+);
+let duplicateFriend = false;
+try {
+  addFriend(player, botName);
+} catch {
+  duplicateFriend = true;
+}
+check('Kein doppelter Freund', duplicateFriend);
+let selfFriend = false;
+try {
+  addFriend(player, player.name);
+} catch {
+  selfFriend = true;
+}
+check('Sich selbst hinzufügen geht nicht', selfFriend);
+let unknownFriend = false;
+try {
+  addFriend(player, 'GibtEsNicht123');
+} catch {
+  unknownFriend = true;
+}
+check('Unbekannter Name wird abgelehnt', unknownFriend);
+check(
+  'Freunde erscheinen bei den Zielen',
+  getTargets(player).some((entry) => entry.name === botName),
+);
+removeFriend(player, newFriend.id);
+check('Freund entfernt', friendList(player).length === 0);
 
 /* --- Karten ----------------------------------------------------------- */
 player.coins = 100_000_000;

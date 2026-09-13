@@ -24,9 +24,10 @@ const SPOTS = [
 
 interface VillageProps {
   onOpenEvents?: () => void;
+  onOpenVillages?: () => void;
 }
 
-export function VillageScene({ onOpenEvents }: VillageProps): JSX.Element | null {
+export function VillageScene({ onOpenEvents, onOpenVillages }: VillageProps): JSX.Element | null {
   const { state, config, applyState, pushToast, refresh } = useGame();
   const short = useShortScreen();
   const [selected, setSelected] = useState<number | null>(null);
@@ -110,7 +111,14 @@ export function VillageScene({ onOpenEvents }: VillageProps): JSX.Element | null
 
       {/* Inselschild */}
       <div className="absolute inset-x-0 top-0 z-10 space-y-1.5 px-2 pt-1.5">
-        <div className="wood-sign flex items-center gap-2 px-3 py-1.5">
+        <button
+          type="button"
+          data-testid="village-sign"
+          onClick={() => {
+            playSound('click', 0.35);
+            onOpenVillages?.();
+          }}
+          className="wood-sign flex w-full items-center gap-2 px-3 py-1.5 text-left active:translate-y-[2px]">
           <div className="min-w-0 flex-1">
             <div className="truncate font-display text-sm font-black leading-tight text-[#ffe9a0] text-outline">
               Insel {village.id}: {village.name}
@@ -127,8 +135,9 @@ export function VillageScene({ onOpenEvents }: VillageProps): JSX.Element | null
                 {progress}%
               </span>
             </div>
+            <div className="mt-0.5 text-center text-[9px] font-bold text-[#f5dfb4]/70">alle Inseln ▸</div>
           </div>
-        </div>
+        </button>
         <EventBanner onOpenEvents={onOpenEvents} />
       </div>
 

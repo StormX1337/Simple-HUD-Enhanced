@@ -419,6 +419,21 @@ export interface PetState {
   feedsToNextLevel: number;
 }
 
+export interface VillageOverview {
+  id: number;
+  name: string;
+  subtitle: string;
+  palette: { skyTop: string; skyBottom: string; ground: string; accent: string };
+  unlocked: boolean;
+  current: boolean;
+  progress: number;
+  buildings: { name: string; kind: BuildingKind; level: number; maxLevel: number }[];
+}
+
+export interface FriendInfo extends TargetInfo {
+  since: number;
+}
+
 export interface SetProgress {
   id: string;
   name: string;

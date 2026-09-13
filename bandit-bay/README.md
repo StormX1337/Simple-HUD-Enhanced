@@ -108,6 +108,13 @@ Karte und Jackpot. Das Feld zieht der Server, der Client animiert nur darauf zu.
 Nach Zyklusende wartet der Preis (bis 3 Mio. Taler und 200 Drehungen für Platz 1) im
 Turnier-Tab.
 
+**Freunde** – im Freunde-Tab kannst du Mitspieler (auch die Bots wie „Miko Maske") über ihren
+Namen hinzufügen. Freunde tauchen bevorzugt als Ziel auf und lassen sich direkt aus der Liste
+angreifen oder ausrauben. Dein eigener Name steht oben zum Weitergeben.
+
+**Inselübersicht** – ein Tipp auf das Inselschild zeigt alle sechs Inseln mit Fortschritt und
+Gebäudestand; fertige Inseln bleiben sichtbar.
+
 **Während du weg warst** – kommst du nach ein paar Stunden zurück, hat die Insel weitergelebt:
 Bots greifen an (Schilde blocken) oder stehlen Taler. Beim Start zeigt eine Übersicht, was
 passiert ist – inklusive Rache-Knopf, wenn du gerade einen Angriff oder Raubzug offen hast.
@@ -153,7 +160,7 @@ bandit-bay/
 ├─ server/
 │  ├─ src/content/content.ts   Spielinhalte + Balance (Inseln, Karten, Quests, Gewinntabelle)
 │  ├─ src/game/                core (Nutzer/XP/Spins), slot, village, battle, collection,
-│  │                          progress, pets, achievements, wheel, tournament,
+│  │                          progress, pets, achievements, wheel, tournament, friends,
 │  │                          absence (Bot-Überfälle während der Abwesenheit)
 │  ├─ src/routes/api.ts        REST-Endpunkte
 │  ├─ src/db.ts                SQLite-Schema und Migration
@@ -181,7 +188,9 @@ bandit-bay/
 | `POST` | `/api/spin` | Drehung (Einsatz wird geprüft) |
 | `POST` | `/api/bet` | Einsatzstufe setzen |
 | `POST` | `/api/village/upgrade` | Gebäude ausbauen |
-| `GET` | `/api/targets` | Ziele für Angriff/Raubzug |
+| `GET` | `/api/targets` | Ziele für Angriff/Raubzug (Freunde bevorzugt) |
+| `GET/POST` | `/api/friends`, `/api/friends/add`, `/api/friends/remove` | Freundesliste |
+| `GET` | `/api/villages` | Übersicht aller Inseln mit Fortschritt |
 | `POST` | `/api/attack`, `/api/raid` | Minispiele auswerten |
 | `POST` | `/api/raid/prepare` | Grabstellen vorbereiten (für Finas Spürnase) |
 | `GET` | `/api/collection` | Karten, Sets, Truhenpreise |
@@ -202,7 +211,7 @@ Authentifizierung: `Authorization: Bearer <token>`; der Token liegt im `localSto
 
 Gespeichert werden: Nutzer, Taler, Drehungen, Schilde, Level, Erfahrung, Inseln, Gebäude und
 deren Stufen, Karten, Karten-Sets, Quests, Meilensteine, Tagesbelohnungen, Glücksrad-Drehungen,
-Turnierpunkte, Begleiter sowie Angriffs- und Raid-Historie.
+Turnierpunkte, Begleiter, Freundschaften sowie Angriffs- und Raid-Historie.
 
 Das gebaute Spiel ist eine PWA: `client/public/manifest.webmanifest`, ein kleiner Service
 Worker (`client/public/sw.js`, hält nur die App-Hülle im Cache, niemals Spielstände) und

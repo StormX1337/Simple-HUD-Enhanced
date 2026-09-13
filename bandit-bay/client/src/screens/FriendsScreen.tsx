@@ -5,18 +5,19 @@ import { formatCoins, formatTime } from '../lib/format';
 import { playSound } from '../lib/sound';
 import { TargetList } from '../components/TargetList';
 import { TournamentScreen } from './TournamentScreen';
+import { FriendListScreen } from './FriendListScreen';
 import type { HistoryEntry, LeaderboardEntry, TargetInfo } from '../types';
 
-type Tab = 'targets' | 'tournament' | 'ranking' | 'history';
+type Tab = 'friends' | 'targets' | 'tournament' | 'ranking' | 'history';
 
 interface Props {
-  onAttack: () => void;
-  onRaid: () => void;
+  onAttack: (targetId?: string) => void;
+  onRaid: (targetId?: string) => void;
 }
 
 export function FriendsScreen({ onAttack, onRaid }: Props): JSX.Element {
   const { state, pushToast } = useGame();
-  const [tab, setTab] = useState<Tab>('targets');
+  const [tab, setTab] = useState<Tab>('friends');
   const [targets, setTargets] = useState<TargetInfo[]>([]);
   const [ranking, setRanking] = useState<LeaderboardEntry[]>([]);
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
@@ -50,6 +51,7 @@ export function FriendsScreen({ onAttack, onRaid }: Props): JSX.Element {
       <div className="mb-3 flex gap-1.5">
         {(
           [
+            ['friends', 'Freunde'],
             ['targets', 'Ziele'],
             ['tournament', 'Turnier'],
             ['ranking', 'Rang'],
@@ -64,7 +66,7 @@ export function FriendsScreen({ onAttack, onRaid }: Props): JSX.Element {
               setTab(id);
             }}
             data-testid={`friends-tab-${id}`}
-            className={`flex-1 rounded-2xl border-2 px-1.5 py-1.5 font-display text-[13px] font-bold ${
+            className={`flex-1 rounded-2xl border-2 px-1 py-1.5 font-display text-[12px] font-bold ${
               tab === id
                 ? 'border-black/25 bg-gradient-to-b from-[#ffd95e] to-[#e0a21a] text-[#4a2f05]'
                 : 'border-white/15 bg-white/10 text-white'
@@ -75,6 +77,13 @@ export function FriendsScreen({ onAttack, onRaid }: Props): JSX.Element {
         ))}
       </div>
 
+      {tab === 'friends' && (
+        <FriendListScreen
+          onAttack={(targetId) => onAttack(targetId)}
+          onRaid={(targetId) => onRaid(targetId)}
+        />
+      )}
+
       {tab === 'targets' && (
         <div>
           <div className="panel-dark mb-3 p-3 text-center text-sm">
@@ -84,7 +93,7 @@ export function FriendsScreen({ onAttack, onRaid }: Props): JSX.Element {
                   type="button"
                   className="btn-red flex-1 text-sm disabled:opacity-40"
                   disabled={!canAttack}
-                  onClick={onAttack}
+                  onClick={() => onAttack()}
                 >
                   ⚒️ Angriff ({state.pendingAttacks})
                 </button>
@@ -92,7 +101,7 @@ export function FriendsScreen({ onAttack, onRaid }: Props): JSX.Element {
                   type="button"
                   className="btn flex-1 bg-gradient-to-b from-[#c792ea] to-[#8d7ae6] text-sm text-white disabled:opacity-40"
                   disabled={!canRaid}
-                  onClick={onRaid}
+                  onClick={() => onRaid()}
                 >
                   🐾 Raubzug ({state.pendingRaids})
                 </button>
@@ -107,9 +116,9 @@ export function FriendsScreen({ onAttack, onRaid }: Props): JSX.Element {
             targets={targets}
             mode={canRaid && !canAttack ? 'raid' : 'attack'}
             busy={!canAttack && !canRaid}
-            onPick={() => {
-              if (canAttack) onAttack();
-              else if (canRaid) onRaid();
+            onPick={(target) => {
+              if (canAttack) onAttack(target.id);
+              else if (canRaid) onRaid(target.id);
             }}
             onReload={() => void load()}
           />

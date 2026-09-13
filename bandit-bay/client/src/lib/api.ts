@@ -3,6 +3,8 @@ import type {
   AttackResult,
   EventState,
   EventWindowInfo,
+  FriendInfo,
+  VillageOverview,
   TournamentState,
   WheelResult,
   WheelStatus,
@@ -88,6 +90,12 @@ export const api = {
   setBet: (bet: number) => post<{ state: PlayerState }>('/bet', { bet }),
   upgrade: (index: number) => post<UpgradeResponse>('/village/upgrade', { index }),
   targets: () => request<{ targets: TargetInfo[] }>('/targets'),
+  villages: () => request<{ current: number; villages: VillageOverview[] }>('/villages'),
+  friends: () => request<{ friends: FriendInfo[] }>('/friends'),
+  addFriend: (name: string) =>
+    post<{ friend: FriendInfo; friends: FriendInfo[] }>('/friends/add', { name }),
+  removeFriend: (friendId: string) =>
+    post<{ friends: FriendInfo[] }>('/friends/remove', { friendId }),
   attack: (targetId: string, spotIndex: number) =>
     post<AttackResult>('/attack', { targetId, spotIndex }),
   raid: (targetId: string, spotIndex: number) => post<RaidResult>('/raid', { targetId, spotIndex }),

@@ -20,6 +20,7 @@ import {
 import {
   applyRegen,
   buildState,
+  getBuildings,
   createUser,
   getUserByName,
   getUserByToken,
@@ -34,6 +35,7 @@ import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
 import { achievementStates, claimAchievement } from '../game/achievements.js';
 import { spinWheel, wheelStatus } from '../game/wheel.js';
 import { claimTournament, tournamentState } from '../game/tournament.js';
+import { addFriend, friendList, removeFriend } from '../game/friends.js';
 import {
   claimDaily,
   claimQuest,
@@ -186,6 +188,57 @@ api.post('/village/upgrade', auth, (req: AuthedRequest, res, next) => {
 /* ------------------------------------------------------------------ */
 /*  Angriff & Raubzug                                                  */
 /* ------------------------------------------------------------------ */
+
+api.get('/friends', auth, (req: AuthedRequest, res) => {
+  res.json({ friends: friendList(me(req)) });
+});
+
+api.post('/friends/add', auth, (req: AuthedRequest, res, next) => {
+  try {
+    const user = me(req);
+    const friend = addFriend(user, String(req.body?.name ?? ''));
+    res.json({ friend, friends: friendList(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+api.post('/friends/remove', auth, (req: AuthedRequest, res, next) => {
+  try {
+    const user = me(req);
+    removeFriend(user, String(req.body?.friendId ?? ''));
+    res.json({ friends: friendList(user) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+api.get('/villages', auth, (req: AuthedRequest, res) => {
+  const user = me(req);
+  res.json({
+    current: user.village,
+    villages: VILLAGES.map((village) => {
+      const rows = getBuildings(user.id, village.id);
+      const total = rows.length * BALANCE.maxBuildingLevel;
+      const done = rows.reduce((sum, row) => sum + row.level, 0);
+      return {
+        id: village.id,
+        name: village.name,
+        subtitle: village.subtitle,
+        palette: village.palette,
+        unlocked: user.village >= village.id,
+        current: user.village === village.id,
+        progress: total === 0 ? 0 : done / total,
+        buildings: village.buildings.map((building, index) => ({
+          name: building.name,
+          kind: building.kind,
+          level: user.village >= village.id ? (rows[index]?.level ?? 0) : 0,
+          maxLevel: BALANCE.maxBuildingLevel,
+        })),
+      };
+    }),
+  });
+});
 
 api.get('/targets', auth, (req: AuthedRequest, res) => {
   res.json({ targets: getTargets(me(req)) });

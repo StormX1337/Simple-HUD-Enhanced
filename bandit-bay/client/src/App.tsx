@@ -9,6 +9,7 @@ import { AttackOverlay } from './components/AttackOverlay';
 import { RaidOverlay } from './components/RaidOverlay';
 import { CardReveal } from './components/CardReveal';
 import { NewsOverlay } from './components/NewsOverlay';
+import { VillageOverviewOverlay } from './components/VillageOverviewOverlay';
 import { Toasts } from './components/Toasts';
 import { LoginScreen } from './screens/LoginScreen';
 import { CardsScreen } from './screens/CardsScreen';
@@ -26,8 +27,15 @@ export default function App(): JSX.Element {
   const [revealed, setRevealed] = useState<{ card: CardDef; isNew: boolean } | null>(null);
   const [rewardsTab, setRewardsTab] = useState<RewardsTab>('daily');
   const [revengeTarget, setRevengeTarget] = useState<string | null>(null);
-  const openAttack = () => setBattle('attack');
-  const openRaid = () => setBattle('raid');
+  const [villagesOpen, setVillagesOpen] = useState(false);
+  const openAttack = (targetId?: string) => {
+    setRevengeTarget(targetId ?? null);
+    setBattle('attack');
+  };
+  const openRaid = (targetId?: string) => {
+    setRevengeTarget(targetId ?? null);
+    setBattle('raid');
+  };
   const closeBattle = () => {
     setBattle(null);
     setRevengeTarget(null);
@@ -130,10 +138,11 @@ export default function App(): JSX.Element {
                 setRewardsTab('events');
                 setScreen('rewards');
               }}
+              onOpenVillages={() => setVillagesOpen(true)}
             />
             <SlotMachine
-              onAttack={openAttack}
-              onRaid={openRaid}
+              onAttack={() => openAttack()}
+              onRaid={() => openRaid()}
               onCard={(card, isNew) => setRevealed({ card, isNew })}
             />
           </>
@@ -160,6 +169,7 @@ export default function App(): JSX.Element {
         onClose={closeBattle}
       />
       <RaidOverlay open={battle === 'raid'} initialTargetId={revengeTarget} onClose={closeBattle} />
+      <VillageOverviewOverlay open={villagesOpen} onClose={() => setVillagesOpen(false)} />
       {news.length > 0 && (
         <NewsOverlay
           news={news}

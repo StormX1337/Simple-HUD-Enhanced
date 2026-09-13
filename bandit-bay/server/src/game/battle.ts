@@ -65,6 +65,14 @@ function targetInfo(target: UserRow, attacker: UserRow): TargetInfo {
 
 /** Zufaellige Ziele für Angriff/Raubzug. */
 export function getTargets(user: UserRow, count = 4): TargetInfo[] {
+  // Bis zu zwei Freunde zuerst.
+  const friendRows = db
+    .prepare<[string, number], UserRow>(
+      `SELECT u.* FROM friends f JOIN users u ON u.id = f.friend_id
+       WHERE f.user_id = ? ORDER BY RANDOM() LIMIT ?`,
+    )
+    .all(user.id, 2);
+
   const rows = db
     .prepare<[string, number, number], UserRow>(
       `SELECT * FROM users
@@ -78,7 +86,9 @@ export function getTargets(user: UserRow, count = 4): TargetInfo[] {
       .prepare<[string], UserRow>('SELECT * FROM users WHERE id != ? ORDER BY RANDOM() LIMIT 12')
       .all(user.id);
   }
-  return pool.slice(0, count).map((row) => targetInfo(refreshBot(row), user));
+  const seen = new Set(friendRows.map((row) => row.id));
+  const rest = pool.filter((row) => !seen.has(row.id));
+  return [...friendRows, ...rest].slice(0, count).map((row) => targetInfo(refreshBot(row), user));
 }
 
 export function getTarget(user: UserRow, targetId: string): TargetInfo {
