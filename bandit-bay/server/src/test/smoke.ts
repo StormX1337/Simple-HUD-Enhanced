@@ -17,11 +17,11 @@ import {
   chestCost,
   upgradeCost,
 } from '../content/content.js';
-import { buildState, createUser, getUserById, saveUser } from '../game/core.js';
+import { buildState, createUser, ensureBuildings, getUserById, saveUser } from '../game/core.js';
 import { spin } from '../game/slot.js';
 import { upgradeBuilding } from '../game/village.js';
-import { attack, getTargets, raid } from '../game/battle.js';
-import { claimSet, grantCard, openChest } from '../game/collection.js';
+import { attack, getTargets, prepareRaid, raid } from '../game/battle.js';
+import { claimSet, effectiveChestCost, grantCard, openChest } from '../game/collection.js';
 import { claimDaily, claimQuest, dailyState, questStates } from '../game/progress.js';
 import { feedPet, petBonus, petStates } from '../game/pets.js';
 import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
@@ -220,7 +220,7 @@ check('Tagesbelohnung nur einmal pro Tag', !claimDaily(player).ok);
 
 /* --- Begleiter -------------------------------------------------------- */
 const pets = petStates(player);
-check('Begleiter vorhanden', pets.length === 3, `${pets.length}`);
+check('Begleiter vorhanden', pets.length === 5, `${pets.length}`);
 const fina = pets.find((pet) => pet.id === 'fina');
 check('Fina ist freigeschaltet', !!fina?.unlocked);
 check('Kein Begleiter zu Beginn aktiv', pets.every((pet) => !pet.active));
@@ -308,6 +308,8 @@ check('Nicht erreichter Meilenstein wird abgelehnt', tooEarly);
 const wheelBefore = wheelStatus(player);
 check('Glücksrad hat acht Felder', wheelBefore.segments.length === 8);
 check('Glücksrad ist verfügbar', wheelBefore.canSpin);
+player.spins = 0;
+saveUser(player);
 const coinsBeforeWheel = player.coins;
 const spinsBeforeWheel = player.spins;
 const wheelResult = spinWheel(player);
@@ -342,6 +344,46 @@ check(
 const noon = Date.UTC(2026, 8, 13, 12, 30);
 check('Mittagsfenster ist aktiv', eventStatus(noon).active, eventStatus(noon).name);
 check('Nachts läuft kein Event', !eventStatus(Date.UTC(2026, 8, 13, 3, 0)).active);
+
+/* --- Begleiter-Fähigkeiten -------------------------------------------- */
+player.village = 5;
+player.coins = 50_000_000;
+saveUser(player);
+ensureBuildings(player.id, 5);
+
+// Fina: deckt eine leere Grabstelle auf
+feedPet(player, 'fina');
+const finaTarget = getTargets(player)[0];
+const prepared = prepareRaid(player, finaTarget.id);
+check('Fina deckt eine Stelle auf', prepared.revealedIndex !== null, `Stelle ${prepared.revealedIndex}`);
+player.pending_raids = 1;
+saveUser(player);
+const preparedRaid = raid(player, finaTarget.id, prepared.revealedIndex === 0 ? 1 : 0);
+check(
+  'Aufgedeckte Stelle war wirklich leer',
+  preparedRaid.spots[prepared.revealedIndex ?? 0].kind === 'empty',
+);
+
+// Otto: Truhenrabatt und wertvollere Duplikate
+const listPrice = chestCost(CHESTS[0], player.level);
+feedPet(player, 'otto');
+const discounted = effectiveChestCost(player, CHESTS[0].id);
+check('Otto verbilligt Truhen', discounted < listPrice, `${listPrice} -> ${discounted}`);
+
+// Bodo: Doppelschlag ist möglich
+feedPet(player, 'bodo');
+check('Bodo ist aktiv', buildState(player).activePet?.id === 'bodo');
+check('Begleiter hat eine Stufe', (petStates(player).find((p) => p.id === 'bodo')?.level ?? 0) >= 1);
+
+// Stufenaufstieg durch mehrfaches Füttern
+for (let i = 0; i < 4; i++) feedPet(player, 'fina');
+const finaState = petStates(player).find((entry) => entry.id === 'fina');
+check('Begleiter steigt auf', (finaState?.level ?? 1) > 1, `Stufe ${finaState?.level}`);
+check(
+  'Bonus wächst mit der Stufe',
+  (finaState?.bonus ?? 0) > 0.4,
+  `${Math.round((finaState?.bonus ?? 0) * 100)} %`,
+);
 
 /* --- Turnier ---------------------------------------------------------- */
 const tournament = tournamentState(player);

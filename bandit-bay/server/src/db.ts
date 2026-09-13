@@ -153,6 +153,13 @@ export function migrate(): void {
       PRIMARY KEY (user_id, pet_id)
     );
 
+    CREATE TABLE IF NOT EXISTS raid_state (
+      user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      target_id TEXT NOT NULL,
+      spots TEXT NOT NULL,
+      created_at INTEGER NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS tournament (
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       cycle INTEGER NOT NULL,

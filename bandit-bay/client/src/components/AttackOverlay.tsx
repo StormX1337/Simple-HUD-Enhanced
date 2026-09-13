@@ -193,9 +193,11 @@ export function AttackOverlay({ open, onClose, initialTargetId }: Props): JSX.El
 
             {target.buildings.map((building) => {
               const spot = ISLAND_SPOTS[building.index] ?? ISLAND_SPOTS[0];
-              const damaged = result?.destroyed && result.spotIndex === building.index;
+              const damaged =
+                (result?.destroyed && result.spotIndex === building.index) ||
+                result?.secondSpotIndex === building.index;
               const level = damaged ? Math.max(0, building.level - 1) : building.level;
-              const isHit = hitSpot === building.index;
+              const isHit = hitSpot === building.index || result?.secondSpotIndex === building.index;
               return (
                 <button
                   key={building.index}
@@ -297,7 +299,13 @@ export function AttackOverlay({ open, onClose, initialTargetId }: Props): JSX.El
             className="panel z-30 m-2.5 p-3 text-center"
           >
             <div className="font-display text-lg font-black">
-              {result.blocked ? '🛡️ Geblockt!' : result.destroyed ? '💥 Volltreffer!' : '💨 Daneben'}
+              {result.blocked
+                ? '🛡️ Geblockt!'
+                : result.secondSpotIndex !== null
+                  ? '💥💥 Doppelschlag!'
+                  : result.destroyed
+                    ? '💥 Volltreffer!'
+                    : '💨 Daneben'}
             </div>
             <p className="mt-0.5 text-sm">{result.message}</p>
             <div className="mt-1 font-display text-2xl text-[#c98c14]">

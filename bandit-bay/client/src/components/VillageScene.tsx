@@ -183,7 +183,8 @@ export function VillageScene({ onOpenEvents }: VillageProps): JSX.Element | null
         {state.activePet && (
           <div className="relative flex flex-col items-center">
             <span className="mb-0.5 whitespace-nowrap rounded-full border-2 border-black/40 bg-black/55 px-1.5 text-[9px] font-black text-[#ffd95e]">
-              {state.activePet.name} {formatDuration(state.activePet.secondsLeft)}
+              {state.activePet.name} · Stufe {state.activePet.level} ·{' '}
+              {formatDuration(state.activePet.secondsLeft)}
             </span>
             <PetArt art={state.activePet.art} size={short ? 40 : 52} happy className="animate-bob" />
           </div>

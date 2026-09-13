@@ -368,17 +368,30 @@ export function wheelCoinBase(level: number, villageId: number): number {
 /*  Begleiter                                                          */
 /* ------------------------------------------------------------------ */
 
-export type PetEffect = 'raid' | 'attack' | 'coins';
+export type PetEffect = 'raid' | 'attack' | 'coins' | 'shield' | 'cards';
+
+/** Zusätzliche Fähigkeit, die jedes Tier einzigartig macht. */
+export type PetAbility =
+  | 'reveal'      // Fina deckt eine leere Grabstelle auf
+  | 'doubleHit'   // Bodo trifft manchmal ein zweites Gebäude
+  | 'refund'      // Pia gibt Drehungen zurück
+  | 'guard'       // Kiki blockt Angriffe ohne Schildverbrauch
+  | 'bargain';    // Otto macht Truhen billiger
 
 export interface PetDef {
   id: string;
   name: string;
   animal: string;
-  art: 'fuchs' | 'baer' | 'papagei';
+  art: 'fuchs' | 'baer' | 'papagei' | 'erdmaennchen' | 'otter';
   description: string;
   effect: PetEffect;
-  /** Bonus als Faktor, z. B. 0.4 = +40 % */
+  /** Grundbonus als Faktor, z. B. 0.4 = +40 % */
   bonus: number;
+  ability: PetAbility;
+  abilityName: string;
+  abilityText: string;
+  /** Wahrscheinlichkeit der Fähigkeit auf Stufe 1 (0 = immer aktiv). */
+  abilityChance: number;
   unlockVillage: number;
   baseCost: number;
   color: string;
@@ -386,6 +399,9 @@ export interface PetDef {
 
 /** Ein Begleiter bleibt nach dem Füttern so lange aktiv. */
 export const PET_DURATION_HOURS = 4;
+/** Alle so vielen Fütterungen steigt der Begleiter eine Stufe auf. */
+export const PET_FEEDS_PER_LEVEL = 4;
+export const PET_MAX_LEVEL = 5;
 
 export const PETS: PetDef[] = [
   {
@@ -393,9 +409,13 @@ export const PETS: PetDef[] = [
     name: 'Fina',
     animal: 'Füchsin',
     art: 'fuchs',
-    description: 'Schnüffelt die besten Verstecke aus: mehr Beute bei Raubzügen.',
+    description: 'Schnüffelt die besten Verstecke aus.',
     effect: 'raid',
     bonus: 0.4,
+    ability: 'reveal',
+    abilityName: 'Spürnase',
+    abilityText: 'Deckt vor dem Graben eine leere Stelle auf.',
+    abilityChance: 0,
     unlockVillage: 1,
     baseCost: 12_000,
     color: '#ff9a3c',
@@ -405,9 +425,13 @@ export const PETS: PetDef[] = [
     name: 'Bodo',
     animal: 'Bär',
     art: 'baer',
-    description: 'Haut kräftig zu: mehr Beute bei Angriffen.',
+    description: 'Haut kräftig zu und bringt mehr Beute nach Hause.',
     effect: 'attack',
     bonus: 0.5,
+    ability: 'doubleHit',
+    abilityName: 'Doppelschlag',
+    abilityText: 'Trifft manchmal ein zweites Gebäude gleich mit.',
+    abilityChance: 0.35,
     unlockVillage: 2,
     baseCost: 60_000,
     color: '#b5834a',
@@ -417,17 +441,69 @@ export const PETS: PetDef[] = [
     name: 'Pia',
     animal: 'Papagei',
     art: 'papagei',
-    description: 'Kreischt bei jedem Treffer: mehr Taler aus dem Automaten.',
+    description: 'Kreischt bei jedem Treffer und lockt mehr Taler heraus.',
     effect: 'coins',
     bonus: 0.25,
+    ability: 'refund',
+    abilityName: 'Federleicht',
+    abilityText: 'Gibt bei einer Drehung manchmal die Drehung zurück.',
+    abilityChance: 0.18,
     unlockVillage: 3,
     baseCost: 160_000,
     color: '#4fc3a1',
+  },
+  {
+    id: 'kiki',
+    name: 'Kiki',
+    animal: 'Erdmännchen',
+    art: 'erdmaennchen',
+    description: 'Hält Wache, während du weg bist.',
+    effect: 'shield',
+    bonus: 0.2,
+    ability: 'guard',
+    abilityName: 'Wachposten',
+    abilityText: 'Wehrt Angriffe ab, ohne dass ein Schild draufgeht.',
+    abilityChance: 0.45,
+    unlockVillage: 4,
+    baseCost: 500_000,
+    color: '#e0a55c',
+  },
+  {
+    id: 'otto',
+    name: 'Otto',
+    animal: 'Otter',
+    art: 'otter',
+    description: 'Handelt geschickt mit Karten und Truhen.',
+    effect: 'cards',
+    bonus: 0.5,
+    ability: 'bargain',
+    abilityName: 'Feilscher',
+    abilityText: 'Truhen kosten ein Viertel weniger, Duplikate zahlen mehr.',
+    abilityChance: 0,
+    unlockVillage: 5,
+    baseCost: 1_500_000,
+    color: '#6fb7d8',
   },
 ];
 
 export function petById(id: string): PetDef | undefined {
   return PETS.find((pet) => pet.id === id);
+}
+
+/** Stufe eines Begleiters aus der Anzahl der Fütterungen. */
+export function petLevel(feeds: number): number {
+  return Math.min(PET_MAX_LEVEL, 1 + Math.floor(feeds / PET_FEEDS_PER_LEVEL));
+}
+
+/** Bonus wächst mit der Stufe (pro Stufe +15 % vom Grundwert). */
+export function petBonusValue(pet: PetDef, feeds: number): number {
+  return pet.bonus * (1 + 0.15 * (petLevel(feeds) - 1));
+}
+
+/** Auch die Fähigkeitschance wächst mit der Stufe. */
+export function petAbilityChance(pet: PetDef, feeds: number): number {
+  if (pet.abilityChance === 0) return 0;
+  return Math.min(0.9, pet.abilityChance * (1 + 0.15 * (petLevel(feeds) - 1)));
 }
 
 /** Futterkosten steigen mit dem Spielerlevel. */

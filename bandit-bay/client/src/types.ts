@@ -100,12 +100,17 @@ export interface PublicUser {
   coins: number;
 }
 
+export type PetArt = 'fuchs' | 'baer' | 'papagei' | 'erdmaennchen' | 'otter';
+export type PetEffectKind = 'raid' | 'attack' | 'coins' | 'shield' | 'cards';
+
 export interface ActivePetState {
   id: string;
   name: string;
-  art: 'fuchs' | 'baer' | 'papagei';
-  effect: 'raid' | 'attack' | 'coins';
+  art: PetArt;
+  effect: PetEffectKind;
   bonus: number;
+  level: number;
+  abilityName: string;
   secondsLeft: number;
 }
 
@@ -183,6 +188,8 @@ export type SpinOutcomeType =
 
 export interface SpinResult {
   reels: SymbolId[];
+  /** Pia hat die Drehung zurückgegeben. */
+  refunded?: boolean;
   matches: 3 | 2 | 0;
   outcome: SpinOutcomeType;
   amount: number;
@@ -197,6 +204,9 @@ export interface AttackResult {
   blocked: boolean;
   destroyed: boolean;
   spotIndex: number;
+  /** Zweites Gebäude, falls Bodos Doppelschlag ausgelöst hat. */
+  secondSpotIndex: number | null;
+  secondBuildingName: string;
   loot: number;
   targetName: string;
   targetBuildingName: string;
@@ -389,10 +399,14 @@ export interface PetState {
   id: string;
   name: string;
   animal: string;
-  art: 'fuchs' | 'baer' | 'papagei';
+  art: PetArt;
   description: string;
-  effect: 'raid' | 'attack' | 'coins';
+  effect: PetEffectKind;
   bonus: number;
+  ability: string;
+  abilityName: string;
+  abilityText: string;
+  abilityChance: number;
   color: string;
   unlockVillage: number;
   unlocked: boolean;
@@ -400,6 +414,9 @@ export interface PetState {
   active: boolean;
   secondsLeft: number;
   feeds: number;
+  level: number;
+  maxLevel: number;
+  feedsToNextLevel: number;
 }
 
 export interface SetProgress {

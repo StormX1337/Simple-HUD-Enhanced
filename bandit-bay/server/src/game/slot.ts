@@ -22,7 +22,7 @@ import {
   saveUser,
 } from './core.js';
 import { grantRandomCard } from './collection.js';
-import { petBonus } from './pets.js';
+import { petBonus, rollPetAbility } from './pets.js';
 import { trackQuest } from './progress.js';
 
 export class GameError extends Error {
@@ -74,6 +74,10 @@ export function spin(user: UserRow, betInput: number): SpinResult {
   user.bet = bet;
   user.total_spins += 1;
 
+  // Begleiter-Fähigkeit: Pia gibt die Drehung manchmal zurück.
+  const refunded = rollPetAbility(user.id, 'refund');
+  if (refunded) user.spins = Math.min(spinCapacity(user.level), user.spins + bet);
+
   const { matches, symbol } = rollOutcome();
   const reels: SymbolId[] = buildReels(matches, symbol);
   const base =
@@ -100,12 +104,17 @@ export function spin(user: UserRow, betInput: number): SpinResult {
         gainCoins(base * bet * 12, 'Taler-Regen! Dreifacher Treffer!');
         break;
       case 'beutel': {
-        outcome = 'spins';
         const gain = 10 * bet * spinBonus;
         const before = user.spins;
         user.spins = Math.min(spinCapacity(user.level), user.spins + gain);
         amount = user.spins - before;
-        message = `Beutel voll: +${amount} Drehungen!`;
+        if (amount > 0) {
+          outcome = 'spins';
+          message = `Beutel voll: +${amount} Drehungen!`;
+        } else {
+          // Drehungen sind voll – dafür klingeln die Taler.
+          gainCoins(base * bet * 8, 'Drehungen voll – der Beutel zahlt in Talern!');
+        }
         break;
       }
       case 'schild':
@@ -153,12 +162,16 @@ export function spin(user: UserRow, betInput: number): SpinResult {
         gainCoins(base * bet * 3, 'Zwei Taler – kleiner Gewinn!');
         break;
       case 'beutel': {
-        outcome = 'spins';
         const gain = 3 * bet * spinBonus;
         const before = user.spins;
         user.spins = Math.min(spinCapacity(user.level), user.spins + gain);
         amount = user.spins - before;
-        message = amount > 0 ? `+${amount} Drehungen` : 'Drehungen bereits voll';
+        if (amount > 0) {
+          outcome = 'spins';
+          message = `+${amount} Drehungen`;
+        } else {
+          gainCoins(base * bet * 2, 'Drehungen voll – dafür ein paar Taler.');
+        }
         break;
       }
       case 'schild':
@@ -191,6 +204,7 @@ export function spin(user: UserRow, betInput: number): SpinResult {
 
   return {
     reels,
+    refunded,
     matches,
     outcome,
     amount,

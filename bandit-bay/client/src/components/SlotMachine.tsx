@@ -142,6 +142,10 @@ export function SlotMachine({ onAttack, onRaid, onCard }: Props): JSX.Element | 
         default:
           break;
       }
+      if (data.refunded) {
+        playSound('spins', 0.5);
+        pushToast('Pia gibt dir die Drehung zurück!', 'good');
+      }
       if (data.levelUps > 0) {
         playSound('levelup', 0.7);
         pushToast(`Level ${data.state.level} erreicht!`, 'good');

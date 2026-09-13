@@ -12,6 +12,8 @@ const EFFECT_LABEL: Record<PetState['effect'], string> = {
   raid: 'Raubzug-Beute',
   attack: 'Angriffs-Beute',
   coins: 'Taler am Automaten',
+  shield: 'Schildschutz',
+  cards: 'Wert doppelter Karten',
 };
 
 export function PetsScreen(): JSX.Element {
@@ -98,8 +100,21 @@ export function PetsScreen(): JSX.Element {
                 <span className="rounded-full bg-black/10 px-2 py-0.5">
                   +{Math.round(pet.bonus * 100)} % {EFFECT_LABEL[pet.effect]}
                 </span>
-                {pet.feeds > 0 && <span className="opacity-60">{pet.feeds}× gefüttert</span>}
+                <span className="rounded-full border border-black/20 bg-[#f8c73c]/40 px-2 py-0.5">
+                  Stufe {pet.level}/{pet.maxLevel}
+                </span>
               </div>
+              <div className="mt-1 rounded-xl border-2 border-black/15 bg-black/5 px-2 py-1 text-[11px]">
+                <span className="font-black">✨ {pet.abilityName}:</span> {pet.abilityText}
+                {pet.abilityChance > 0 && (
+                  <span className="font-black"> ({Math.round(pet.abilityChance * 100)} %)</span>
+                )}
+              </div>
+              {pet.level < pet.maxLevel && (
+                <div className="mt-1 text-[10px] opacity-60">
+                  Noch {pet.feedsToNextLevel}× füttern bis Stufe {pet.level + 1}
+                </div>
+              )}
 
               {!pet.unlocked ? (
                 <div className="mt-2 rounded-xl border-2 border-black/15 bg-black/10 px-2 py-1 text-center text-[11px] font-bold">

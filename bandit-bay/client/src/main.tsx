@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { DevGallery } from './DevGallery';
 import { GameProvider } from './game/GameContext';
 import './index.css';
 
@@ -14,7 +15,7 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <GameProvider>
-      <App />
+      {window.location.search.includes('gallery') ? <DevGallery /> : <App />}
     </GameProvider>
   </React.StrictMode>,
 );

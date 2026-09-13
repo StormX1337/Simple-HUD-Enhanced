@@ -6,6 +6,8 @@ import {
   eventStatus,
   MAX_VILLAGE,
   PETS,
+  petBonusValue,
+  petLevel,
   PLAYER_AVATARS,
   getVillage,
   maxBetForLevel,
@@ -308,8 +310,8 @@ export function toPublicUser(user: UserRow): PublicUser {
 function activePetState(userId: string): ActivePetState | null {
   const ts = now();
   const row = db
-    .prepare<[string, number], { pet_id: string; active_until: number }>(
-      'SELECT pet_id, active_until FROM pets WHERE user_id = ? AND active_until > ? LIMIT 1',
+    .prepare<[string, number], { pet_id: string; active_until: number; feeds: number }>(
+      'SELECT pet_id, active_until, feeds FROM pets WHERE user_id = ? AND active_until > ? LIMIT 1',
     )
     .get(userId, ts);
   if (!row) return null;
@@ -320,7 +322,9 @@ function activePetState(userId: string): ActivePetState | null {
     name: pet.name,
     art: pet.art,
     effect: pet.effect,
-    bonus: pet.bonus,
+    bonus: petBonusValue(pet, row.feeds),
+    level: petLevel(row.feeds),
+    abilityName: pet.abilityName,
     secondsLeft: Math.ceil((row.active_until - ts) / 1000),
   };
 }

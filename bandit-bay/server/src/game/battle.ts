@@ -19,7 +19,7 @@ import {
   saveUser,
 } from './core.js';
 import { trackQuest } from './progress.js';
-import { petBonus } from './pets.js';
+import { hasPetAbility, petBonus, rollPetAbility } from './pets.js';
 import { addTournamentPoints } from './tournament.js';
 import { GameError } from './slot.js';
 
@@ -111,6 +111,8 @@ export function attack(user: UserRow, targetId: string, spotIndex: number): Atta
   let destroyed = false;
   let loot = 0;
   let message = '';
+  let secondSpotIndex: number | null = null;
+  let secondBuildingName = '';
 
   if (target.shields > 0) {
     blocked = true;
@@ -143,6 +145,23 @@ export function attack(user: UserRow, targetId: string, spotIndex: number): Atta
       loot = Math.round(base * user.bet * 2);
       message = `Leeres Grundstück erwischt – nur ein paar Taler bei ${target.name}.`;
     }
+    // Begleiter-Fähigkeit: Bodo trifft manchmal ein zweites Gebäude.
+    if (destroyed && rollPetAbility(user.id, 'doubleHit')) {
+      const others = getBuildings(target.id, target.village).filter(
+        (row) => row.idx !== spotIndex && row.level > 0,
+      );
+      if (others.length > 0) {
+        const extra = others[randInt(0, others.length - 1)];
+        db.prepare(
+          'UPDATE buildings SET level = ? WHERE user_id = ? AND village = ? AND idx = ?',
+        ).run(extra.level - 1, target.id, target.village, extra.idx);
+        secondSpotIndex = extra.idx;
+        secondBuildingName = village.buildings[extra.idx]?.name ?? 'Gebäude';
+        loot += Math.round(base * user.bet * 4);
+        message += ` Bodo erwischt auch ${secondBuildingName}!`;
+      }
+    }
+
     logEvent({
       userId: target.id,
       type: 'attacked',
@@ -176,6 +195,8 @@ export function attack(user: UserRow, targetId: string, spotIndex: number): Atta
     blocked,
     destroyed,
     spotIndex,
+    secondSpotIndex,
+    secondBuildingName,
     loot,
     targetName: target.name,
     targetBuildingName: buildingName,
@@ -198,6 +219,56 @@ function shuffle<T>(items: T[]): T[] {
   return copy;
 }
 
+interface StoredRaid {
+  target_id: string;
+  spots: string;
+  created_at: number;
+}
+
+/** Erzeugt die vier Grabstellen für ein Ziel. */
+function buildSpots(user: UserRow, target: UserRow): RaidSpot[] {
+  const raidBonus = petBonus(user.id, 'raid') * raidEventMultiplier();
+  const base = coinValue(user.level, user.village) * coinEventMultiplier() * raidBonus;
+  const minLoot = Math.round(base * user.bet * 5);
+  const jackpot = Math.max(minLoot * 3, Math.round(target.coins * BALANCE.raidJackpotShare * raidBonus));
+  const normal = Math.max(minLoot, Math.round(target.coins * BALANCE.raidLootShare * raidBonus));
+  const kinds: RaidSpot['kind'][] = shuffle(['jackpot', 'loot', 'loot', 'empty']);
+  return kinds.map((kind, index) => ({
+    index,
+    kind,
+    amount: kind === 'jackpot' ? jackpot : kind === 'loot' ? normal : 0,
+  }));
+}
+
+export interface RaidPreparation {
+  targetId: string;
+  /** Von Fina aufgedeckte leere Stelle (sonst null). */
+  revealedIndex: number | null;
+  abilityName: string | null;
+}
+
+/** Grabstellen vorbereiten, damit Fähigkeiten vor dem Graben wirken können. */
+export function prepareRaid(user: UserRow, targetId: string): RaidPreparation {
+  const target = getUserById(targetId);
+  if (!target || target.id === user.id) throw new GameError('Ziel nicht gefunden', 404);
+  refreshBot(target);
+
+  const spots = buildSpots(user, target);
+  db.prepare(
+    `INSERT INTO raid_state (user_id, target_id, spots, created_at) VALUES (?, ?, ?, ?)
+     ON CONFLICT(user_id) DO UPDATE SET target_id = excluded.target_id, spots = excluded.spots,
+       created_at = excluded.created_at`,
+  ).run(user.id, target.id, JSON.stringify(spots), Date.now());
+
+  const reveal = hasPetAbility(user.id, 'reveal');
+  const empty = spots.find((spot) => spot.kind === 'empty');
+  return {
+    targetId: target.id,
+    revealedIndex: reveal && empty ? empty.index : null,
+    abilityName: reveal ? 'Spürnase' : null,
+  };
+}
+
 export function raid(user: UserRow, targetId: string, spotIndex: number): RaidResult {
   if (user.pending_raids <= 0) throw new GameError('Du hast keinen Raubzug übrig');
   if (spotIndex < 0 || spotIndex > 3) throw new GameError('Ungültige Grabstelle');
@@ -208,18 +279,17 @@ export function raid(user: UserRow, targetId: string, spotIndex: number): RaidRe
   user.pending_raids -= 1;
   user.total_raids += 1;
 
-  const raidBonus = petBonus(user.id, 'raid') * raidEventMultiplier();
-  const base = coinValue(user.level, user.village) * coinEventMultiplier() * raidBonus;
-  const minLoot = Math.round(base * user.bet * 5);
-  const jackpot = Math.max(minLoot * 3, Math.round(target.coins * BALANCE.raidJackpotShare * raidBonus));
-  const normal = Math.max(minLoot, Math.round(target.coins * BALANCE.raidLootShare * raidBonus));
-
-  const kinds: RaidSpot['kind'][] = shuffle(['jackpot', 'loot', 'loot', 'empty']);
-  const spots: RaidSpot[] = kinds.map((kind, index) => ({
-    index,
-    kind,
-    amount: kind === 'jackpot' ? jackpot : kind === 'loot' ? normal : 0,
-  }));
+  // Vorbereitete Grabstellen verwenden, sonst neu würfeln.
+  const stored = db
+    .prepare<[string], StoredRaid>('SELECT target_id, spots, created_at FROM raid_state WHERE user_id = ?')
+    .get(user.id);
+  let spots: RaidSpot[];
+  if (stored && stored.target_id === targetId && Date.now() - stored.created_at < 10 * 60_000) {
+    spots = JSON.parse(stored.spots) as RaidSpot[];
+  } else {
+    spots = buildSpots(user, target);
+  }
+  db.prepare('DELETE FROM raid_state WHERE user_id = ?').run(user.id);
 
   const picked = spots[spotIndex];
   const loot = picked.amount;

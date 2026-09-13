@@ -42,6 +42,9 @@ Weitere Skripte:
 | `node tools/ui-smoke.mjs` | Durchspiel-Test der Oberfläche (braucht laufenden Dev-Server und Playwright) |
 | `node tools/generate-icons.mjs` | App-Icons neu erzeugen (braucht Playwright) |
 
+Tipp für die Gebäude-Grafiken: `http://localhost:5173/?gallery` zeigt alle Gebäudetypen in allen
+Ausbaustufen nebeneinander.
+
 ---
 
 ## Tech-Stack und warum
@@ -111,13 +114,17 @@ passiert ist – inklusive Rache-Knopf, wenn du gerade einen Angriff oder Raubzu
 Verluste sind gedeckelt (höchstens 20 % der Taler, erst ab Level 3, maximal 12 Stunden werden
 nachgeholt).
 
-**Begleiter** – drei Tiere helfen dir, sobald du sie fütterst (4 Stunden aktiv, immer nur eines):
+**Begleiter** – fünf Tiere mit eigenem Bonus *und* eigener Fähigkeit. Füttern kostet Taler und
+aktiviert das Tier für 4 Stunden; es kann immer nur eines aktiv sein. Jede vierte Fütterung
+bringt eine Stufe (max. 5), die Bonus und Fähigkeitschance um je 15 % anhebt.
 
-| Begleiter | Ab Insel | Wirkung |
-| --- | --- | --- |
-| Fina (Füchsin) | 1 | +40 % Beute bei Raubzügen |
-| Bodo (Bär) | 2 | +50 % Beute bei Angriffen |
-| Pia (Papagei) | 3 | +25 % Taler am Automaten |
+| Begleiter | Ab Insel | Bonus | Fähigkeit |
+| --- | --- | --- | --- |
+| Fina (Füchsin) | 1 | +40 % Raubzug-Beute | **Spürnase** – deckt vor dem Graben eine leere Stelle auf |
+| Bodo (Bär) | 2 | +50 % Angriffs-Beute | **Doppelschlag** – trifft zu 35 % ein zweites Gebäude |
+| Pia (Papagei) | 3 | +25 % Taler am Automaten | **Federleicht** – gibt zu 18 % die Drehung zurück |
+| Kiki (Erdmännchen) | 4 | +20 % Schildschutz | **Wachposten** – wehrt zu 45 % Angriffe ab, ohne Schild zu verbrauchen |
+| Otto (Otter) | 5 | +50 % Wert doppelter Karten | **Feilscher** – Truhen kosten 25 % weniger |
 
 ---
 
@@ -133,8 +140,9 @@ Alle Werte stehen an einer Stelle: `server/src/content/content.ts`.
 * **Drehungen**: Start 75, Kapazität 75 + 3 × Level, +1 alle 3 Minuten.
 * **Level**: `xpForNextLevel = 260 × level^1.35`, Level-Up gibt Taler, Drehungen und
   alle 5 Level ein Schild.
-* **Begleiter**: Futter kostet 12.000 / 60.000 / 160.000 Taler (+20 % pro Spielerlevel),
-  Wirkdauer 4 Stunden. Boni werden serverseitig auf Auszahlung und Beute gerechnet.
+* **Begleiter**: Futter kostet 12.000 bis 1,5 Mio. Taler (+20 % pro Spielerlevel), Wirkdauer
+  4 Stunden. Boni und Fähigkeiten rechnet der Server auf Auszahlung, Beute und Truhenpreise.
+* **Drehungen voll?** Beutel-Symbole und Rad-Felder zahlen dann in Talern aus, statt zu verfallen.
 
 ---
 
@@ -175,6 +183,7 @@ bandit-bay/
 | `POST` | `/api/village/upgrade` | Gebäude ausbauen |
 | `GET` | `/api/targets` | Ziele für Angriff/Raubzug |
 | `POST` | `/api/attack`, `/api/raid` | Minispiele auswerten |
+| `POST` | `/api/raid/prepare` | Grabstellen vorbereiten (für Finas Spürnase) |
 | `GET` | `/api/collection` | Karten, Sets, Truhenpreise |
 | `POST` | `/api/collection/chest`, `/api/collection/set` | Truhe öffnen, Set einlösen |
 | `GET/POST` | `/api/quests`, `/api/quests/claim` | Tagesquests |
@@ -207,7 +216,7 @@ eigene Icons unter `client/public/icons/`.
   (`spin.wav`, `coin.wav`, `attack.wav`, `raid.wav`, `upgrade.wav`, `reward.wav`, `levelup.wav`, …).
 * **Grafiken**: Die SVG-Komponenten unter `client/src/components/art/` austauschen –
   `SymbolIcon` (Walzensymbole), `BuildingArt` (Gebäude nach Typ und Stufe),
-  `CardArt` (Kartenmotive), `PetArt` (Begleiter), `Scenery` (Palmen, Wolken, Sandhügel …),
+  `CardArt` (Kartenmotive), `PetArt` (fünf Begleiter), `Scenery` (Palmen, Wolken, Sandhügel …),
   `HudIcons` (Taler, Drehungen, Schild, Karten) und `Raccoon` (Maskottchen).
 * **Inhalte**: Inseln, Gebäude, Karten, Quests und Belohnungen in
   `server/src/content/content.ts` anpassen – Client und Datenbank folgen automatisch.

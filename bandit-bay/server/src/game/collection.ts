@@ -12,6 +12,7 @@ import {
   spinCapacity,
 } from '../content/content.js';
 import { addXp, logEvent, pickWeighted, saveUser } from './core.js';
+import { hasPetAbility, petBonus } from './pets.js';
 import { trackQuest } from './progress.js';
 
 export interface CardDrop {
@@ -46,7 +47,7 @@ export function grantCard(user: UserRow, card: CardDef): CardDrop {
 
   let coins = 0;
   if (!isNew) {
-    coins = duplicateValue(card.rarity, user.level);
+    coins = Math.round(duplicateValue(card.rarity, user.level) * petBonus(user.id, 'cards'));
     user.coins += coins;
   }
   trackQuest(user.id, 'cards', 1);
@@ -64,10 +65,18 @@ export interface ChestResult {
   drops: CardDrop[];
 }
 
+/** Truhenpreis inklusive Begleiter-Rabatt (Otto). */
+export function effectiveChestCost(user: UserRow, chestId: string): number {
+  const chest = CHESTS.find((c) => c.id === chestId);
+  if (!chest) return 0;
+  const base = chestCost(chest, user.level);
+  return hasPetAbility(user.id, 'bargain') ? Math.round((base * 0.75) / 100) * 100 : base;
+}
+
 export function openChest(user: UserRow, chestId: string): ChestResult {
   const chest = CHESTS.find((c) => c.id === chestId);
   if (!chest) return { ok: false, error: 'Unbekannte Truhe', cost: 0, drops: [] };
-  const cost = chestCost(chest, user.level);
+  const cost = effectiveChestCost(user, chest.id);
   if (user.coins < cost) return { ok: false, error: 'Nicht genug Taler', cost, drops: [] };
 
   user.coins -= cost;

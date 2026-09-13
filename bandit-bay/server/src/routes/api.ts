@@ -27,8 +27,8 @@ import {
 } from '../game/core.js';
 import { GameError, setBet, spin } from '../game/slot.js';
 import { upgradeBuilding } from '../game/village.js';
-import { attack, getTarget, getTargets, raid } from '../game/battle.js';
-import { claimSet, grantRandomCard, openChest } from '../game/collection.js';
+import { attack, getTarget, getTargets, prepareRaid, raid } from '../game/battle.js';
+import { claimSet, effectiveChestCost, grantRandomCard, openChest } from '../game/collection.js';
 import { feedPet, petStates } from '../game/pets.js';
 import { markNewsSeen, simulateAbsence, unseenNews } from '../game/absence.js';
 import { achievementStates, claimAchievement } from '../game/achievements.js';
@@ -202,6 +202,15 @@ api.post('/attack', auth, (req: AuthedRequest, res, next) => {
   }
 });
 
+api.post('/raid/prepare', auth, (req: AuthedRequest, res, next) => {
+  try {
+    const user = me(req);
+    res.json(prepareRaid(user, String(req.body?.targetId ?? '')));
+  } catch (error) {
+    next(error);
+  }
+});
+
 api.post('/raid', auth, (req: AuthedRequest, res, next) => {
   try {
     const user = me(req);
@@ -222,7 +231,7 @@ api.get('/collection', auth, (req: AuthedRequest, res) => {
   const state = buildState(user);
   res.json({
     state,
-    chests: CHESTS.map((chest) => ({ ...chest, cost: chestCost(chest, user.level) })),
+    chests: CHESTS.map((chest) => ({ ...chest, cost: effectiveChestCost(user, chest.id) })),
     sets: CARD_SETS.map((set) => {
       const cards = cardsOfSet(set.id);
       const owned = cards.filter((card) => (state.cards[card.id] ?? 0) > 0).length;

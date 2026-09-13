@@ -101,6 +101,11 @@ export function spinWheel(user: UserRow): WheelResult {
       const before = user.spins;
       user.spins = Math.min(spinCapacity(user.level), user.spins + amount);
       spins = user.spins - before;
+      // Sind die Drehungen voll, gibt es stattdessen Taler.
+      if (spins === 0) {
+        coins = Math.round(wheelCoinBase(user.level, user.village) * amount * 8);
+        user.coins += coins;
+      }
       break;
     }
     case 'shield':

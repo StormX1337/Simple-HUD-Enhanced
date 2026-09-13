@@ -2,8 +2,13 @@ import { db, now, type PetRow, type UserRow } from '../db.js';
 import {
   PETS,
   PET_DURATION_HOURS,
+  PET_MAX_LEVEL,
+  petAbilityChance,
+  petBonusValue,
   petById,
   petCost,
+  petLevel,
+  type PetAbility,
   type PetDef,
   type PetEffect,
 } from '../content/content.js';
@@ -18,6 +23,10 @@ export interface PetState {
   description: string;
   effect: PetEffect;
   bonus: number;
+  ability: PetAbility;
+  abilityName: string;
+  abilityText: string;
+  abilityChance: number;
   color: string;
   unlockVillage: number;
   unlocked: boolean;
@@ -25,6 +34,9 @@ export interface PetState {
   active: boolean;
   secondsLeft: number;
   feeds: number;
+  level: number;
+  maxLevel: number;
+  feedsToNextLevel: number;
 }
 
 function petRows(userId: string): PetRow[] {
@@ -36,8 +48,10 @@ export function petStates(user: UserRow): PetState[] {
   const ts = now();
   return PETS.map((pet) => {
     const row = rows.find((entry) => entry.pet_id === pet.id);
+    const feeds = row?.feeds ?? 0;
     const activeUntil = row?.active_until ?? 0;
     const active = activeUntil > ts;
+    const level = petLevel(feeds);
     return {
       id: pet.id,
       name: pet.name,
@@ -45,38 +59,68 @@ export function petStates(user: UserRow): PetState[] {
       art: pet.art,
       description: pet.description,
       effect: pet.effect,
-      bonus: pet.bonus,
+      bonus: petBonusValue(pet, feeds),
+      ability: pet.ability,
+      abilityName: pet.abilityName,
+      abilityText: pet.abilityText,
+      abilityChance: petAbilityChance(pet, feeds),
       color: pet.color,
       unlockVillage: pet.unlockVillage,
       unlocked: user.village >= pet.unlockVillage,
       cost: petCost(pet, user.level),
       active,
       secondsLeft: active ? Math.ceil((activeUntil - ts) / 1000) : 0,
-      feeds: row?.feeds ?? 0,
+      feeds,
+      level,
+      maxLevel: PET_MAX_LEVEL,
+      feedsToNextLevel: level >= PET_MAX_LEVEL ? 0 : 4 - (feeds % 4),
     };
   });
 }
 
+interface ActivePet {
+  def: PetDef;
+  feeds: number;
+}
+
 /** Aktiver Begleiter (höchstens einer gleichzeitig). */
-export function activePet(userId: string): PetDef | null {
+export function activePet(userId: string): ActivePet | null {
   const ts = now();
   const row = petRows(userId).find((entry) => entry.active_until > ts);
-  return row ? (petById(row.pet_id) ?? null) : null;
+  if (!row) return null;
+  const def = petById(row.pet_id);
+  return def ? { def, feeds: row.feeds } : null;
 }
 
 /** Bonusfaktor eines Effekts, z. B. 1.4 wenn Fina aktiv ist. */
 export function petBonus(userId: string, effect: PetEffect): number {
   const pet = activePet(userId);
-  return pet && pet.effect === effect ? 1 + pet.bonus : 1;
+  return pet && pet.def.effect === effect ? 1 + petBonusValue(pet.def, pet.feeds) : 1;
+}
+
+/** Ist die Fähigkeit dieses Begleiters gerade aktiv? */
+export function hasPetAbility(userId: string, ability: PetAbility): boolean {
+  const pet = activePet(userId);
+  return !!pet && pet.def.ability === ability;
+}
+
+/** Fähigkeit auslösen (bei Fähigkeiten mit Zufallschance). */
+export function rollPetAbility(userId: string, ability: PetAbility): boolean {
+  const pet = activePet(userId);
+  if (!pet || pet.def.ability !== ability) return false;
+  const chance = petAbilityChance(pet.def, pet.feeds);
+  return chance === 0 ? true : Math.random() < chance;
 }
 
 export interface FeedResult {
   petId: string;
   cost: number;
   secondsLeft: number;
+  level: number;
+  leveledUp: boolean;
 }
 
-/** Begleiter füttern: kostet Taler und aktiviert ihn für einige Stunden. */
+/** Begleiter füttern: kostet Taler, aktiviert ihn und bringt ihn voran. */
 export function feedPet(user: UserRow, petId: string): FeedResult {
   const pet = petById(petId);
   if (!pet) throw new GameError('Unbekannter Begleiter', 404);
@@ -86,13 +130,13 @@ export function feedPet(user: UserRow, petId: string): FeedResult {
   const cost = petCost(pet, user.level);
   if (user.coins < cost) throw new GameError('Nicht genug Taler für das Futter');
 
+  const before = petRows(user.id).find((entry) => entry.pet_id === pet.id)?.feeds ?? 0;
   const ts = now();
   const activeUntil = ts + PET_DURATION_HOURS * 3_600_000;
   user.coins -= cost;
   saveUser(user);
 
   const tx = db.transaction(() => {
-    // Nur ein Begleiter ist gleichzeitig aktiv.
     db.prepare('UPDATE pets SET active_until = 0 WHERE user_id = ?').run(user.id);
     db.prepare(
       `INSERT INTO pets (user_id, pet_id, active_until, feeds) VALUES (?, ?, ?, 1)
@@ -101,6 +145,13 @@ export function feedPet(user: UserRow, petId: string): FeedResult {
   });
   tx();
 
+  const level = petLevel(before + 1);
   logEvent({ userId: user.id, type: 'pet', amount: -cost, detail: `${pet.name} gefüttert` });
-  return { petId: pet.id, cost, secondsLeft: PET_DURATION_HOURS * 3600 };
+  return {
+    petId: pet.id,
+    cost,
+    secondsLeft: PET_DURATION_HOURS * 3600,
+    level,
+    leveledUp: level > petLevel(before),
+  };
 }

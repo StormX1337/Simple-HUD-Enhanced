@@ -1,5 +1,5 @@
 interface Props {
-  art: 'fuchs' | 'baer' | 'papagei';
+  art: 'fuchs' | 'baer' | 'papagei' | 'erdmaennchen' | 'otter';
   size?: number;
   className?: string;
   happy?: boolean;
@@ -56,6 +56,50 @@ export function PetArt({ art, size = 92, className = '', happy = false }: Props)
           <circle cx="73" cy="55" r="2.6" fill="#1c2231" />
           <ellipse cx="60" cy="69" rx="7" ry="5" fill="#1c2231" />
           <path d={happy ? 'M52 80c5 5 11 5 16 0' : 'M53 80h14'} stroke={OUTLINE} strokeWidth="2.8" fill="none" strokeLinecap="round" />
+        </g>
+      )}
+
+      {art === 'erdmaennchen' && (
+        <g>
+          <ellipse cx="60" cy="92" rx="20" ry="26" fill="#e0a55c" stroke={OUTLINE} strokeWidth="3.4" />
+          <ellipse cx="60" cy="96" rx="12" ry="18" fill="#f4d3a5" />
+          <path d="M80 104c12 6 16 14 12 20-8 0-15-5-18-12z" fill="#e0a55c" stroke={OUTLINE} strokeWidth="3" strokeLinejoin="round" />
+          <circle cx="42" cy="44" r="9" fill="#e0a55c" stroke={OUTLINE} strokeWidth="3" />
+          <circle cx="78" cy="44" r="9" fill="#e0a55c" stroke={OUTLINE} strokeWidth="3" />
+          <ellipse cx="60" cy="52" rx="20" ry="24" fill="#eab978" stroke={OUTLINE} strokeWidth="3.4" />
+          <path d="M60 30c11 0 20 7 22 17-7-4-14-6-22-6s-15 2-22 6c2-10 11-17 22-17z" fill="#e0a55c" />
+          <ellipse cx="50" cy="48" rx="7" ry="8" fill="#4a3524" />
+          <ellipse cx="70" cy="48" rx="7" ry="8" fill="#4a3524" />
+          <circle cx="51" cy="47" r="3.4" fill="#fff" />
+          <circle cx="71" cy="47" r="3.4" fill="#fff" />
+          <ellipse cx="60" cy="64" rx="11" ry="9" fill="#fbe8cf" stroke={OUTLINE} strokeWidth="2.6" />
+          <path d="M36 96c-6 4-9 10-7 14 6 1 11-2 14-7z" fill="#e0a55c" stroke={OUTLINE} strokeWidth="2.8" strokeLinejoin="round" />
+          <path d="M60 57l5 4-5 4-5-4z" fill="#1c2231" />
+          <path d={happy ? 'M53 69c4 4 10 4 14 0' : 'M54 69h12'} stroke={OUTLINE} strokeWidth="2.6" fill="none" strokeLinecap="round" />
+        </g>
+      )}
+
+      {art === 'otter' && (
+        <g>
+          <path d="M28 96c-14 8-18 18-12 24 10 0 19-6 23-15z" fill="#8d6a4f" stroke={OUTLINE} strokeWidth="3.2" strokeLinejoin="round" />
+          <ellipse cx="62" cy="92" rx="26" ry="24" fill="#a77f5e" stroke={OUTLINE} strokeWidth="3.4" />
+          <ellipse cx="62" cy="96" rx="16" ry="16" fill="#e3c9a8" />
+          <circle cx="42" cy="36" r="8" fill="#8d6a4f" stroke={OUTLINE} strokeWidth="3" />
+          <circle cx="80" cy="36" r="8" fill="#8d6a4f" stroke={OUTLINE} strokeWidth="3" />
+          <circle cx="61" cy="52" r="27" fill="#a77f5e" stroke={OUTLINE} strokeWidth="3.4" />
+          <path d="M61 27c12 0 22 8 25 19-8-5-16-7-25-7s-17 2-25 7c3-11 13-19 25-19z" fill="#8d6a4f" />
+          <circle cx="50" cy="50" r="5.5" fill="#fff" stroke={OUTLINE} strokeWidth="2" />
+          <circle cx="72" cy="50" r="5.5" fill="#fff" stroke={OUTLINE} strokeWidth="2" />
+          <circle cx="51" cy="51" r="2.8" fill="#1c2231" />
+          <circle cx="73" cy="51" r="2.8" fill="#1c2231" />
+          <ellipse cx="61" cy="65" rx="15" ry="11" fill="#f4e3cd" stroke={OUTLINE} strokeWidth="2.6" />
+          <ellipse cx="61" cy="60" rx="5" ry="4" fill="#1c2231" />
+          <path d={happy ? 'M53 70c5 5 11 5 16 0' : 'M54 70h14'} stroke={OUTLINE} strokeWidth="2.6" fill="none" strokeLinecap="round" />
+          <path d="M46 74c-6 2-10 2-14 0M76 74c6 2 10 2 14 0" stroke={OUTLINE} strokeWidth="2" fill="none" strokeLinecap="round" />
+          <g transform="translate(62 100)">
+            <path d="M-11 0c0-7 5-12 11-12s11 5 11 12z" fill="#ffd6e4" stroke="#b9698a" strokeWidth="2.6" strokeLinejoin="round" />
+            <path d="M0 -12v12M-6 -10l-2 10M6 -10l2 10" stroke="#e8a6c0" strokeWidth="2" />
+          </g>
         </g>
       )}
 

@@ -33,6 +33,7 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
   const [target, setTarget] = useState<TargetInfo | null>(null);
   const [result, setResult] = useState<RaidResult | null>(null);
   const [digging, setDigging] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState<{ index: number; ability: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
   const loadTargets = useCallback(async () => {
@@ -52,6 +53,7 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
     setTarget(null);
     setResult(null);
     setDigging(null);
+    setRevealed(null);
     void loadTargets();
     if (initialTargetId) {
       void api
@@ -60,6 +62,20 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
         .catch(() => undefined);
     }
   }, [open, loadTargets, initialTargetId]);
+
+  // Grabstellen vorbereiten, sobald ein Ziel gewählt ist (Finas Spürnase).
+  useEffect(() => {
+    if (!open || !target) return;
+    setRevealed(null);
+    void api
+      .prepareRaid(target.id)
+      .then((data) => {
+        if (data.revealedIndex !== null && data.abilityName) {
+          setRevealed({ index: data.revealedIndex, ability: data.abilityName });
+        }
+      })
+      .catch(() => undefined);
+  }, [open, target]);
 
   if (!open || !state) return null;
 
@@ -95,6 +111,7 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
       setTarget(null);
       setResult(null);
       setDigging(null);
+      setRevealed(null);
       void loadTargets();
     } else {
       onClose();
@@ -176,7 +193,8 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
 
             {[0, 1, 2, 3].map((index) => {
               const spot = result?.spots[index];
-              const revealed = !!result;
+              const shown = !!result;
+              const hinted = !result && revealed?.index === index;
               const picked = digging === index;
               const position = DIG_SPOTS[index];
               return (
@@ -184,7 +202,7 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
                   key={index}
                   type="button"
                   data-testid="raid-spot"
-                  disabled={busy || revealed}
+                  disabled={busy || shown || hinted}
                   onClick={() => void dig(index)}
                   className={`absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center transition-transform active:scale-95 disabled:cursor-default ${
                     revealed && !picked ? 'opacity-70' : ''
@@ -192,12 +210,12 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
                   style={{ left: `${position.x}%`, top: `${position.y}%` }}
                 >
                   <motion.div
-                    animate={picked && !revealed ? { rotate: [0, -8, 8, -6, 0], y: [0, -4, 0] } : {}}
-                    transition={{ duration: 0.5, repeat: picked && !revealed ? Infinity : 0 }}
+                    animate={picked && !shown ? { rotate: [0, -8, 8, -6, 0], y: [0, -4, 0] } : {}}
+                    transition={{ duration: 0.5, repeat: picked && !shown ? Infinity : 0 }}
                     className="relative"
                   >
-                    <DigPile size={short ? 92 : 116} dug={revealed} />
-                    {revealed && spot && spot.amount > 0 && (
+                    <DigPile size={short ? 92 : 116} dug={shown || hinted} />
+                    {shown && spot && spot.amount > 0 && (
                       <motion.span
                         initial={{ scale: 0.3, y: 10, opacity: 0 }}
                         animate={{ scale: 1, y: -6, opacity: 1 }}
@@ -211,22 +229,26 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
 
                   <span
                     className={`-mt-2 rounded-full border-2 px-2 py-0.5 font-display text-[11px] font-black ${
-                      revealed && spot
+                      shown && spot
                         ? spot.amount > 0
                           ? 'border-[#7a4a05] bg-gradient-to-b from-[#ffe9a0] to-[#e0a21a] text-[#4a2f05]'
                           : 'border-black/40 bg-black/55 text-white/80'
-                        : 'border-black/40 bg-black/45 text-white'
+                        : hinted
+                          ? 'border-[#ff9a3c] bg-[#ff9a3c] text-[#3b2412]'
+                          : 'border-black/40 bg-black/45 text-white'
                     }`}
                   >
-                    {revealed && spot
+                    {shown && spot
                       ? spot.amount > 0
                         ? formatCoins(spot.amount)
                         : 'leer'
-                      : `Stelle ${index + 1}`}
+                      : hinted
+                        ? 'leer!'
+                        : `Stelle ${index + 1}`}
                   </span>
 
                   {/* Münzregen beim Fund */}
-                  {revealed && picked && spot && spot.amount > 0 && (
+                  {shown && picked && spot && spot.amount > 0 && (
                     <>
                       {[...Array(7)].map((_, coin) => (
                         <motion.span
@@ -259,7 +281,9 @@ export function RaidOverlay({ open, onClose, initialTargetId }: Props): JSX.Elem
             {!result && (
               <div className="absolute inset-x-0 bottom-2 z-20 text-center">
                 <span className="rounded-full border-2 border-black/40 bg-black/60 px-3 py-1 font-display text-xs font-black text-white">
-                  Wo sind die Taler vergraben?
+                  {revealed
+                    ? `${revealed.ability}: eine Stelle ist leer!`
+                    : 'Wo sind die Taler vergraben?'}
                 </span>
               </div>
             )}

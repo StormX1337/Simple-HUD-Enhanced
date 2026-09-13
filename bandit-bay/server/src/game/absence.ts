@@ -2,6 +2,7 @@ import { db, now, type EventRow, type UserRow } from '../db.js';
 import type { HistoryEntry } from '../types.js';
 import { BALANCE, getVillage } from '../content/content.js';
 import { getBuildings, logEvent, randInt, saveUser } from './core.js';
+import { rollPetAbility } from './pets.js';
 
 /** Ein Simulationsfenster: alle drei Stunden kann ein Bot vorbeischauen. */
 const WINDOW_MS = 3 * 3_600_000;
@@ -53,6 +54,17 @@ export function simulateAbsence(user: UserRow): void {
     if (!bot) break;
 
     if (Math.random() < 0.6) {
+      // Begleiter-Fähigkeit: Kiki wehrt den Angriff ohne Schildverbrauch ab.
+      if (rollPetAbility(user.id, 'guard')) {
+        logEvent({
+          userId: user.id,
+          type: 'blocked',
+          otherId: bot.id,
+          otherName: bot.name,
+          detail: 'Kiki hat Wache gehalten',
+        });
+        continue;
+      }
       // Angriff auf ein Gebäude
       if (user.shields > 0) {
         user.shields -= 1;

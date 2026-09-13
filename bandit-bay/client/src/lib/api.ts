@@ -91,6 +91,11 @@ export const api = {
   attack: (targetId: string, spotIndex: number) =>
     post<AttackResult>('/attack', { targetId, spotIndex }),
   raid: (targetId: string, spotIndex: number) => post<RaidResult>('/raid', { targetId, spotIndex }),
+  prepareRaid: (targetId: string) =>
+    post<{ targetId: string; revealedIndex: number | null; abilityName: string | null }>(
+      '/raid/prepare',
+      { targetId },
+    ),
   collection: () =>
     request<{ state: PlayerState; chests: ChestOffer[]; sets: SetProgress[] }>('/collection'),
   openChest: (chestId: string) => post<ChestResponse>('/collection/chest', { chestId }),

@@ -82,6 +82,15 @@ export default function App(): JSX.Element {
                   },
                 },
                 {
+                  id: 'wheel',
+                  icon: '🎡',
+                  label: 'Rad',
+                  onClick: () => {
+                    setRewardsTab('wheel');
+                    setScreen('rewards');
+                  },
+                },
+                {
                   id: 'pets',
                   icon: '🦊',
                   label: 'Tier',
@@ -91,23 +100,7 @@ export default function App(): JSX.Element {
                     setScreen('rewards');
                   },
                 },
-                {
-                  id: 'quests',
-                  icon: '📜',
-                  label: 'Quests',
-                  badge: questBadge,
-                  onClick: () => setScreen('quests'),
-                },
-                {
-                  id: 'wheel',
-                  icon: '🎡',
-                  label: 'Rad',
-                  onClick: () => {
-                    setRewardsTab('wheel');
-                    setScreen('rewards');
-                  },
-                },
-                { id: 'shop', icon: '🧰', label: 'Truhen', onClick: () => setScreen('cards') },
+
               ]}
             />
             <SideRail
