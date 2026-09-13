@@ -170,17 +170,25 @@ if (shieldedBefore > 0) {
   check('Angriff wurde geblockt', attackResult.blocked);
 }
 
-const openTarget = targets.find((t) => t.shields === 0 && t.buildings.some((b) => b.level > 0));
+const openTarget = targets.find(
+  (t) => t.id !== shieldTarget.id && t.shields === 0 && t.buildings.some((b) => b.level > 0),
+);
 if (openTarget) {
-  const before = openTarget.buildings.find((b) => b.level > 0)!;
-  const result = attack(player, openTarget.id, before.index);
+  const spot = openTarget.buildings.find((b) => b.level > 0)!;
+  // Stand direkt vor dem Angriff lesen – die Liste kann veraltet sein.
+  const levelBefore = db
+    .prepare<[string, number, number], { level: number }>(
+      'SELECT level FROM buildings WHERE user_id = ? AND village = ? AND idx = ?',
+    )
+    .get(openTarget.id, openTarget.villageId, spot.index)!.level;
+  const result = attack(player, openTarget.id, spot.index);
   check('Ungeschütztes Gebäude wird beschädigt', result.destroyed);
   const after = db
     .prepare<[string, number, number], { level: number }>(
       'SELECT level FROM buildings WHERE user_id = ? AND village = ? AND idx = ?',
     )
-    .get(openTarget.id, openTarget.villageId, before.index);
-  check('Gebäudestufe gesunken', (after?.level ?? 99) === before.level - 1);
+    .get(openTarget.id, openTarget.villageId, spot.index);
+  check('Gebäudestufe gesunken', (after?.level ?? 99) === levelBefore - 1);
 }
 
 const raidTarget = targets.find((t) => t.id !== shieldTarget.id) ?? targets[0];
